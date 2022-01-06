@@ -14,6 +14,14 @@ void main(List<String> arguments) {
 
   // Run the command in the project directories
   for (final path in projectPaths) {
+    // Skip flutter pub get in example projects since flutter does it anyways
+    if (engine == 'flutter' &&
+        args.contains('get') &&
+        path.split('/').last == 'example') {
+      print('\nSkipping flutter example project: $path');
+      continue;
+    }
+
     print('\nRunning in $path');
     final result = Process.runSync(engine, args, workingDirectory: path);
     stdout.write(result.stdout);
