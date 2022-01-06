@@ -1,3 +1,6 @@
+## 1.2.2
+- Print process output in real time
+
 ## 1.2.1
 - Updated flutter detection
 

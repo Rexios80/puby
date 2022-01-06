@@ -23,13 +23,15 @@ void main(List<String> arguments) async {
     print(
       '\nRunning ${project.engine.name} ${args.join(' ')} in ${project.path}',
     );
-    final result = Process.runSync(
+    final process = await Process.start(
       project.engine.name,
       args,
       workingDirectory: project.path,
     );
-    stdout.write(result.stdout);
-    stderr.write(result.stderr);
+    // Piping directly to stdout and stderr can cause unexpected behavior
+    process.stdout.listen((e) => stdout.write(String.fromCharCodes(e)));
+    process.stderr.listen((e) => stderr.write(String.fromCharCodes(e)));
+    await process.exitCode;
   }
 
   print('\nDone!');
