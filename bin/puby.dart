@@ -36,9 +36,10 @@ void main(List<String> arguments) async {
 }
 
 Future<List<Project>> findProjects() async {
-  final pubspecEntities = Directory.current.listSync(recursive: true).where(
-        (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
-      );
+  final pubspecEntities =
+      Directory.current.listSync(recursive: true, followLinks: false).where(
+            (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
+          );
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {

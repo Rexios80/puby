@@ -1,3 +1,6 @@
+## 1.2.0
+- Don't search symlinks for pubspec files
+
 ## 1.1.2
 - Exit with message if no arguments are passed
 
