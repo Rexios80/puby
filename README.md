@@ -12,7 +12,7 @@ $ dart pub global activate puby
 
 ### Usage
 ```console
-puby dart get
-puby flutter upgrade --major-versions
+puby get
+puby upgrade --major-versions
 ...
 ```
