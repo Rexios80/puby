@@ -1,7 +1,8 @@
 Run pub commands for all sub projects in the current directory recursively
 
 ## Features
-Supports all pub commands for both dart and flutter
+- Supports all pub commands
+- Determines if a project uses dart or flutter automatically
 
 ## Use as an executable
 
