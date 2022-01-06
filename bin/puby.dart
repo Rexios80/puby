@@ -3,6 +3,11 @@ import 'dart:io';
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) async {
+  if (arguments.isEmpty) {
+    print('Usage: puby [options]');
+    exit(0);
+  }
+
   final args = ['pub', ...arguments];
   final projects = await findProjects();
 

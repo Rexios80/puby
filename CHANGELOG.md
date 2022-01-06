@@ -1,3 +1,6 @@
+## 1.1.2
+- Exit with message if no arguments are passed
+
 ## 1.1.1
 - Updated readme
 
