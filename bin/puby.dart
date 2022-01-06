@@ -60,7 +60,7 @@ class Project {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
 
     final Engine engine;
-    if (pubspec['environment']['flutter'] != null) {
+    if (pubspec['dependencies']['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;

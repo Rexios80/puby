@@ -1,3 +1,6 @@
+## 1.2.1
+- Updated flutter detection
+
 ## 1.2.0
 - Don't search symlinks for pubspec files
 
