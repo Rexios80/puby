@@ -1,3 +1,6 @@
+## 1.2.3
+- Fixed crash with no dependencies listed in pubspec
+
 ## 1.2.2
 - Print process output in real time
 
