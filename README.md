@@ -13,7 +13,7 @@ $ dart pub global activate puby
 
 ### Usage
 ```console
-puby get
-puby upgrade --major-versions
+$ puby get
+$ puby upgrade --major-versions
 ...
 ```
