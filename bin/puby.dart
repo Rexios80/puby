@@ -8,7 +8,19 @@ void main(List<String> arguments) async {
     exit(0);
   }
 
-  final args = ['pub', ...arguments];
+  final List<String> args;
+  if (arguments.first == 'gen') {
+    args = [
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '--delete-conflicting-outputs',
+    ];
+  } else {
+    args = ['pub', ...arguments];
+  }
+
   final projects = await findProjects();
 
   for (final project in projects) {

@@ -1,3 +1,6 @@
+## 1.3.0
+- Added `puby gen` shortcut for `[dart|flutter] pub run build_runner build --delete-conflicting-outputs`
+
 ## 1.2.3
 - Fixed crash with no dependencies listed in pubspec
 
