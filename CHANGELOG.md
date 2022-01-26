@@ -1,3 +1,7 @@
+## 1.4.0
+- Added `puby test` and `puby clean`
+- Use relative paths
+
 ## 1.3.0
 - Added `puby gen` shortcut for `[dart|flutter] pub run build_runner build --delete-conflicting-outputs`
 
