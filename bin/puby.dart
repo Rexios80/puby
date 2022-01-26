@@ -107,7 +107,7 @@ class Project {
 
     return Project._(
       engine: engine,
-      path: path,
+      path: path.replaceAll(Directory.current.path + '/', ''),
       example: example,
     );
   }
