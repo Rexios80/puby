@@ -40,9 +40,7 @@ void main(List<String> arguments) async {
     }
 
     final pathString = project.path == '.' ? 'current directory' : project.path;
-    print(
-      '\nRunning "${project.engine.name} $argString" in $pathString...',
-    );
+    print('\nRunning "${project.engine.name} $argString" in $pathString...');
     final process = await Process.start(
       project.engine.name,
       args,
