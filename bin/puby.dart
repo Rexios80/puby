@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 final convenienceCommands = {
@@ -107,7 +107,7 @@ class Project {
 
     return Project._(
       engine: engine,
-      path: path.replaceAll(Directory.current.path + '/', ''),
+      path: relative(path),
       example: example,
     );
   }
