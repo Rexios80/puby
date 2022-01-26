@@ -1,3 +1,6 @@
+## 1.6.0
+- Fixed issue with unicode characters in output
+
 ## 1.5.0
 - Combined exit code for use in CI
 

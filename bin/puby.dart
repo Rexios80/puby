@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
+final decoder = Utf8Decoder();
 final convenienceCommands = {
   'gen': [
     'pub',
@@ -47,8 +49,8 @@ void main(List<String> arguments) async {
       workingDirectory: project.path,
     );
     // Piping directly to stdout and stderr can cause unexpected behavior
-    process.stdout.listen((e) => stdout.write(String.fromCharCodes(e)));
-    process.stderr.listen((e) => stderr.write(String.fromCharCodes(e)));
+    process.stdout.listen((e) => stdout.write(decoder.convert(e)));
+    process.stderr.listen((e) => stderr.write(decoder.convert(e)));
 
     final processExitCode = await process.exitCode;
 
