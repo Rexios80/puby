@@ -1,3 +1,6 @@
+## 1.5.0
+- Combined exit code for use in CI
+
 ## 1.4.0
 - Added `puby test` and `puby clean`
 - Use relative paths

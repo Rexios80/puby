@@ -4,6 +4,7 @@ Run pub commands for all sub projects in the current directory recursively
 - Supports all pub commands
 - Determines if a project uses dart or flutter automatically
 - Convenience shortcuts for common dart/flutter commands
+- Combined exit code for use in CI
 
 | Command                | Equivalent                                                                          |
 | ---------------------- | ----------------------------------------------------------------------------------- |

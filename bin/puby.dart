@@ -31,6 +31,7 @@ void main(List<String> arguments) async {
 
   final projects = await findProjects();
 
+  int exitCode = 0;
   for (final project in projects) {
     if (shouldSkipProject(project, args)) {
       continue;
@@ -48,10 +49,20 @@ void main(List<String> arguments) async {
     // Piping directly to stdout and stderr can cause unexpected behavior
     process.stdout.listen((e) => stdout.write(String.fromCharCodes(e)));
     process.stderr.listen((e) => stderr.write(String.fromCharCodes(e)));
-    await process.exitCode;
+
+    final processExitCode = await process.exitCode;
+
+    // Combine exit codes
+    exitCode = exitCode | processExitCode;
   }
 
-  print('\nDone!');
+  if (exitCode != 0) {
+    print('\nOne or more commands failed');
+  } else {
+    print('\nAll commands succeeded');
+  }
+
+  exit(exitCode);
 }
 
 bool shouldSkipProject(Project project, List<String> args) {
