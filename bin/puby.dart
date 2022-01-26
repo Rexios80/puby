@@ -2,6 +2,18 @@ import 'dart:io';
 
 import 'package:yaml/yaml.dart';
 
+final convenienceCommands = {
+  'gen': [
+    'pub',
+    'run',
+    'build_runner',
+    'build',
+    '--delete-conflicting-outputs',
+  ],
+  'test': ['test'],
+  'clean': ['clean'],
+};
+
 void main(List<String> arguments) async {
   if (arguments.isEmpty) {
     print('Usage: puby [options]');
@@ -9,31 +21,23 @@ void main(List<String> arguments) async {
   }
 
   final List<String> args;
-  if (arguments.first == 'gen') {
-    args = [
-      'pub',
-      'run',
-      'build_runner',
-      'build',
-      '--delete-conflicting-outputs',
-    ];
+  final firstArg = arguments.first;
+  if (convenienceCommands.containsKey(firstArg)) {
+    args = convenienceCommands[firstArg]! + arguments.sublist(1);
   } else {
     args = ['pub', ...arguments];
   }
+  final argString = args.join(' ');
 
   final projects = await findProjects();
 
   for (final project in projects) {
-    // Skip flutter pub get in example projects since flutter does it anyways
-    if (project.engine == Engine.flutter &&
-        args.contains('get') &&
-        project.example) {
-      print('\nSkipping flutter example project: ${project.path}');
+    if (shouldSkipProject(project, args)) {
       continue;
     }
 
     print(
-      '\nRunning ${project.engine.name} ${args.join(' ')} in ${project.path}',
+      '\nRunning "${project.engine.name} $argString" in ${project.path}...',
     );
     final process = await Process.start(
       project.engine.name,
@@ -47,6 +51,24 @@ void main(List<String> arguments) async {
   }
 
   print('\nDone!');
+}
+
+bool shouldSkipProject(Project project, List<String> args) {
+  if (project.engine == Engine.flutter &&
+      project.example &&
+      args.length >= 2 &&
+      args[0] == 'pub' &&
+      args[1] == 'get') {
+    // Skip flutter pub get in example projects since flutter does it anyways
+    print('\nSkipping flutter example project: ${project.path}');
+    return true;
+  } else if (project.engine == Engine.dart && args[0] == 'clean') {
+    // dart clean is not a valid command
+    print('\nSkipping dart project: ${project.path}');
+    return true;
+  } else {
+    return false;
+  }
 }
 
 Future<List<Project>> findProjects() async {
