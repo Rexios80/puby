@@ -17,9 +17,18 @@ final convenienceCommands = {
 };
 
 void main(List<String> arguments) async {
-  if (arguments.isEmpty) {
-    print('Usage: puby [options]');
-    exit(0);
+  if (arguments.isEmpty ||
+      arguments.first == '-h' ||
+      arguments.first == '--help') {
+    print(
+      '''
+Usage:
+  puby [options]          [dart|flutter] pub [options]
+  puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
+  puby test [options]     [dart|flutter] test [options]
+  puby clean [options]    flutter clean [options] (only runs in flutter projects)''',
+    );
+    exit(1);
   }
 
   final List<String> args;

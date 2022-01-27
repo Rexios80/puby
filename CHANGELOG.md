@@ -1,3 +1,6 @@
+## 1.7.0
+- Added more useful help text
+
 ## 1.6.0
 - Fixed issue with unicode characters in output
 

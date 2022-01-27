@@ -8,6 +8,7 @@ Run pub commands for all sub projects in the current directory recursively
 
 | Command                | Equivalent                                                                          |
 | ---------------------- | ----------------------------------------------------------------------------------- |
+| `puby [options]`       | `[dart\|flutter] pub [options]`                                                     |
 | `puby gen [options]`   | `[dart\|flutter] pub run build_runner build --delete-conflicting-outputs [options]` |
 | `puby test [options]`  | `[dart\|flutter] test [options]`                                                    |
 | `puby clean [options]` | `flutter clean [options]` (only runs in flutter projects)                           |
