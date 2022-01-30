@@ -44,7 +44,7 @@ Usage:
 
   int exitCode = 0;
   for (final project in projects) {
-    if (shouldSkipProject(project, args)) {
+    if (shouldSkipProject(project, projects.length, args)) {
       continue;
     }
 
@@ -74,13 +74,15 @@ Usage:
   exit(exitCode);
 }
 
-bool shouldSkipProject(Project project, List<String> args) {
-  if (project.engine == Engine.flutter &&
+bool shouldSkipProject(Project project, int projectCount, List<String> args) {
+  if (projectCount >= 2 &&
+      project.engine == Engine.flutter &&
       project.example &&
       args.length >= 2 &&
       args[0] == 'pub' &&
       args[1] == 'get') {
     // Skip flutter pub get in example projects since flutter does it anyways
+    // If the only project is an example, don't skip it
     print('\nSkipping flutter example project: ${project.path}');
     return true;
   } else if (project.engine == Engine.dart && args[0] == 'clean') {

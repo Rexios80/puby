@@ -1,3 +1,6 @@
+## 1.8.0
+- Don't skip a Flutter example project if it is the only project found
+
 ## 1.7.0
 - Added more useful help text
 
