@@ -1,3 +1,6 @@
+## 1.9.1
+- Fixed skipping flutter example projects on Windows
+
 ## 1.9.0
 - Fixed running on Windows
 

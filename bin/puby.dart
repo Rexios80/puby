@@ -127,7 +127,7 @@ class Project {
     }
 
     final path = entity.parent.path;
-    final example = path.endsWith('/example');
+    final example = path.endsWith('${Platform.pathSeparator}example');
 
     return Project._(
       engine: engine,
