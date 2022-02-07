@@ -1,3 +1,6 @@
+## 1.9.0
+- Fixed running on Windows
+
 ## 1.8.0
 - Don't skip a Flutter example project if it is the only project found
 
