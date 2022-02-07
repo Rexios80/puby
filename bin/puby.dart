@@ -54,6 +54,7 @@ Usage:
       project.engine.name,
       args,
       workingDirectory: project.path,
+      runInShell: true,
     );
     // Piping directly to stdout and stderr can cause unexpected behavior
     process.stdout.listen((e) => stdout.write(decoder.convert(e)));
