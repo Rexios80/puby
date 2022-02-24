@@ -76,7 +76,11 @@ Usage:
 }
 
 bool shouldSkipProject(Project project, int projectCount, List<String> args) {
-  if (projectCount >= 2 &&
+  if (project.hidden) {
+    // Skip hidden folders
+    print('\nSkipping hidden project: ${project.path}');
+    return true;
+  } else if (projectCount >= 2 &&
       project.engine == Engine.flutter &&
       project.example &&
       args.length >= 2 &&
@@ -113,8 +117,14 @@ class Project {
   final Engine engine;
   final String path;
   final bool example;
+  final bool hidden;
 
-  Project._({required this.engine, required this.path, required this.example});
+  Project._({
+    required this.engine,
+    required this.path,
+    required this.example,
+    required this.hidden,
+  });
 
   static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
@@ -126,13 +136,17 @@ class Project {
       engine = Engine.dart;
     }
 
-    final path = entity.parent.path;
+    final path = relative(entity.parent.path);
     final example = path.endsWith('${Platform.pathSeparator}example');
+    final hidden = path
+        .split(Platform.pathSeparator)
+        .any((e) => e.length > 1 && e.startsWith('.'));
 
     return Project._(
       engine: engine,
-      path: relative(path),
+      path: path,
       example: example,
+      hidden: hidden,
     );
   }
 }
