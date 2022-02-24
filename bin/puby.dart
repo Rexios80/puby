@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
@@ -16,17 +17,24 @@ final convenienceCommands = {
   'clean': ['clean'],
 };
 
+final magentaPen = AnsiPen()..magenta();
+final greenPen = AnsiPen()..green();
+final yellowPen = AnsiPen()..yellow();
+final redPen = AnsiPen()..red();
+
 void main(List<String> arguments) async {
   if (arguments.isEmpty ||
       arguments.first == '-h' ||
       arguments.first == '--help') {
     print(
-      '''
+      magentaPen(
+        '''
 Usage:
   puby [options]          [dart|flutter] pub [options]
   puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
   puby test [options]     [dart|flutter] test [options]
   puby clean [options]    flutter clean [options] (only runs in flutter projects)''',
+      ),
     );
     exit(1);
   }
@@ -49,7 +57,11 @@ Usage:
     }
 
     final pathString = project.path == '.' ? 'current directory' : project.path;
-    print('\nRunning "${project.engine.name} $argString" in $pathString...');
+    print(
+      greenPen(
+        '\nRunning "${project.engine.name} $argString" in $pathString...',
+      ),
+    );
     final process = await Process.start(
       project.engine.name,
       args,
@@ -58,7 +70,7 @@ Usage:
     );
     // Piping directly to stdout and stderr can cause unexpected behavior
     process.stdout.listen((e) => stdout.write(decoder.convert(e)));
-    process.stderr.listen((e) => stderr.write(decoder.convert(e)));
+    process.stderr.listen((e) => stderr.write(redPen(decoder.convert(e))));
 
     final processExitCode = await process.exitCode;
 
@@ -67,19 +79,21 @@ Usage:
   }
 
   if (exitCode != 0) {
-    print('\nOne or more commands failed');
+    print(redPen('\nOne or more commands failed'));
   } else {
-    print('\nAll commands succeeded');
+    print(greenPen('\nAll commands succeeded'));
   }
 
   exit(exitCode);
 }
 
 bool shouldSkipProject(Project project, int projectCount, List<String> args) {
+  final bool skip;
+  final String? message;
   if (project.hidden) {
     // Skip hidden folders
-    print('\nSkipping hidden project: ${project.path}');
-    return true;
+    message = 'Skipping hidden project: ${project.path}';
+    skip = true;
   } else if (project.engine == Engine.flutter &&
       project.example &&
       args.length >= 2 &&
@@ -87,15 +101,21 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
       args[1] == 'get') {
     // Skip flutter pub get in example projects since flutter does it anyways
     // If the only project is an example, don't skip it
-    print('\nSkipping flutter example project: ${project.path}');
-    return true;
+    message = 'Skipping flutter example project: ${project.path}';
+    skip = true;
   } else if (project.engine == Engine.dart && args[0] == 'clean') {
     // dart clean is not a valid command
-    print('\nSkipping dart project: ${project.path}');
-    return true;
+    message = 'Skipping dart project: ${project.path}';
+    skip = true;
   } else {
-    return false;
+    message = null;
+    skip = false;
   }
+
+  if (message != null) {
+    print(yellowPen('\n$message'));
+  }
+  return skip;
 }
 
 Future<List<Project>> findProjects() async {
