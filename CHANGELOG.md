@@ -1,3 +1,6 @@
+## 1.10.0
+- Skip projects in hidden folders
+
 ## 1.9.1
 - Fixed skipping flutter example projects on Windows
 

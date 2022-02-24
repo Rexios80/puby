@@ -80,8 +80,7 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
     // Skip hidden folders
     print('\nSkipping hidden project: ${project.path}');
     return true;
-  } else if (projectCount >= 2 &&
-      project.engine == Engine.flutter &&
+  } else if (project.engine == Engine.flutter &&
       project.example &&
       args.length >= 2 &&
       args[0] == 'pub' &&
