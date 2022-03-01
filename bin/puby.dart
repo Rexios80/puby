@@ -27,7 +27,7 @@ void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check('puby');
   if (newVersion != null) {
     print(
-      redPen(
+      yellowPen(
         'There is an update available: $newVersion. Run `dart pub global activate puby` to update.',
       ),
     );

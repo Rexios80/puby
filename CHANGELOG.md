@@ -1,3 +1,6 @@
+## 1.12.1
+- Print the update text in yellow
+
 ## 1.12.0
 - Added update checking
 
