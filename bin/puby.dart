@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart';
+import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:yaml/yaml.dart';
 
 final decoder = Utf8Decoder();
@@ -23,6 +24,15 @@ final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
+  final newVersion = await PubUpdateChecker.check('puby');
+  if (newVersion != null) {
+    print(
+      redPen(
+        'There is an update available: $newVersion. Run `dart pub global activate puby` to update.',
+      ),
+    );
+  }
+
   if (arguments.isEmpty ||
       arguments.first == '-h' ||
       arguments.first == '--help') {

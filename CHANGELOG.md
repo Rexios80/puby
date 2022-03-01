@@ -1,3 +1,6 @@
+## 1.12.0
+- Added update checking
+
 ## 1.11.0
 - Fixed flutter example project skipping if example folder is in current directory
 
