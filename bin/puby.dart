@@ -24,7 +24,7 @@ final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
-  final newVersion = await PubUpdateChecker.check('puby');
+  final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
     print(
       yellowPen(
