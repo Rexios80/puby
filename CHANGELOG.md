@@ -1,3 +1,6 @@
+## 1.11.0
+- Fixed flutter example project skipping if example folder is in current directory
+
 ## 1.10.0
 - Skip projects in hidden folders
 - Colored outputs

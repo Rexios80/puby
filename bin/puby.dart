@@ -156,7 +156,7 @@ class Project {
     }
 
     final path = relative(entity.parent.path);
-    final example = path.endsWith('${Platform.pathSeparator}example');
+    final example = path.split(Platform.pathSeparator).last == 'example';
     final hidden = path
         .split(Platform.pathSeparator)
         .any((e) => e.length > 1 && e.startsWith('.'));
