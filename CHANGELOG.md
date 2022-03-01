@@ -1,3 +1,6 @@
+## 1.12.2
+- Updated pub_update_checker
+
 ## 1.12.1
 - Print the update text in yellow
 
