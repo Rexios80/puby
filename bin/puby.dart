@@ -74,7 +74,7 @@ Usage:
     );
     final process = await Process.start(
       project.engine.name,
-      args,
+      project.engine.prefixArgs + args,
       workingDirectory: project.path,
       runInShell: true,
     );
@@ -157,15 +157,17 @@ class Project {
 
   static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
+    final path = relative(entity.parent.path);
 
     final Engine engine;
-    if (pubspec['dependencies']?['flutter'] != null) {
+    if (Directory('$path/.fvm').existsSync()) {
+      engine = Engine.fvm;
+    } else if (pubspec['dependencies']?['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
     }
 
-    final path = relative(entity.parent.path);
     final example = path.split(Platform.pathSeparator).last == 'example';
     final hidden = path
         .split(Platform.pathSeparator)
@@ -183,4 +185,17 @@ class Project {
 enum Engine {
   dart,
   flutter,
+  fvm,
+}
+
+extension on Engine {
+  List<String> get prefixArgs {
+    switch (this) {
+      case Engine.dart:
+      case Engine.flutter:
+        return [];
+      case Engine.fvm:
+        return ['flutter'];
+    }
+  }
 }
