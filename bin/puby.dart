@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:yaml/yaml.dart';
 
+import 'config.dart';
+
 final decoder = Utf8Decoder();
 final convenienceCommands = {
   'gen': [
@@ -49,35 +51,41 @@ Usage:
     exit(1);
   }
 
-  final List<String> args;
+  final List<String> transformedArgs;
   final firstArg = arguments.first;
   if (convenienceCommands.containsKey(firstArg)) {
-    args = convenienceCommands[firstArg]! + arguments.sublist(1);
+    transformedArgs = convenienceCommands[firstArg]! + arguments.sublist(1);
   } else {
-    args = ['pub', ...arguments];
+    transformedArgs = ['pub', ...arguments];
   }
-  final argString = args.join(' ');
 
   final projects = await findProjects();
 
   int exitCode = 0;
   for (final project in projects) {
-    if (shouldSkipProject(project, projects.length, args)) {
+    // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
+    if (explicitExclude(project, transformedArgs) ||
+        defaultExclude(project, projects.length, transformedArgs)) {
       continue;
     }
 
+    final finalArgs = project.engine.prefixArgs + transformedArgs;
+
+    final argString = finalArgs.join(' ');
     final pathString = project.path == '.' ? 'current directory' : project.path;
     print(
       greenPen(
         '\nRunning "${project.engine.name} $argString" in $pathString...',
       ),
     );
+
     final process = await Process.start(
       project.engine.name,
-      args,
+      finalArgs,
       workingDirectory: project.path,
       runInShell: true,
     );
+
     // Piping directly to stdout and stderr can cause unexpected behavior
     process.stdout.listen((e) => stdout.write(decoder.convert(e)));
     process.stderr.listen((e) => stderr.write(redPen(decoder.convert(e))));
@@ -97,14 +105,14 @@ Usage:
   exit(exitCode);
 }
 
-bool shouldSkipProject(Project project, int projectCount, List<String> args) {
+bool defaultExclude(Project project, int projectCount, List<String> args) {
   final bool skip;
   final String? message;
   if (project.hidden) {
     // Skip hidden folders
     message = 'Skipping hidden project: ${project.path}';
     skip = true;
-  } else if (project.engine == Engine.flutter &&
+  } else if (project.engine.isFlutter &&
       project.example &&
       args.length >= 2 &&
       args[0] == 'pub' &&
@@ -128,6 +136,17 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
   return skip;
 }
 
+bool explicitExclude(Project project, List<String> args) {
+  final argString = args.join(' ');
+
+  final skip = project.config.excludes.any(argString.startsWith);
+  if (skip) {
+    print(yellowPen('\nSkipping project with exclusion: ${project.path}'));
+  }
+
+  return skip;
+}
+
 Future<List<Project>> findProjects() async {
   final pubspecEntities =
       Directory.current.listSync(recursive: true, followLinks: false).where(
@@ -145,27 +164,32 @@ Future<List<Project>> findProjects() async {
 class Project {
   final Engine engine;
   final String path;
+  final PubyConfig config;
   final bool example;
   final bool hidden;
 
   Project._({
     required this.engine,
     required this.path,
+    required this.config,
     required this.example,
     required this.hidden,
   });
 
   static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
+    final path = relative(entity.parent.path);
+    final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
-    if (pubspec['dependencies']?['flutter'] != null) {
+    if (Directory('$path/.fvm').existsSync()) {
+      engine = Engine.fvm;
+    } else if (pubspec['dependencies']?['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
     }
 
-    final path = relative(entity.parent.path);
     final example = path.split(Platform.pathSeparator).last == 'example';
     final hidden = path
         .split(Platform.pathSeparator)
@@ -174,6 +198,7 @@ class Project {
     return Project._(
       engine: engine,
       path: path,
+      config: config,
       example: example,
       hidden: hidden,
     );
@@ -183,4 +208,19 @@ class Project {
 enum Engine {
   dart,
   flutter,
+  fvm,
+}
+
+extension on Engine {
+  bool get isFlutter => this == Engine.flutter || this == Engine.fvm;
+
+  List<String> get prefixArgs {
+    switch (this) {
+      case Engine.dart:
+      case Engine.flutter:
+        return [];
+      case Engine.fvm:
+        return ['flutter'];
+    }
+  }
 }
