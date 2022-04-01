@@ -33,7 +33,7 @@ void main() {
       'flutter_puby_test${Platform.pathSeparator}example',
       'flutter pub run build_runner build --delete-conflicting-outputs',
     ]);
-    
+
     // fvm
     expectLine(stdout, [
       'fvm_puby_test',

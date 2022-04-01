@@ -27,7 +27,7 @@ void main() {
       'flutter_puby_test${Platform.pathSeparator}example',
       'flutter test --coverage',
     ]);
-    
+
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter test --coverage']);
     // TODO: Skip with skip project feature
