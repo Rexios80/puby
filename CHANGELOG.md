@@ -1,3 +1,8 @@
+## 1.13.0
+- FVM support
+- Config file to allow per-project command exclusions
+- Added tests
+
 ## 1.12.2
 - Updated pub_update_checker
 
