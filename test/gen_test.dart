@@ -6,7 +6,7 @@ import 'test_utils.dart';
 
 void main() {
   test('[engine] clean', () async {
-    final result = await testCommand('dart', ['../bin/puby.dart', 'gen']);
+    final result = await testCommand(['gen']);
     final stdout = result.stdout;
 
     expectLine(stdout, [

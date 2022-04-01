@@ -6,8 +6,7 @@ import 'test_utils.dart';
 
 void main() {
   test('[engine] test', () async {
-    final result =
-        await testCommand('dart', ['../bin/puby.dart', 'test', '--coverage']);
+    final result = await testCommand(['test', '--coverage']);
     final stdout = result.stdout;
 
     expectLine(stdout, ['dart_puby_test', 'dart test --coverage']);

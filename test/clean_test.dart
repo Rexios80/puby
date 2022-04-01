@@ -6,7 +6,7 @@ import 'test_utils.dart';
 
 void main() {
   test('[engine] clean', () async {
-    final result = await testCommand('dart', ['../bin/puby.dart', 'clean']);
+    final result = await testCommand(['clean']);
     final stdout = result.stdout;
 
     // Clean does not run in dart projects

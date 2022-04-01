@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-Future<ProcessResult> testCommand(String executable, List<String> arguments) {
-  return Process.run(executable, arguments, workingDirectory: 'test_resources');
+Future<ProcessResult> testCommand(List<String> arguments) {
+  return Process.run(
+    'dart',
+    ['../bin/puby.dart', ...arguments],
+    workingDirectory: 'test_resources',
+  );
 }
 
 void expectLine(dynamic stdout, List<String> matchers) {
