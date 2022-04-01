@@ -64,8 +64,8 @@ Usage:
   int exitCode = 0;
   for (final project in projects) {
     // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-    if (defaultExclude(project, projects.length, transformedArgs) ||
-        explicitExclude(project, transformedArgs)) {
+    if (explicitExclude(project, transformedArgs) ||
+        defaultExclude(project, projects.length, transformedArgs)) {
       continue;
     }
 
