@@ -28,4 +28,4 @@ jobs:
       - name: Pana
         run: |
           flutter pub global activate pana
-          pana --no-warning --exit-code-threshold 0
+          pana --no-warning --exit-code-threshold 20
