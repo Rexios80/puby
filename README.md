@@ -44,6 +44,7 @@ exclude:
 ```
 
 Exclusions match from the start of a command, and the entire exclusion string must be present. Here are some examples:
+
 | Exclusion              | Example command excluded                     |
 | ---------------------- | -------------------------------------------- |
 | `test`                 | `[dart\|flutter] test --coverage`            |

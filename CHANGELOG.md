@@ -1,3 +1,6 @@
+## 1.13.1
+- Fixed readme layout
+
 ## 1.13.0
 - FVM support
 - Config file to allow per-project command exclusions
