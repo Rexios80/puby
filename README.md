@@ -15,6 +15,8 @@ Run pub commands for all sub projects in the current directory recursively
 | `puby test [options]`  | `[dart\|flutter] test [options]`                                                    |
 | `puby clean [options]` | `flutter clean [options]` (only runs in flutter projects)                           |
 
+For projects configured with FVM, `fvm flutter [options]` is used.
+
 ## Use as an executable
 
 ### Installation
