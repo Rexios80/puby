@@ -20,7 +20,7 @@ void main() {
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get']);
-    // Skip flutter example projects
+    // Default exclusion
     expectLine(
       stdout,
       ['flutter_puby_test${Platform.pathSeparator}example', 'Skip'],
@@ -30,7 +30,7 @@ void main() {
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter pub get']);
-    // Skip flutter example projects
+    // Default exclusion
     expectLine(
       stdout,
       ['fvm_puby_test${Platform.pathSeparator}example', 'Skip'],

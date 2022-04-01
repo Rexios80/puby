@@ -12,8 +12,9 @@ void main() {
     expect(result.exitCode, 0);
 
     // dart
-    // Clean does not run in dart projects
+    // Default exclusion
     expectLine(stdout, ['dart_puby_test', 'Skip']);
+    // Default exclusion
     expectLine(
       stdout,
       ['dart_puby_test${Platform.pathSeparator}example', 'Skip'],

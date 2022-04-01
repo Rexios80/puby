@@ -14,26 +14,26 @@ void main() {
 
     // dart
     expectLine(stdout, ['dart_puby_test', 'dart test --coverage']);
-    // TODO: Skip with skip project feature
-    expectLine(stdout, [
-      'dart_puby_test${Platform.pathSeparator}example',
-      'dart test --coverage',
-    ]);
+    // Explicit exclusion
+    expectLine(
+      stdout,
+      ['dart_puby_test${Platform.pathSeparator}example', 'Skip'],
+    );
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter test --coverage']);
-    // TODO: Skip with skip project feature
-    expectLine(stdout, [
-      'flutter_puby_test${Platform.pathSeparator}example',
-      'flutter test --coverage',
-    ]);
+    // Explicit exclusion
+    expectLine(
+      stdout,
+      ['flutter_puby_test${Platform.pathSeparator}example', 'Skip'],
+    );
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter test --coverage']);
-    // TODO: Skip with skip project feature
-    expectLine(stdout, [
-      'fvm_puby_test${Platform.pathSeparator}example',
-      'fvm flutter test --coverage',
-    ]);
+    // Explicit exclusion
+    expectLine(
+      stdout,
+      ['fvm_puby_test${Platform.pathSeparator}example', 'Skip'],
+    );
   });
 }

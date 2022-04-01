@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:yaml/yaml.dart';
 
+import 'config.dart';
+
 final decoder = Utf8Decoder();
 final convenienceCommands = {
   'gen': [
@@ -61,8 +63,9 @@ Usage:
 
   int exitCode = 0;
   for (final project in projects) {
-    // Fvm is a layer on top of flutter, so don't add the prefix args for this check
-    if (shouldSkipProject(project, projects.length, transformedArgs)) {
+    // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
+    if (defaultExclude(project, projects.length, transformedArgs) ||
+        explicitExclude(project, transformedArgs)) {
       continue;
     }
 
@@ -102,7 +105,7 @@ Usage:
   exit(exitCode);
 }
 
-bool shouldSkipProject(Project project, int projectCount, List<String> args) {
+bool defaultExclude(Project project, int projectCount, List<String> args) {
   final bool skip;
   final String? message;
   if (project.hidden) {
@@ -133,6 +136,17 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
   return skip;
 }
 
+bool explicitExclude(Project project, List<String> args) {
+  final argString = args.join(' ');
+
+  final skip = project.config.excludes.any(argString.startsWith);
+  if (skip) {
+    print(yellowPen('\nSkipping project with exclusion: ${project.path}'));
+  }
+
+  return skip;
+}
+
 Future<List<Project>> findProjects() async {
   final pubspecEntities =
       Directory.current.listSync(recursive: true, followLinks: false).where(
@@ -150,12 +164,14 @@ Future<List<Project>> findProjects() async {
 class Project {
   final Engine engine;
   final String path;
+  final PubyConfig config;
   final bool example;
   final bool hidden;
 
   Project._({
     required this.engine,
     required this.path,
+    required this.config,
     required this.example,
     required this.hidden,
   });
@@ -163,6 +179,7 @@ class Project {
   static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
     final path = relative(entity.parent.path);
+    final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
     if (Directory('$path/.fvm').existsSync()) {
@@ -181,6 +198,7 @@ class Project {
     return Project._(
       engine: engine,
       path: path,
+      config: config,
       example: example,
       hidden: hidden,
     );
