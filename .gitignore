@@ -11,3 +11,5 @@ pubspec.lock
 
 # macOS
 .DS_Store
+
+.vscode

@@ -56,7 +56,6 @@ Usage:
   } else {
     args = ['pub', ...arguments];
   }
-  final argString = args.join(' ');
 
   final projects = await findProjects();
 
@@ -67,14 +66,15 @@ Usage:
     }
 
     final pathString = project.path == '.' ? 'current directory' : project.path;
+    final List<String> localArgs = List.from([...project.engine.args, ...args]);
     print(
       greenPen(
-        '\nRunning "${project.engine.name} $argString" in $pathString...',
+        '\nRunning "${project.engine.command} ${localArgs.join(' ')}" in $pathString...',
       ),
     );
     final process = await Process.start(
-      project.engine.name,
-      args,
+      project.engine.command,
+      localArgs,
       workingDirectory: project.path,
       runInShell: true,
     );
@@ -104,7 +104,8 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
     // Skip hidden folders
     message = 'Skipping hidden project: ${project.path}';
     skip = true;
-  } else if (project.engine == Engine.flutter &&
+  } else if ((project.engine == Engine.flutter ||
+          project.engine == Engine.fvm) &&
       project.example &&
       args.length >= 2 &&
       args[0] == 'pub' &&
@@ -129,6 +130,9 @@ bool shouldSkipProject(Project project, int projectCount, List<String> args) {
 }
 
 Future<List<Project>> findProjects() async {
+  final bool fvmSupported = Directory.current
+      .listSync(recursive: false, followLinks: false)
+      .any((entity) => entity.path.endsWith('.fvm'));
   final pubspecEntities =
       Directory.current.listSync(recursive: true, followLinks: false).where(
             (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
@@ -136,7 +140,8 @@ Future<List<Project>> findProjects() async {
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
-    final project = await Project.fromPubspecEntity(pubspecEntity);
+    final project =
+        await Project.fromPubspecEntity(pubspecEntity, isFvm: fvmSupported);
     projects.add(project);
   }
   return projects;
@@ -155,11 +160,16 @@ class Project {
     required this.hidden,
   });
 
-  static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
+  static Future<Project> fromPubspecEntity(
+    FileSystemEntity entity, {
+    bool isFvm = false,
+  }) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
 
     final Engine engine;
-    if (pubspec['dependencies']?['flutter'] != null) {
+    if (isFvm) {
+      engine = Engine.fvm;
+    } else if (pubspec['dependencies']?['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
@@ -180,7 +190,15 @@ class Project {
   }
 }
 
-enum Engine {
-  dart,
-  flutter,
+class Engine {
+  static const Engine dart = Engine._internal('dart');
+  static const Engine flutter = Engine._internal('flutter');
+  static const Engine fvm = Engine._internal('fvm', args: ['flutter']);
+
+  static const List<Engine> values = [dart, flutter, fvm];
+
+  const Engine._internal(this.command, {this.args = const []});
+
+  final String command;
+  final List<String> args;
 }
