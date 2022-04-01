@@ -9,10 +9,21 @@ void main() {
     final result = await testCommand(['gen']);
     final stdout = result.stdout;
 
+    // Since these projects have no code generation, the command should fail
+    expect(result.exitCode, isNot(0));
+
+    // dart
     expectLine(stdout, [
       'dart_puby_test',
       'dart pub run build_runner build --delete-conflicting-outputs',
     ]);
+    // TODO: Skip with skip project feature
+    expectLine(stdout, [
+      'dart_puby_test${Platform.pathSeparator}example',
+      'dart pub run build_runner build --delete-conflicting-outputs',
+    ]);
+
+    // flutter
     expectLine(stdout, [
       'flutter_puby_test',
       'flutter pub run build_runner build --delete-conflicting-outputs',
@@ -22,6 +33,16 @@ void main() {
       'flutter_puby_test${Platform.pathSeparator}example',
       'flutter pub run build_runner build --delete-conflicting-outputs',
     ]);
-    // TODO: fvm
+    
+    // fvm
+    expectLine(stdout, [
+      'fvm_puby_test',
+      'fvm flutter pub run build_runner build --delete-conflicting-outputs',
+    ]);
+    // TODO: Skip with skip project feature
+    expectLine(stdout, [
+      'fvm_puby_test${Platform.pathSeparator}example',
+      'fvm flutter pub run build_runner build --delete-conflicting-outputs',
+    ]);
   });
 }
