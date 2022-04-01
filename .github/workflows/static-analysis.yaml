@@ -26,7 +26,9 @@ jobs:
       #     flutter pub run build_runner build --delete-conflicting-outputs
       #     git diff --exit-code
       - name: Activate fvm
-        run: dart pub global activate fvm
+        run: |
+          dart pub global activate fvm
+          fvm install stable
       - name: Test
         run: flutter test
       - name: Pana
