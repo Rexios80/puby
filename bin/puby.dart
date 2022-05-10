@@ -61,6 +61,11 @@ Usage:
 
   final projects = await findProjects();
 
+  if (projects.isEmpty) {
+    print(redPen('No projects found in the current folder.'));
+    exit(1);
+  }
+
   int exitCode = 0;
   for (final project in projects) {
     // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
