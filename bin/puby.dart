@@ -62,7 +62,7 @@ Usage:
   final projects = await findProjects();
 
   if (projects.isEmpty) {
-    print(redPen('No projects found in the current folder.'));
+    print(redPen('No projects found in the current directory'));
     exit(1);
   }
 

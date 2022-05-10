@@ -1,3 +1,6 @@
+## 1.14.0
+- Exit if there are no projects found in the current directory
+
 ## 1.13.1
 - Fixed readme layout
 
