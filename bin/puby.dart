@@ -6,6 +6,7 @@ import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:yaml/yaml.dart';
 
 import 'config.dart';
+import 'utils.dart';
 
 final decoder = Utf8Decoder();
 final convenienceCommands = {
@@ -59,7 +60,8 @@ Usage:
     transformedArgs = ['pub', ...arguments];
   }
 
-  final projects = await findProjects();
+  final fvmEnabled = await fvmInstalled();
+  final projects = await findProjects(fvmEnabled: fvmEnabled);
 
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -83,6 +85,10 @@ Usage:
         '\nRunning "${project.engine.name} $argString" in $pathString...',
       ),
     );
+
+    if (project.usesFvm && !fvmEnabled) {
+      print(yellowPen('This project uses FVM, but FVM is not installed'));
+    }
 
     final process = await Process.start(
       project.engine.name,
@@ -152,7 +158,7 @@ bool explicitExclude(Project project, List<String> args) {
   return skip;
 }
 
-Future<List<Project>> findProjects() async {
+Future<List<Project>> findProjects({required bool fvmEnabled}) async {
   final pubspecEntities =
       Directory.current.listSync(recursive: true, followLinks: false).where(
             (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
@@ -160,7 +166,8 @@ Future<List<Project>> findProjects() async {
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
-    final project = await Project.fromPubspecEntity(pubspecEntity);
+    final project =
+        await Project.fromPubspecEntity(pubspecEntity, fvmEnabled: fvmEnabled);
     projects.add(project);
   }
   return projects;
@@ -172,6 +179,7 @@ class Project {
   final PubyConfig config;
   final bool example;
   final bool hidden;
+  final bool usesFvm;
 
   Project._({
     required this.engine,
@@ -179,17 +187,23 @@ class Project {
     required this.config,
     required this.example,
     required this.hidden,
+    required this.usesFvm,
   });
 
-  static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
+  static Future<Project> fromPubspecEntity(
+    FileSystemEntity entity, {
+    required bool fvmEnabled,
+  }) async {
     final pubspec = await loadYaml(File(entity.path).readAsStringSync());
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
+    final usesFvm = Directory('$path/.fvm').existsSync();
+
     final Engine engine;
-    if (Directory('$path/.fvm').existsSync()) {
+    if (fvmEnabled && usesFvm) {
       engine = Engine.fvm;
-    } else if (pubspec['dependencies']?['flutter'] != null) {
+    } else if (pubspec?['dependencies']?['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
@@ -206,6 +220,7 @@ class Project {
       config: config,
       example: example,
       hidden: hidden,
+      usesFvm: usesFvm,
     );
   }
 }

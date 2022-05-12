@@ -1,3 +1,7 @@
+## 1.14.1
+- Handle empty pubspec files
+- Only use FVM if it is installed
+
 ## 1.14.0
 - Exit if there are no projects found in the current directory
 
