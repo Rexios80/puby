@@ -26,6 +26,8 @@ final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
+  final stopwatch = Stopwatch()..start();
+
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
     print(
@@ -101,10 +103,18 @@ Usage:
     exitCode = exitCode | processExitCode;
   }
 
-  if (exitCode != 0) {
-    print(redPen('\nOne or more commands failed'));
+  final elapsed = stopwatch.elapsedMilliseconds;
+  final String time;
+  if (elapsed > 1000) {
+    time = '${(elapsed / 1000).toStringAsFixed(1)}s';
   } else {
-    print(greenPen('\nAll commands succeeded'));
+    time = '${elapsed}ms';
+  }
+
+  if (exitCode != 0) {
+    print(redPen('\nOne or more commands failed ($time)'));
+  } else {
+    print(greenPen('\nAll commands succeeded ($time)'));
   }
 
   exit(exitCode);

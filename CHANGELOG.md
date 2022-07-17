@@ -1,3 +1,6 @@
+## 1.15.0
+- Show elapsed time after command completion
+
 ## 1.14.1
 - Handle empty pubspec files
 
