@@ -166,7 +166,7 @@ Future<List<Project>> findProjects() async {
   final pubspecEntities =
       Directory.current.listSync(recursive: true, followLinks: false).where(
             (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
-          );
+          ).cast<File>();
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
@@ -191,8 +191,8 @@ class Project {
     required this.hidden,
   });
 
-  static Future<Project> fromPubspecEntity(FileSystemEntity entity) async {
-    final pubspec = await loadYaml(File(entity.path).readAsStringSync());
+  static Future<Project> fromPubspecEntity(File entity) async {
+    final pubspec = await loadYaml(entity.readAsStringSync());
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
