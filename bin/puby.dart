@@ -198,15 +198,16 @@ class Project {
   });
 
   static Future<Project> fromPubspecEntity(File entity) async {
+    final path = relative(entity.parent.path);
+    final config = PubyConfig.fromProjectPath(path);
+
     late final Pubspec? pubspec;
     try {
       pubspec = Pubspec.parse(entity.readAsStringSync());
     } catch (e) {
-      print(redPen('Error parsing pubspec: ${entity.path}'));
+      print(redPen('Error parsing pubspec: $path'));
       pubspec = null;
     }
-    final path = relative(entity.parent.path);
-    final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
     if (Directory('$path/.fvm').existsSync()) {
