@@ -1,6 +1,9 @@
+## 1.16.1
+- Fixed typo
+
 ## 1.16.0
 - Commands no longer run in build folders
-- Uses pubpsec_parse package for pubspec parsing
+- Uses pubspec_parse package for pubspec parsing
 
 ## 1.15.0
 - Show elapsed time after command completion

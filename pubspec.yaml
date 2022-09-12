@@ -1,6 +1,6 @@
 name: puby
 description: Run pub commands for all sub projects in the current directory recursively
-version: 1.16.0
+version: 1.16.1
 homepage: https://github.com/Rexios80/puby
 
 environment:
