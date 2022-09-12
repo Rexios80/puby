@@ -198,14 +198,20 @@ class Project {
   });
 
   static Future<Project> fromPubspecEntity(File entity) async {
-    final pubspec = Pubspec.parse(entity.readAsStringSync());
+    late final Pubspec? pubspec;
+    try {
+      pubspec = Pubspec.parse(entity.readAsStringSync());
+    } catch (e) {
+      print(redPen('Error parsing pubspec: ${entity.path}'));
+      pubspec = null;
+    }
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
     if (Directory('$path/.fvm').existsSync()) {
       engine = Engine.fvm;
-    } else if (pubspec.dependencies['flutter'] != null) {
+    } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;

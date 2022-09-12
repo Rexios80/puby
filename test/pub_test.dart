@@ -42,5 +42,8 @@ void main() {
     // Flutter pub get should run in the example project anyways
     // Can't test this with fvm since the output is the same as flutter
     // expectLine(stdout, ['example', 'fvm flutter pub get']);
+
+    // invalid_pubspec
+    expectLine(stdout, ['invalid_pubspec', 'Error parsing pubspec']);
   });
 }
