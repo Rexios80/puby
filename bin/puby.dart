@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
-import 'package:yaml/yaml.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 import 'config.dart';
 
@@ -192,14 +192,14 @@ class Project {
   });
 
   static Future<Project> fromPubspecEntity(File entity) async {
-    final pubspec = await loadYaml(entity.readAsStringSync());
+    final pubspec = Pubspec.parse(entity.readAsStringSync());
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
     if (Directory('$path/.fvm').existsSync()) {
       engine = Engine.fvm;
-    } else if (pubspec?['dependencies']?['flutter'] != null) {
+    } else if (pubspec.dependencies['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
