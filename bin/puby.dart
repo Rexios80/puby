@@ -127,6 +127,10 @@ bool defaultExclude(Project project, int projectCount, List<String> args) {
     // Skip hidden folders
     message = 'Skipping hidden project: ${project.path}';
     skip = true;
+  } else if (project.path.startsWith('build/') ||
+      project.path.contains('/build/')) {
+    message = 'Skipping project in build folder: ${project.path}';
+    skip = true;
   } else if (project.engine.isFlutter &&
       project.example &&
       args.length >= 2 &&
@@ -163,10 +167,12 @@ bool explicitExclude(Project project, List<String> args) {
 }
 
 Future<List<Project>> findProjects() async {
-  final pubspecEntities =
-      Directory.current.listSync(recursive: true, followLinks: false).where(
-            (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
-          ).cast<File>();
+  final pubspecEntities = Directory.current
+      .listSync(recursive: true, followLinks: false)
+      .where(
+        (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
+      )
+      .cast<File>();
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {

@@ -17,6 +17,10 @@ void main() {
       stdout,
       ['dart_puby_test${Platform.pathSeparator}example', 'dart pub get'],
     );
+    expectLine(stdout, [
+      'dart_puby_test${Platform.pathSeparator}build${Platform.pathSeparator}web',
+      'Skip'
+    ]);
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get']);

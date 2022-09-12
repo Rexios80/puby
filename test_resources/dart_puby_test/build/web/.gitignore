@@ -2,5 +2,5 @@
 .dart_tool/
 .packages
 
-# Inlcude this build directory for testing
-!build/
+# Conventional directory for build output.
+build/
