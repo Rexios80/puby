@@ -69,6 +69,7 @@ Usage:
   }
 
   int exitCode = 0;
+  final List<String> failures = [];
   for (final project in projects) {
     // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
     if (explicitExclude(project, transformedArgs) ||
@@ -99,6 +100,10 @@ Usage:
 
     final processExitCode = await process.exitCode;
 
+    if (processExitCode != 0) {
+      failures.add(project.path);
+    }
+
     // Combine exit codes
     exitCode = exitCode | processExitCode;
   }
@@ -113,6 +118,10 @@ Usage:
 
   if (exitCode != 0) {
     print(redPen('\nOne or more commands failed ($time)'));
+    print(redPen('Failures:'));
+    for (final failure in failures) {
+      print(redPen('  $failure'));
+    }
   } else {
     print(greenPen('\nAll commands succeeded ($time)'));
   }

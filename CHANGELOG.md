@@ -1,3 +1,6 @@
+## 1.17.0
+- Prints failed projects to the console
+
 ## 1.16.1
 - Fixed typo
 
