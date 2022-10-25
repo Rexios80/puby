@@ -13,7 +13,7 @@ void main() {
     expect(result.exitCode, isNot(0));
 
     // dart
-    expectLine(stdout, ['dart_puby_test', 'dart test --coverage']);
+    expectLine(stdout, ['dart_puby_test', 'flutter test --coverage']);
     // Explicit exclusion
     expectLine(
       stdout,
@@ -29,7 +29,7 @@ void main() {
     );
 
     // fvm
-    expectLine(stdout, ['fvm_puby_test', 'fvm flutter test --coverage']);
+    expectLine(stdout, ['fvm_puby_test', 'flutter test --coverage']);
     // Explicit exclusion
     expectLine(
       stdout,

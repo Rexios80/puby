@@ -61,13 +61,8 @@ Usage:
     transformedArgs = ['pub', ...arguments];
   }
 
-  final Engine? engineOverride;
-  if (transformedArgs[0] == 'clean') {
-    engineOverride = Engine.flutter;
-  } else {
-    engineOverride = null;
-  }
-  final projects = await findProjects(engineOverride: engineOverride);
+  final projects =
+      await findProjects(engineOverride: engineOverride(transformedArgs));
 
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -133,6 +128,26 @@ Usage:
   }
 
   exit(exitCode);
+}
+
+Engine? engineOverride(List<String> args) {
+  final Engine? engine;
+  final String? message;
+  if (args[0] == 'clean') {
+    engine = Engine.flutter;
+    message = 'Overriding engine to "flutter" for "clean" command';
+  } else if (args.length >= 2 && args[0] == 'test' && args[1] == '--coverage') {
+    engine = Engine.flutter;
+    message = 'Overriding engine to "flutter" for "test --coverage" command';
+  } else {
+    engine = null;
+    message = null;
+  }
+
+  if (message != null) {
+    print(yellowPen('$message\n'));
+  }
+  return engine;
 }
 
 bool defaultExclude(Project project, int projectCount, List<String> args) {
