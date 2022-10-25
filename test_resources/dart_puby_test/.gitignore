@@ -1,6 +1,3 @@
 # Files and directories created by pub.
 .dart_tool/
 .packages
-
-# Inlcude this build directory for testing
-!build/

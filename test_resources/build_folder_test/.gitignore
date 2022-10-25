@@ -1,0 +1,2 @@
+# Inlcude this build directory for testing
+!build/

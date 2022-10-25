@@ -11,16 +11,18 @@ void main() {
 
     expect(result.exitCode, 0);
 
+    // project in build folder
+    expectLine(stdout, [
+      'build_folder_test${Platform.pathSeparator}build${Platform.pathSeparator}web',
+      'Skip'
+    ]);
+
     // dart
     expectLine(stdout, ['dart_puby_test', 'dart pub get']);
     expectLine(
       stdout,
       ['dart_puby_test${Platform.pathSeparator}example', 'dart pub get'],
     );
-    expectLine(stdout, [
-      'dart_puby_test${Platform.pathSeparator}build${Platform.pathSeparator}web',
-      'Skip'
-    ]);
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get']);
@@ -44,6 +46,6 @@ void main() {
     // expectLine(stdout, ['example', 'fvm flutter pub get']);
 
     // invalid_pubspec
-    expectLine(stdout, ['invalid_pubspec', 'Error parsing pubspec']);
+    expectLine(stdout, ['invalid_pubspec_test', 'Error parsing pubspec']);
   });
 }
