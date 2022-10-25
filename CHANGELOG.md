@@ -1,3 +1,6 @@
+## 1.18.0
+- Run `flutter clean` in dart projects
+
 ## 1.17.0
 - Prints failed projects to the console
 

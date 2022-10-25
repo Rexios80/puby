@@ -47,7 +47,7 @@ Usage:
   puby [options]          [dart|flutter] pub [options]
   puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
   puby test [options]     [dart|flutter] test [options]
-  puby clean [options]    flutter clean [options] (only runs in flutter projects)''',
+  puby clean [options]    flutter clean [options]''',
       ),
     );
     exit(1);
@@ -61,7 +61,13 @@ Usage:
     transformedArgs = ['pub', ...arguments];
   }
 
-  final projects = await findProjects();
+  final Engine? engineOverride;
+  if (transformedArgs[0] == 'clean') {
+    engineOverride = Engine.flutter;
+  } else {
+    engineOverride = null;
+  }
+  final projects = await findProjects(engineOverride: engineOverride);
 
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -149,10 +155,6 @@ bool defaultExclude(Project project, int projectCount, List<String> args) {
     // If the only project is an example, don't skip it
     message = 'Skipping flutter example project: ${project.path}';
     skip = true;
-  } else if (project.engine == Engine.dart && args[0] == 'clean') {
-    // dart clean is not a valid command
-    message = 'Skipping dart project: ${project.path}';
-    skip = true;
   } else {
     message = null;
     skip = false;
@@ -175,7 +177,7 @@ bool explicitExclude(Project project, List<String> args) {
   return skip;
 }
 
-Future<List<Project>> findProjects() async {
+Future<List<Project>> findProjects({Engine? engineOverride}) async {
   final pubspecEntities = Directory.current
       .listSync(recursive: true, followLinks: false)
       .where(
@@ -185,7 +187,10 @@ Future<List<Project>> findProjects() async {
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
-    final project = await Project.fromPubspecEntity(pubspecEntity);
+    final project = await Project.fromPubspecEntity(
+      pubspecEntity,
+      engineOverride: engineOverride,
+    );
     projects.add(project);
   }
   return projects;
@@ -206,7 +211,10 @@ class Project {
     required this.hidden,
   });
 
-  static Future<Project> fromPubspecEntity(File entity) async {
+  static Future<Project> fromPubspecEntity(
+    File entity, {
+    Engine? engineOverride,
+  }) async {
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
@@ -219,7 +227,9 @@ class Project {
     }
 
     final Engine engine;
-    if (Directory('$path/.fvm').existsSync()) {
+    if (engineOverride != null) {
+      engine = engineOverride;
+    } else if (Directory('$path/.fvm').existsSync()) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;

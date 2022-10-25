@@ -12,12 +12,10 @@ void main() {
     expect(result.exitCode, 0);
 
     // dart
-    // Default exclusion
-    expectLine(stdout, ['dart_puby_test', 'Skip']);
-    // Default exclusion
+    expectLine(stdout, ['dart_puby_test', 'flutter clean']);
     expectLine(
       stdout,
-      ['dart_puby_test${Platform.pathSeparator}example', 'Skip'],
+      ['dart_puby_test${Platform.pathSeparator}example', 'flutter clean'],
     );
 
     // flutter
@@ -28,10 +26,10 @@ void main() {
     ]);
 
     // fvm
-    expectLine(stdout, ['fvm_puby_test', 'fvm flutter clean']);
+    expectLine(stdout, ['fvm_puby_test', 'flutter clean']);
     expectLine(stdout, [
       'fvm_puby_test${Platform.pathSeparator}example',
-      'fvm flutter clean',
+      'flutter clean',
     ]);
   });
 }
