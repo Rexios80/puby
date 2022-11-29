@@ -1,3 +1,4 @@
 exclude:
   - test
   - pub get
+  - pub upgrade

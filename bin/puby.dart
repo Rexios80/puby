@@ -8,16 +8,26 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'config.dart';
 
 final decoder = Utf8Decoder();
-final convenienceCommands = {
+final convenienceCommands = <String, List<List<String>>>{
   'gen': [
-    'pub',
-    'run',
-    'build_runner',
-    'build',
-    '--delete-conflicting-outputs',
+    [
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '--delete-conflicting-outputs',
+    ],
   ],
-  'test': ['test'],
-  'clean': ['clean'],
+  'test': [
+    ['test'],
+  ],
+  'clean': [
+    ['clean'],
+  ],
+  'mup': [
+    ['pub', 'upgrade', '--major-versions'],
+    ['pub', 'upgrade'],
+  ],
 };
 
 final magentaPen = AnsiPen()..magenta();
@@ -26,8 +36,6 @@ final yellowPen = AnsiPen()..yellow();
 final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
-  final stopwatch = Stopwatch()..start();
-
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
     print(
@@ -47,22 +55,36 @@ Usage:
   puby [options]          [dart|flutter] pub [options]
   puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
   puby test [options]     [dart|flutter] test [options]
-  puby clean [options]    flutter clean [options]''',
+  puby clean [options]    flutter clean [options]
+  puby mup [options]      puby upgrade --major-versions [options] && puby upgrade [options]''',
       ),
     );
     exit(1);
   }
 
-  final List<String> transformedArgs;
   final firstArg = arguments.first;
+
+  final commands = <List<String>>[];
   if (convenienceCommands.containsKey(firstArg)) {
-    transformedArgs = convenienceCommands[firstArg]! + arguments.sublist(1);
+    for (final command in convenienceCommands[firstArg]!) {
+      commands.add(command + arguments.sublist(1));
+    }
   } else {
-    transformedArgs = ['pub', ...arguments];
+    commands.add(['pub', ...arguments]);
   }
 
-  final projects =
-      await findProjects(engineOverride: engineOverride(transformedArgs));
+  int exitCode = 0;
+  for (final command in commands) {
+    exitCode |= await run(command);
+  }
+
+  exit(exitCode);
+}
+
+Future<int> run(List<String> args) async {
+  final stopwatch = Stopwatch()..start();
+
+  final projects = await findProjects(engineOverride: engineOverride(args));
 
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -73,12 +95,12 @@ Usage:
   final List<String> failures = [];
   for (final project in projects) {
     // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-    if (explicitExclude(project, transformedArgs) ||
-        defaultExclude(project, projects.length, transformedArgs)) {
+    if (explicitExclude(project, args) ||
+        defaultExclude(project, projects.length, args)) {
       continue;
     }
 
-    final finalArgs = project.engine.prefixArgs + transformedArgs;
+    final finalArgs = project.engine.prefixArgs + args;
 
     final argString = finalArgs.join(' ');
     final pathString = project.path == '.' ? 'current directory' : project.path;
@@ -106,7 +128,7 @@ Usage:
     }
 
     // Combine exit codes
-    exitCode = exitCode | processExitCode;
+    exitCode |= processExitCode;
   }
 
   final elapsed = stopwatch.elapsedMilliseconds;
@@ -127,7 +149,7 @@ Usage:
     print(greenPen('\nAll commands succeeded ($time)'));
   }
 
-  exit(exitCode);
+  return exitCode;
 }
 
 Engine? engineOverride(List<String> args) {
@@ -145,7 +167,7 @@ Engine? engineOverride(List<String> args) {
   }
 
   if (message != null) {
-    print(yellowPen('$message\n'));
+    print(yellowPen(message));
   }
   return engine;
 }

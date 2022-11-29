@@ -1,3 +1,6 @@
+## 1.19.0
+- Adds `puby mup` convenience command for `puby upgrade --major-versions && puby upgrade`
+
 ## 1.18.0
 - Run `flutter clean` in dart projects
 
