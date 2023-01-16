@@ -1,0 +1,9 @@
+name: transitive_flutter_test
+publish_to: none
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+dependencies:
+  flutter_puby_test:
+    path: ../flutter_puby_test

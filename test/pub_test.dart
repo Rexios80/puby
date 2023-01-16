@@ -47,5 +47,12 @@ void main() {
 
     // invalid_pubspec
     expectLine(stdout, ['invalid_pubspec_test', 'Error parsing pubspec']);
+
+    // transitive flutter
+    // This one should fail
+    expectLine(stdout, ['transitive_flutter_test', 'dart pub get']);
+
+    // This one should succeed
+    expectLine(stdout, ['transitive_flutter_test', 'flutter pub get']);
   });
 }
