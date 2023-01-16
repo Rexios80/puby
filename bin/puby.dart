@@ -75,13 +75,13 @@ Usage:
 
   int exitCode = 0;
   for (final command in commands) {
-    exitCode |= await run(command);
+    exitCode |= await runAll(command);
   }
 
   exit(exitCode);
 }
 
-Future<int> run(List<String> args) async {
+Future<int> runAll(List<String> args) async {
   final stopwatch = Stopwatch()..start();
 
   final projects = await findProjects(engineOverride: engineOverride(args));
@@ -94,34 +94,7 @@ Future<int> run(List<String> args) async {
   int exitCode = 0;
   final List<String> failures = [];
   for (final project in projects) {
-    // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-    if (explicitExclude(project, args) ||
-        defaultExclude(project, projects.length, args)) {
-      continue;
-    }
-
-    final finalArgs = project.engine.prefixArgs + args;
-
-    final argString = finalArgs.join(' ');
-    final pathString = project.path == '.' ? 'current directory' : project.path;
-    print(
-      greenPen(
-        '\nRunning "${project.engine.name} $argString" in $pathString...',
-      ),
-    );
-
-    final process = await Process.start(
-      project.engine.name,
-      finalArgs,
-      workingDirectory: project.path,
-      runInShell: true,
-    );
-
-    // Piping directly to stdout and stderr can cause unexpected behavior
-    process.stdout.listen((e) => stdout.write(decoder.convert(e)));
-    process.stderr.listen((e) => stderr.write(redPen(decoder.convert(e))));
-
-    final processExitCode = await process.exitCode;
+    final processExitCode = await run(project, projects.length, args);
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -150,6 +123,56 @@ Future<int> run(List<String> args) async {
   }
 
   return exitCode;
+}
+
+Future<int> run(Project project, int projectCount, List<String> args) async {
+  // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
+  if (explicitExclude(project, args) ||
+      defaultExclude(project, projectCount, args)) {
+    return 0;
+  }
+
+  final finalArgs = project.engine.prefixArgs + args;
+
+  final argString = finalArgs.join(' ');
+  final pathString = project.path == '.' ? 'current directory' : project.path;
+  print(
+    greenPen(
+      '\nRunning "${project.engine.name} $argString" in $pathString...',
+    ),
+  );
+
+  final process = await Process.start(
+    project.engine.name,
+    finalArgs,
+    workingDirectory: project.path,
+    runInShell: true,
+  );
+
+  // Piping directly to stdout and stderr can cause unexpected behavior
+  final err = <String>[];
+  process.stdout.listen((e) => stdout.write(decoder.convert(e)));
+  process.stderr.listen((e) {
+    final line = decoder.convert(e);
+    err.add(line);
+    stderr.write(redPen(line));
+  });
+
+  final processExitCode = await process.exitCode;
+
+  if (err.any(
+    (e) => e.contains(
+      'Flutter users should run `flutter pub get` instead of `dart pub get`.',
+    ),
+  )) {
+    // If a project doesn't explicitly depend on flutter, it is not possible
+    // to know if it's dependencies require flutter. So retry if that's the
+    // reason for failure.
+    print(yellowPen('\nRetrying with "flutter" engine'));
+    return run(project.copyWith(engine: Engine.flutter), projectCount, args);
+  }
+
+  return processExitCode;
 }
 
 Engine? engineOverride(List<String> args) {
@@ -281,6 +304,16 @@ class Project {
 
     return Project._(
       engine: engine,
+      path: path,
+      config: config,
+      example: example,
+      hidden: hidden,
+    );
+  }
+
+  Project copyWith({Engine? engine}) {
+    return Project._(
+      engine: engine ?? this.engine,
       path: path,
       config: config,
       example: example,

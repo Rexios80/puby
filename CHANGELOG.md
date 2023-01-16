@@ -1,3 +1,6 @@
+## 1.20.0
+- Retry with `flutter` engine if `dart` command fails with 'Flutter users should run `flutter pub get` instead of `dart pub get`.'
+
 ## 1.19.0
 - Adds `puby mup` convenience command for `puby upgrade --major-versions && puby upgrade`
 
