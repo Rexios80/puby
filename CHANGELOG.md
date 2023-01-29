@@ -1,3 +1,9 @@
+## 1.21.0
+- `puby mup` now only runs `pub upgrade --major-versions`
+  - > Fix a bug in dart pub upgrade --major-versions where packages not requiring major updates would be held back unless needed.
+  - https://github.com/dart-lang/sdk/blob/main/CHANGELOG.md#pub
+- Updates minimum Dart SDK to 2.19.0
+
 ## 1.20.0
 - Retry with `flutter` engine if `dart` command fails with 'Flutter users should run `flutter pub get` instead of `dart pub get`.'
 

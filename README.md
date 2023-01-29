@@ -14,7 +14,7 @@ Run pub commands for all sub projects in the current directory recursively
 | `puby gen [options]`   | `[dart\|flutter] pub run build_runner build --delete-conflicting-outputs [options]` |
 | `puby test [options]`  | `[dart\|flutter] test [options]`                                                    |
 | `puby clean [options]` | `flutter clean [options]`                                                           |
-| `puby mup [options]`   | `puby upgrade --major-versions [options] && puby upgrade [options]`                 |
+| `puby mup [options]`   | `[dart\|flutter] pub upgrade --major-versions [options]`                            |
 
 For projects configured with FVM, `fvm flutter [options]` is used.
 

@@ -26,7 +26,6 @@ final convenienceCommands = <String, List<List<String>>>{
   ],
   'mup': [
     ['pub', 'upgrade', '--major-versions'],
-    ['pub', 'upgrade'],
   ],
 };
 
@@ -56,7 +55,7 @@ Usage:
   puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
   puby test [options]     [dart|flutter] test [options]
   puby clean [options]    flutter clean [options]
-  puby mup [options]      puby upgrade --major-versions [options] && puby upgrade [options]''',
+  puby mup [options]      [dart|flutter] pub upgrade --major-versions [options]''',
       ),
     );
     exit(1);
@@ -73,7 +72,7 @@ Usage:
     commands.add(['pub', ...arguments]);
   }
 
-  int exitCode = 0;
+  var exitCode = 0;
   for (final command in commands) {
     exitCode |= await runAll(command);
   }
@@ -91,8 +90,8 @@ Future<int> runAll(List<String> args) async {
     exit(1);
   }
 
-  int exitCode = 0;
-  final List<String> failures = [];
+  var exitCode = 0;
+  final failures = <String>[];
   for (final project in projects) {
     final processExitCode = await run(project, projects.length, args);
 

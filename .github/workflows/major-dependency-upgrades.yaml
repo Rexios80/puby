@@ -23,11 +23,12 @@ jobs:
           key: ${{ env.cache-name }}-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: ${{ env.cache-name }}-
 
-      - name: Activate puby
-        run: dart pub global activate puby
+      # Don't use puby because this IS puby
+      # - name: Activate puby
+      #   run: dart pub global activate puby
 
       - name: Upgrade dependencies
-        run: puby upgrade --major-versions
+        run: dart pub upgrade --major-versions
       
       - name: Check pubspec diff
         id: pubspec_check
