@@ -32,7 +32,7 @@ void main() {
       ['flutter_puby_test${Platform.pathSeparator}example', 'Skip'],
     );
     // Flutter pub get should run in the example project anyways
-    expectLine(stdout, ['example', 'flutter pub get']);
+    expectLine(stdout, ['Resolving dependencies in ./example...']);
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter pub get']);
