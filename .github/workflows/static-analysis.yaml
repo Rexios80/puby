@@ -30,7 +30,7 @@ jobs:
           dart pub global activate fvm
           fvm install stable
       - name: Test
-        run: flutter test
+        run: dart test
       - name: Pana
         run: |
           flutter pub global activate pana
