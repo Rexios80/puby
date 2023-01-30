@@ -9,29 +9,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - uses: subosito/flutter-action@v2
-      - name: Pub get
-        run: flutter pub get
-      - name: Format
-        run: flutter format . --set-exit-if-changed
-      - name: Analyze
-        run: flutter analyze
-      # - name: Embedme
-      #   run: |
-      #     npm install embedme
-      #     npx embedme README.md --verify
-      # - name: Build runner
-      #   if: ${{ matrix.project == 'fast_rx_test' }}
-      #   run: |
-      #     flutter pub run build_runner build --delete-conflicting-outputs
-      #     git diff --exit-code
-      - name: Activate fvm
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install FVM
         run: |
-          dart pub global activate fvm
+          brew tap leoafarias/fvm
+          brew install fvm
+          echo "$HOME/fvm/default/bin" >> $GITHUB_PATH
           fvm install stable
+          fvm global stable
+      - name: Pub get
+        run: dart pub get
+      - name: Format
+        run: dart format . --set-exit-if-changed
+      - name: Analyze
+        run: dart Analyze
       - name: Test
         run: dart test
       - name: Pana
         run: |
-          flutter pub global activate pana
-          pana --no-warning --exit-code-threshold 20
+          dart pub global activate pana
+          pana --no-warning --exit-code-threshold 0

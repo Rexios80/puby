@@ -9,6 +9,8 @@ void main() {
     final result = await testCommand(['get']);
     final stdout = result.stdout;
 
+    print(stdout);
+
     expect(result.exitCode, 0);
 
     // project in build folder
