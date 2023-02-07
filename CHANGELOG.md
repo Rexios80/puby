@@ -1,3 +1,6 @@
+## 1.23.0
+- Adds `puby reset` as an alias for `puby clean && puby get`
+
 ## 1.22.0
 - Adds the ability to disable FVM support with the `--no-fvm` option
 

@@ -25,6 +25,10 @@ const convenienceCommands = <String, List<List<String>>>{
   'mup': [
     ['pub', 'upgrade', '--major-versions'],
   ],
+  'reset': [
+    ['clean'],
+    ['pub', 'get'],
+  ]
 };
 
 const help = '''
@@ -34,6 +38,7 @@ Commands:
   puby test [options]     [dart|flutter] test [options]
   puby clean [options]    flutter clean [options]
   puby mup [options]      [dart|flutter] pub upgrade --major-versions [options]
+  puby reset              puby clean && puby get
 
 Options:
   --no-fvm                Disable FVM support''';
