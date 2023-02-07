@@ -16,7 +16,7 @@ Run pub commands for all sub projects in the current directory recursively
 | `puby clean [options]` | `flutter clean [options]`                                                           |
 | `puby mup [options]`   | `[dart\|flutter] pub upgrade --major-versions [options]`                            |
 
-For projects configured with FVM, `fvm flutter [options]` is used.
+For projects configured with FVM, `fvm flutter [options]` is used. FVM support can be disabled with the `--no-fvm` option.
 
 ## Use as an executable
 

@@ -1,5 +1,5 @@
 ## 1.22.0
-- Adds the ability to disable FVM support with the `--no-fvm` flag
+- Adds the ability to disable FVM support with the `--no-fvm` option
 
 ## 1.21.0
 - `puby mup` now only runs `pub upgrade --major-versions`
