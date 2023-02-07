@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:ansicolor/ansicolor.dart';
-import 'package:path/path.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
-
-import 'config.dart';
+import 'package:puby/engine.dart';
+import 'package:puby/pens.dart';
+import 'package:puby/project.dart';
 
 final decoder = Utf8Decoder();
 final convenienceCommands = <String, List<List<String>>>{
@@ -28,11 +26,6 @@ final convenienceCommands = <String, List<List<String>>>{
     ['pub', 'upgrade', '--major-versions'],
   ],
 };
-
-final magentaPen = AnsiPen()..magenta();
-final greenPen = AnsiPen()..green();
-final yellowPen = AnsiPen()..yellow();
-final redPen = AnsiPen()..red();
 
 void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check();
@@ -83,7 +76,10 @@ Usage:
 Future<int> runAll(List<String> args) async {
   final stopwatch = Stopwatch()..start();
 
-  final projects = await findProjects(engineOverride: engineOverride(args));
+  final projects = await findProjects(
+    engineOverride: engineOverride(args),
+    noFvm: args.remove('--no-fvm'),
+  );
 
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -236,7 +232,10 @@ bool explicitExclude(Project project, List<String> args) {
   return skip;
 }
 
-Future<List<Project>> findProjects({Engine? engineOverride}) async {
+Future<List<Project>> findProjects({
+  Engine? engineOverride,
+  bool noFvm = false,
+}) async {
   final pubspecEntities = Directory.current
       .listSync(recursive: true, followLinks: false)
       .where(
@@ -249,94 +248,9 @@ Future<List<Project>> findProjects({Engine? engineOverride}) async {
     final project = await Project.fromPubspecEntity(
       pubspecEntity,
       engineOverride: engineOverride,
+      noFvm: noFvm,
     );
     projects.add(project);
   }
   return projects;
-}
-
-class Project {
-  final Engine engine;
-  final String path;
-  final PubyConfig config;
-  final bool example;
-  final bool hidden;
-
-  Project._({
-    required this.engine,
-    required this.path,
-    required this.config,
-    required this.example,
-    required this.hidden,
-  });
-
-  static Future<Project> fromPubspecEntity(
-    File entity, {
-    Engine? engineOverride,
-  }) async {
-    final path = relative(entity.parent.path);
-    final config = PubyConfig.fromProjectPath(path);
-
-    late final Pubspec? pubspec;
-    try {
-      pubspec = Pubspec.parse(entity.readAsStringSync());
-    } catch (e) {
-      print(redPen('Error parsing pubspec: $path'));
-      pubspec = null;
-    }
-
-    final Engine engine;
-    if (engineOverride != null) {
-      engine = engineOverride;
-    } else if (Directory('$path/.fvm').existsSync()) {
-      engine = Engine.fvm;
-    } else if (pubspec?.dependencies['flutter'] != null) {
-      engine = Engine.flutter;
-    } else {
-      engine = Engine.dart;
-    }
-
-    final example = path.split(Platform.pathSeparator).last == 'example';
-    final hidden = path
-        .split(Platform.pathSeparator)
-        .any((e) => e.length > 1 && e.startsWith('.'));
-
-    return Project._(
-      engine: engine,
-      path: path,
-      config: config,
-      example: example,
-      hidden: hidden,
-    );
-  }
-
-  Project copyWith({Engine? engine}) {
-    return Project._(
-      engine: engine ?? this.engine,
-      path: path,
-      config: config,
-      example: example,
-      hidden: hidden,
-    );
-  }
-}
-
-enum Engine {
-  dart,
-  flutter,
-  fvm,
-}
-
-extension on Engine {
-  bool get isFlutter => this == Engine.flutter || this == Engine.fvm;
-
-  List<String> get prefixArgs {
-    switch (this) {
-      case Engine.dart:
-      case Engine.flutter:
-        return [];
-      case Engine.fvm:
-        return ['flutter'];
-    }
-  }
 }
