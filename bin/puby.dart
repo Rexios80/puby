@@ -5,8 +5,8 @@ import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 
-final decoder = Utf8Decoder();
-final convenienceCommands = <String, List<List<String>>>{
+const decoder = Utf8Decoder();
+const convenienceCommands = <String, List<List<String>>>{
   'gen': [
     [
       'pub',
@@ -27,6 +27,17 @@ final convenienceCommands = <String, List<List<String>>>{
   ],
 };
 
+const help = '''
+Commands:
+  puby [options]          [dart|flutter] pub [options]
+  puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
+  puby test [options]     [dart|flutter] test [options]
+  puby clean [options]    flutter clean [options]
+  puby mup [options]      [dart|flutter] pub upgrade --major-versions [options]
+
+Options:
+  --no-fvm                Disable FVM support''';
+
 void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
@@ -40,17 +51,7 @@ void main(List<String> arguments) async {
   if (arguments.isEmpty ||
       arguments.first == '-h' ||
       arguments.first == '--help') {
-    print(
-      magentaPen(
-        '''
-Usage:
-  puby [options]          [dart|flutter] pub [options]
-  puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
-  puby test [options]     [dart|flutter] test [options]
-  puby clean [options]    flutter clean [options]
-  puby mup [options]      [dart|flutter] pub upgrade --major-versions [options]''',
-      ),
-    );
+    print(magentaPen(help));
     exit(1);
   }
 

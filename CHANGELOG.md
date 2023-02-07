@@ -1,3 +1,6 @@
+## 1.22.0
+- Adds the ability to disable FVM support with the `--no-fvm` flag
+
 ## 1.21.0
 - `puby mup` now only runs `pub upgrade --major-versions`
   - > Fix a bug in dart pub upgrade --major-versions where packages not requiring major updates would be held back unless needed.
