@@ -2,15 +2,19 @@ import 'dart:io';
 
 import 'package:yaml/yaml.dart';
 
+/// A puby configuration file
 class PubyConfig {
+  /// Specified command exclusions
   final List<String> excludes;
 
   PubyConfig._({
     required this.excludes,
   });
 
+  /// Create an empty puby config
   PubyConfig.empty() : this._(excludes: []);
 
+  /// Create a puby config from a project path
   factory PubyConfig.fromProjectPath(String path) {
     final file = File('$path/puby.yaml');
     if (!file.existsSync()) {

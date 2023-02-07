@@ -49,18 +49,11 @@ class Project {
     }
 
     bool usesFvm() {
-      if (Directory('$path/.fvm').existsSync()) {
-        if (noFvm) {
-          print(
-            yellowPen('Project uses FVM, but FVM support is disabled: $path'),
-          );
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        return false;
-      }
+      if (!Directory('$path/.fvm').existsSync()) return false;
+      if (!noFvm) return true;
+
+      print(yellowPen('Project uses FVM, but FVM support is disabled: $path'));
+      return false;
     }
 
     final Engine engine;
