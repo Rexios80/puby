@@ -161,6 +161,11 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
 
   final processExitCode = await process.exitCode;
 
+  // Skip error handling if the command was successful
+  if (processExitCode == 0) {
+    return 0;
+  }
+
   if (err.any(
     (e) => e.contains(
       'Flutter users should run `flutter pub get` instead of `dart pub get`.',
@@ -171,6 +176,16 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
     // reason for failure.
     print(yellowPen('\nRetrying with "flutter" engine'));
     return run(project.copyWith(engine: Engine.flutter), projectCount, args);
+  }
+
+  final unknownSubcommandMatch =
+      RegExp(r'Could not find a subcommand named "(.+?)" for ".+? pub"\.')
+          .firstMatch(err.join('\n'));
+
+  if (unknownSubcommandMatch != null) {
+    // Do not attempt to run in other projects if the command is unknown
+    print(redPen('\nUnknown command: ${unknownSubcommandMatch[1]}'));
+    exit(1);
   }
 
   return processExitCode;

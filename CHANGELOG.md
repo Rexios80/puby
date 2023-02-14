@@ -1,3 +1,6 @@
+## 1.24.0
+- Exit immediately if pub returns an unknown subcommand error
+
 ## 1.23.0
 - Adds `puby reset` as an alias for `puby clean && puby get`
 
