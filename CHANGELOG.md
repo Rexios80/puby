@@ -1,3 +1,6 @@
+## 1.25.0
+- Project-level error if FVM required flutter version is not installed
+
 ## 1.24.0
 - Exit immediately if pub returns an unknown subcommand error
 

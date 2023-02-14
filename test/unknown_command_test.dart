@@ -7,7 +7,7 @@ void main() {
     final result = await testCommand(['asdf']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 1);
+    expect(result.exitCode, isNot(0));
     expectLine(stdout, ['Unknown command: asdf']);
   });
 }

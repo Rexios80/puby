@@ -151,12 +151,17 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
   );
 
   // Piping directly to stdout and stderr can cause unexpected behavior
+  var killed = false;
   final err = <String>[];
-  process.stdout.listen((e) => stdout.write(decoder.convert(e)));
-  process.stderr.listen((e) {
-    final line = decoder.convert(e);
-    err.add(line);
+  process.stdout.takeWhile((_) => !killed).map(decoder.convert).listen((line) {
+    stdout.write(line);
+    if (!shouldContinue(project, line)) {
+      killed = process.kill();
+    }
+  });
+  process.stderr.takeWhile((_) => !killed).map(decoder.convert).listen((line) {
     stderr.write(redPen(line));
+    err.add(line);
   });
 
   final processExitCode = await process.exitCode;
@@ -181,7 +186,6 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
   final unknownSubcommandMatch =
       RegExp(r'Could not find a subcommand named "(.+?)" for ".+? pub"\.')
           .firstMatch(err.join('\n'));
-
   if (unknownSubcommandMatch != null) {
     // Do not attempt to run in other projects if the command is unknown
     print(redPen('\nUnknown command: ${unknownSubcommandMatch[1]}'));
@@ -189,6 +193,25 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
   }
 
   return processExitCode;
+}
+
+/// Check if we should continue after this line is received
+bool shouldContinue(Project project, String line) {
+  if (project.engine == Engine.fvm) {
+    final flutterVersionNotInstalledMatch =
+        RegExp(r'Flutter "(.+?)" is not installed\.').firstMatch(line);
+    if (flutterVersionNotInstalledMatch != null) {
+      // FVM will ask for input from the user, kill the process to avoid
+      // hanging
+      print(
+        redPen(
+          '\nRun `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
+        ),
+      );
+      return false;
+    }
+  }
+  return true;
 }
 
 Engine? engineOverride(List<String> args) {

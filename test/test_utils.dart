@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-Future<ProcessResult> testCommand(List<String> arguments) {
+Future<ProcessResult> testCommand(
+  List<String> arguments, {
+  String workingDirectory = 'test_resources',
+}) {
+  final levels = workingDirectory.split('/').length;
+  final root = '../' * levels;
   return Process.run(
     'dart',
-    ['../bin/puby.dart', ...arguments],
-    workingDirectory: 'test_resources',
+    ['${root}bin/puby.dart', ...arguments],
+    workingDirectory: workingDirectory,
   );
 }
 
