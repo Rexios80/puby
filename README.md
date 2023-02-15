@@ -35,6 +35,11 @@ $ puby upgrade --major-versions
 ...
 ```
 
+## Notes on `puby exec`
+Paths relative to the directory you are running `puby` in will not work. For example:
+- `puby exec ./foo.sh` will not work
+- `puby exec $PWD/foo.sh` will work
+
 ## Configuration
 Create a `puby.yaml` file in the root of the project you want to configure
 
