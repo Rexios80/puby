@@ -63,30 +63,30 @@ void main(List<String> arguments) async {
 
   final firstArg = arguments.first;
 
-  final bool runWithEngine;
+  final bool raw;
   final commands = <List<String>>[];
   if (firstArg == 'exec') {
     commands.add(arguments.sublist(1));
-    runWithEngine = false;
+    raw = true;
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
       commands.add(command + arguments.sublist(1));
     }
-    runWithEngine = true;
+    raw = false;
   } else {
     commands.add(['pub', ...arguments]);
-    runWithEngine = true;
+    raw = false;
   }
 
   var exitCode = 0;
   for (final command in commands) {
-    exitCode |= await runAll(command, runWithEngine);
+    exitCode |= await runAll(command, raw);
   }
 
   exit(exitCode);
 }
 
-Future<int> runAll(List<String> args, bool runWithEngine) async {
+Future<int> runAll(List<String> args, bool raw) async {
   final stopwatch = Stopwatch()..start();
 
   final projects = await findProjects(
@@ -102,8 +102,7 @@ Future<int> runAll(List<String> args, bool runWithEngine) async {
   var exitCode = 0;
   final failures = <String>[];
   for (final project in projects) {
-    final processExitCode =
-        await run(project, projects.length, args, runWithEngine);
+    final processExitCode = await run(project, projects.length, args, raw);
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -138,7 +137,7 @@ Future<int> run(
   Project project,
   int projectCount,
   List<String> args,
-  bool runWithEngine,
+  bool raw,
 ) async {
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
   if (explicitExclude(project, args) ||
@@ -147,7 +146,7 @@ Future<int> run(
   }
 
   final finalArgs = [
-    if (runWithEngine) ...[
+    if (!raw) ...[
       project.engine.name,
       ...project.engine.prefixArgs,
     ],
@@ -177,7 +176,7 @@ Future<int> run(
       .map(decoder.convert)
       .listen((line) {
     stdout.write(line);
-    if (!shouldContinue(project, line)) {
+    if (!raw && shouldKill(project, line)) {
       killed = process.kill();
     }
   }).asFuture();
@@ -195,9 +194,9 @@ Future<int> run(
   // out of order
   await Future.wait([stdoutFuture, stderrFuture]);
 
-  // Skip error handling if the command was successful
-  if (processExitCode == 0) {
-    return 0;
+  // Skip error handling if the command was successful or this is a raw command
+  if (raw || processExitCode == 0) {
+    return processExitCode;
   }
 
   if (err.any(
@@ -213,7 +212,7 @@ Future<int> run(
       project.copyWith(engine: Engine.flutter),
       projectCount,
       args,
-      runWithEngine,
+      raw,
     );
   }
 
@@ -230,7 +229,7 @@ Future<int> run(
 }
 
 /// Check if we should continue after this line is received
-bool shouldContinue(Project project, String line) {
+bool shouldKill(Project project, String line) {
   if (project.engine == Engine.fvm) {
     final flutterVersionNotInstalledMatch =
         RegExp(r'Flutter "(.+?)" is not installed\.').firstMatch(line);
@@ -242,10 +241,10 @@ bool shouldContinue(Project project, String line) {
           '\nRun `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
         ),
       );
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 Engine? engineOverride(List<String> args) {
