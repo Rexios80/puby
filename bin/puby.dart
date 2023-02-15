@@ -39,7 +39,7 @@ Commands:
   puby clean [options]    flutter clean [options]
   puby mup [options]      [engine] pub upgrade --major-versions [options]
   puby reset              puby clean && puby get
-  puby exec [command]     Execute the command in all projects
+  puby exec [command]     command
 
 Options:
   --no-fvm                Disable FVM support''';
