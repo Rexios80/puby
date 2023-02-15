@@ -33,12 +33,13 @@ const convenienceCommands = <String, List<List<String>>>{
 
 const help = '''
 Commands:
-  puby [options]          [dart|flutter] pub [options]
-  puby gen [options]      [dart|flutter] pub run build_runner build --delete-conflicting-outputs [options]
-  puby test [options]     [dart|flutter] test [options]
+  puby [options]          [engine] pub [options]
+  puby gen [options]      [engine] pub run build_runner build --delete-conflicting-outputs [options]
+  puby test [options]     [engine] test [options]
   puby clean [options]    flutter clean [options]
-  puby mup [options]      [dart|flutter] pub upgrade --major-versions [options]
+  puby mup [options]      [engine] pub upgrade --major-versions [options]
   puby reset              puby clean && puby get
+  puby exec [command]     Execute the command in all projects
 
 Options:
   --no-fvm                Disable FVM support''';
@@ -62,24 +63,30 @@ void main(List<String> arguments) async {
 
   final firstArg = arguments.first;
 
+  final bool runWithEngine;
   final commands = <List<String>>[];
-  if (convenienceCommands.containsKey(firstArg)) {
+  if (firstArg == 'exec') {
+    commands.add(arguments.sublist(1));
+    runWithEngine = false;
+  } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
       commands.add(command + arguments.sublist(1));
     }
+    runWithEngine = true;
   } else {
     commands.add(['pub', ...arguments]);
+    runWithEngine = true;
   }
 
   var exitCode = 0;
   for (final command in commands) {
-    exitCode |= await runAll(command);
+    exitCode |= await runAll(command, runWithEngine);
   }
 
   exit(exitCode);
 }
 
-Future<int> runAll(List<String> args) async {
+Future<int> runAll(List<String> args, bool runWithEngine) async {
   final stopwatch = Stopwatch()..start();
 
   final projects = await findProjects(
@@ -95,7 +102,8 @@ Future<int> runAll(List<String> args) async {
   var exitCode = 0;
   final failures = <String>[];
   for (final project in projects) {
-    final processExitCode = await run(project, projects.length, args);
+    final processExitCode =
+        await run(project, projects.length, args, runWithEngine);
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -126,26 +134,37 @@ Future<int> runAll(List<String> args) async {
   return exitCode;
 }
 
-Future<int> run(Project project, int projectCount, List<String> args) async {
+Future<int> run(
+  Project project,
+  int projectCount,
+  List<String> args,
+  bool runWithEngine,
+) async {
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
   if (explicitExclude(project, args) ||
       defaultExclude(project, projectCount, args)) {
     return 0;
   }
 
-  final finalArgs = project.engine.prefixArgs + args;
+  final finalArgs = [
+    if (runWithEngine) ...[
+      project.engine.name,
+      ...project.engine.prefixArgs,
+    ],
+    ...args,
+  ];
 
   final argString = finalArgs.join(' ');
   final pathString = project.path == '.' ? 'current directory' : project.path;
   print(
     greenPen(
-      '\nRunning "${project.engine.name} $argString" in $pathString...',
+      '\nRunning "$argString" in $pathString...',
     ),
   );
 
   final process = await Process.start(
-    project.engine.name,
-    finalArgs,
+    finalArgs.first,
+    finalArgs.sublist(1),
     workingDirectory: project.path,
     runInShell: true,
   );
@@ -153,18 +172,28 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
   // Piping directly to stdout and stderr can cause unexpected behavior
   var killed = false;
   final err = <String>[];
-  process.stdout.takeWhile((_) => !killed).map(decoder.convert).listen((line) {
+  final stdoutFuture = process.stdout
+      .takeWhile((_) => !killed)
+      .map(decoder.convert)
+      .listen((line) {
     stdout.write(line);
     if (!shouldContinue(project, line)) {
       killed = process.kill();
     }
-  });
-  process.stderr.takeWhile((_) => !killed).map(decoder.convert).listen((line) {
+  }).asFuture();
+  final stderrFuture = process.stderr
+      .takeWhile((_) => !killed)
+      .map(decoder.convert)
+      .listen((line) {
     stderr.write(redPen(line));
     err.add(line);
-  });
+  }).asFuture();
 
   final processExitCode = await process.exitCode;
+
+  // If we do not wait for these streams to finish, output could end up
+  // out of order
+  await Future.wait([stdoutFuture, stderrFuture]);
 
   // Skip error handling if the command was successful
   if (processExitCode == 0) {
@@ -180,7 +209,12 @@ Future<int> run(Project project, int projectCount, List<String> args) async {
     // to know if it's dependencies require flutter. So retry if that's the
     // reason for failure.
     print(yellowPen('\nRetrying with "flutter" engine'));
-    return run(project.copyWith(engine: Engine.flutter), projectCount, args);
+    return run(
+      project.copyWith(engine: Engine.flutter),
+      projectCount,
+      args,
+      runWithEngine,
+    );
   }
 
   final unknownSubcommandMatch =

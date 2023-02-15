@@ -1,23 +1,25 @@
-Run pub commands for all sub projects in the current directory recursively
+Run commands in all projects in the current directory. Handle monorepos with ease.
 
 ## Features
+- No configuration necessary. Run `puby` anywhere. It won't complain.
 - Supports all project-level pub commands
-- Determines if a project uses dart or flutter automatically
-- FVM support
+- Execute any command in all projects with `puby exec`
+- Determines the project engine (`dart`, `flutter`, `fvm`) automatically
 - Convenience shortcuts for common dart/flutter commands
 - Combined exit code for use in CI
 - Per-project command exclusions
 
-| Command                | Equivalent                                                                          |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| `puby [options]`       | `[dart\|flutter] pub [options]`                                                     |
-| `puby gen [options]`   | `[dart\|flutter] pub run build_runner build --delete-conflicting-outputs [options]` |
-| `puby test [options]`  | `[dart\|flutter] test [options]`                                                    |
-| `puby clean [options]` | `flutter clean [options]`                                                           |
-| `puby mup [options]`   | `[dart\|flutter] pub upgrade --major-versions [options]`                            |
-| `puby reset`           | `puby clean && puby get`                                                            |
+| Command                | Equivalent                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `puby [options]`       | `[engine] pub [options]`                                                     |
+| `puby gen [options]`   | `[engine] pub run build_runner build --delete-conflicting-outputs [options]` |
+| `puby test [options]`  | `[engine] test [options]`                                                    |
+| `puby clean [options]` | `flutter clean [options]`                                                    |
+| `puby mup [options]`   | `[engine] pub upgrade --major-versions [options]`                            |
+| `puby reset`           | `puby clean && puby get`                                                     |
+| `puby exec [command]`  | `command`                                                                    |
 
-For projects configured with FVM, `fvm flutter [options]` is used. FVM support can be disabled with the `--no-fvm` option.
+For projects configured with FVM, `fvm flutter` is used. FVM support can be disabled with the `--no-fvm` option.
 
 ## Use as an executable
 
@@ -49,5 +51,5 @@ Exclusions match from the start of a command, and the entire exclusion string mu
 
 | Exclusion              | Example command excluded                     |
 | ---------------------- | -------------------------------------------- |
-| `test`                 | `[dart\|flutter] test --coverage`            |
-| `pub run build_runner` | `[dart\|flutter] pub run build_runner build` |
+| `test`                 | `[engine] test --coverage`            |
+| `pub run build_runner` | `[engine] pub run build_runner build` |

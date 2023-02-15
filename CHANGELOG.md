@@ -1,3 +1,7 @@
+## 1.26.0
+- Adds `puby exec` to run any command in all projects
+- Fixes a race condition with command output
+
 ## 1.25.0
 - Project-level error if FVM required flutter version is not installed
 
