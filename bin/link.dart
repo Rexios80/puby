@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -5,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:puby/dependency.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
+import 'package:puby/task_queue.dart';
 import 'package:puby/time.dart';
 import 'package:yaml/yaml.dart';
 
@@ -58,17 +60,22 @@ Future<void> linkDependencies(List<Project> projects) async {
     }
   }
 
-  final futures = missing.map((lock) async {
-    final result = await Process.run(
-      'dart',
-      ['pub', 'cache', 'add', lock.name, '--version', lock.version],
-    );
+  final queue = TaskQueue();
+  for (final lock in missing) {
+    unawaited(
+      queue.add(() async {
+        final result = await Process.run(
+          'dart',
+          ['pub', 'cache', 'add', lock.name, '--version', lock.version],
+        );
 
-    if (result.exitCode != 0) {
-      print(redPen(result.stderr));
-    }
-  });
-  await Future.wait(futures);
+        if (result.exitCode != 0) {
+          print(redPen(result.stderr));
+        }
+      }),
+    );
+  }
+  await queue.tasksComplete;
 
   print(greenPen('Cache warmed in ${stopwatch.prettyPrint()}\n'));
 }
