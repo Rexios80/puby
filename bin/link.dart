@@ -77,6 +77,7 @@ Future<void> linkDependencies(List<Project> projects) async {
   }
   await queue.tasksComplete;
 
+  stopwatch.stop();
   print(greenPen('Cache warmed in ${stopwatch.prettyPrint()}\n'));
 }
 

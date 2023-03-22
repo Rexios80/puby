@@ -135,6 +135,7 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
     }
   }
 
+  stopwatch.stop();
   final time = stopwatch.prettyPrint();
 
   if (exitCode != 0) {
@@ -156,6 +157,8 @@ Future<int> runInProject({
   required Command command,
   required bool noFvm,
 }) async {
+  final stopwatch = Stopwatch()..start();
+
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
   if (explicitExclude(project, command) ||
       defaultExclude(project, projectCount, command)) {
@@ -214,11 +217,15 @@ Future<int> runInProject({
   // out of order
   await Future.wait([stdoutFuture, stderrFuture]);
 
+  stopwatch.stop();
   // Skip error handling if the command was successful or this is a raw command
   if (command.raw || processExitCode == 0) {
-    if (command.silent) {
-      print(greenPen('Ran "$argString" in $pathString'));
-    }
+    print(
+      greenPen(
+        'Ran "$argString" in $pathString (${stopwatch.prettyPrint()})',
+      ),
+    );
+
     return processExitCode;
   }
 

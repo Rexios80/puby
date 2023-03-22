@@ -2,6 +2,7 @@
 - Adds `puby link` to link all locked dependencies
 - Only search for projects once
 - Fixes platform path separator issues
+- More informational timers
 
 ## 1.26.0
 - Adds `puby exec` to run any command in all projects
