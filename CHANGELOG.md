@@ -1,5 +1,6 @@
 ## NEXT
 - Only search for projects once
+- Fixes platform path separator issues
 
 ## 1.26.0
 - Adds `puby exec` to run any command in all projects

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 /// A puby configuration file
@@ -16,7 +17,7 @@ class PubyConfig {
 
   /// Create a puby config from a project path
   factory PubyConfig.fromProjectPath(String path) {
-    final file = File('$path/puby.yaml');
+    final file = File(p.join(path, 'puby.yaml'));
     if (!file.existsSync()) {
       return PubyConfig.empty();
     }

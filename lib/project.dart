@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/config.dart';
 import 'package:puby/engine.dart';
@@ -33,7 +33,7 @@ class Project {
 
   /// Create a [Project] from a pubspec file
   static Project fromPubspecEntity(File entity) {
-    final path = relative(entity.parent.path);
+    final path = p.relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
     late final Pubspec? pubspec;
@@ -45,7 +45,7 @@ class Project {
     }
 
     final Engine engine;
-    if (Directory('$path/.fvm').existsSync()) {
+    if (Directory(p.join(path, '.fvm')).existsSync()) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;
