@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -13,23 +12,17 @@ void main() {
 
     // dart
     expectLine(stdout, ['dart_puby_test', 'flutter clean']);
-    expectLine(
-      stdout,
-      ['dart_puby_test${Platform.pathSeparator}example', 'flutter clean'],
-    );
+    expectLine(stdout, [p.join('dart_puby_test', 'example'), 'flutter clean']);
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter clean']);
-    expectLine(stdout, [
-      'flutter_puby_test${Platform.pathSeparator}example',
-      'flutter clean',
-    ]);
+    expectLine(
+      stdout,
+      [p.join('flutter_puby_test', 'example'), 'flutter clean'],
+    );
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'flutter clean']);
-    expectLine(stdout, [
-      'fvm_puby_test${Platform.pathSeparator}example',
-      'flutter clean',
-    ]);
+    expectLine(stdout, [p.join('fvm_puby_test', 'example'), 'flutter clean']);
   });
 }

@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -19,7 +18,7 @@ void main() {
         '"dart pub upgrade --major-versions"',
       ]);
       expectLine(stdout, [
-        'dart_puby_test${Platform.pathSeparator}example',
+        p.join('dart_puby_test', 'example'),
         '"dart pub upgrade --major-versions"',
       ]);
 
@@ -29,7 +28,7 @@ void main() {
         '"flutter pub upgrade --major-versions"',
       ]);
       expectLine(stdout, [
-        'flutter_puby_test${Platform.pathSeparator}example',
+        p.join('flutter_puby_test', 'example'),
         '"flutter pub upgrade --major-versions"',
       ]);
 
@@ -39,7 +38,7 @@ void main() {
         '"fvm flutter pub upgrade --major-versions"',
       ]);
       expectLine(stdout, [
-        'fvm_puby_test${Platform.pathSeparator}example',
+        p.join('fvm_puby_test', 'example'),
         '"fvm flutter pub upgrade --major-versions"',
       ]);
     },

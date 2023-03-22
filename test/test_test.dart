@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -15,25 +14,16 @@ void main() {
     // dart
     expectLine(stdout, ['dart_puby_test', 'flutter test --coverage']);
     // Explicit exclusion
-    expectLine(
-      stdout,
-      ['dart_puby_test${Platform.pathSeparator}example', 'Skip'],
-    );
+    expectLine(stdout, [p.join('dart_puby_test', 'example'), 'Skip']);
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter test --coverage']);
     // Explicit exclusion
-    expectLine(
-      stdout,
-      ['flutter_puby_test${Platform.pathSeparator}example', 'Skip'],
-    );
+    expectLine(stdout, [p.join('flutter_puby_test', 'example'), 'Skip']);
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'flutter test --coverage']);
     // Explicit exclusion
-    expectLine(
-      stdout,
-      ['fvm_puby_test${Platform.pathSeparator}example', 'Skip'],
-    );
+    expectLine(stdout, [p.join('fvm_puby_test', 'example'), 'Skip']);
   });
 }
