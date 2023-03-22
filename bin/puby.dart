@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:pub_update_checker/pub_update_checker.dart';
+import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
@@ -16,7 +17,7 @@ const convenienceCommands = <String, List<List<String>>>{
       'build_runner',
       'build',
       '--delete-conflicting-outputs',
-    ],
+    ]
   ],
   'test': [
     ['test'],
@@ -71,42 +72,33 @@ void main(List<String> arguments) async {
 
   final firstArg = arguments.first;
 
-  final bool raw;
-  final commands = <List<String>>[];
+  final commands = <Command>[];
   if (firstArg == 'exec') {
-    commands.add(arguments.sublist(1));
-    raw = true;
+    commands.add(Command(arguments.sublist(1), raw: true));
   } else if (firstArg == 'link') {
     linkDependencies(projects);
-    commands.add(['pub', 'get', '--offline']);
-    raw = false;
+    commands.add(Command(['pub', 'get', '--offline']));
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
-      commands.add(command + arguments.sublist(1));
+      commands.add(Command(command + arguments.sublist(1)));
     }
-    raw = false;
   } else {
-    commands.add(['pub', ...arguments]);
-    raw = false;
+    commands.add(Command(['pub', ...arguments]));
   }
 
   var exitCode = 0;
   for (final command in commands) {
-    exitCode |= await runInAllProjects(projects, command, raw);
+    exitCode |= await runInAllProjects(projects, command);
   }
 
   exit(exitCode);
 }
 
-Future<int> runInAllProjects(
-  List<Project> projects,
-  List<String> args,
-  bool raw,
-) async {
+Future<int> runInAllProjects(List<Project> projects, Command command) async {
   // TODO: More granular stopwatch
   final stopwatch = Stopwatch()..start();
 
-  final noFvm = args.remove('--no-fvm');
+  final noFvm = command.args.remove('--no-fvm');
 
   var exitCode = 0;
   final failures = <String>[];
@@ -114,9 +106,8 @@ Future<int> runInAllProjects(
     final processExitCode = await run(
       project: project,
       projectCount: projects.length,
-      args: args,
+      command: command,
       noFvm: noFvm,
-      raw: raw,
     );
 
     if (processExitCode != 0) {
@@ -151,23 +142,22 @@ Future<int> runInAllProjects(
 Future<int> run({
   required Project project,
   required int projectCount,
-  required List<String> args,
+  required Command command,
   required bool noFvm,
-  required bool raw,
 }) async {
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-  if (explicitExclude(project, args) ||
-      defaultExclude(project, projectCount, args)) {
+  if (explicitExclude(project, command.args) ||
+      defaultExclude(project, projectCount, command.args)) {
     return 0;
   }
 
-  final engine = resolveEngine(project, noFvm, args);
+  final engine = resolveEngine(project, noFvm, command.args);
   final finalArgs = [
-    if (!raw) ...[
+    if (!command.raw) ...[
       engine.name,
       ...engine.prefixArgs,
     ],
-    ...args,
+    ...command.args,
   ];
 
   final argString = finalArgs.join(' ');
@@ -193,7 +183,7 @@ Future<int> run({
       .map(decoder.convert)
       .listen((line) {
     stdout.write(line);
-    if (!raw && shouldKill(project, line)) {
+    if (!command.raw && shouldKill(project, line)) {
       killed = process.kill();
     }
   }).asFuture();
@@ -212,7 +202,7 @@ Future<int> run({
   await Future.wait([stdoutFuture, stderrFuture]);
 
   // Skip error handling if the command was successful or this is a raw command
-  if (raw || processExitCode == 0) {
+  if (command.raw || processExitCode == 0) {
     return processExitCode;
   }
 
@@ -228,9 +218,8 @@ Future<int> run({
     return run(
       project: project.copyWith(engine: Engine.flutter),
       projectCount: projectCount,
-      args: args,
+      command: command,
       noFvm: noFvm,
-      raw: raw,
     );
   }
 
