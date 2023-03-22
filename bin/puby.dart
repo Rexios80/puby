@@ -100,7 +100,6 @@ void main(List<String> arguments) async {
 }
 
 Future<int> runInAllProjects(List<Project> projects, Command command) async {
-  // TODO: More granular stopwatch
   final stopwatch = Stopwatch()..start();
 
   final noFvm = command.args.remove('--no-fvm');
