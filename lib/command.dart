@@ -12,11 +12,14 @@ class Command {
   /// Whether to run the command silently
   final bool silent;
 
+  /// If fvm support should be disabled
+  final bool noFvm;
+
   /// Constructor
-  const Command(
+  Command(
     this.args, {
     this.raw = false,
     this.parallel = false,
     this.silent = false,
-  });
+  }) : noFvm = args.remove('--no-fvm');
 }

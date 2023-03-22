@@ -102,8 +102,6 @@ void main(List<String> arguments) async {
 Future<int> runInAllProjects(List<Project> projects, Command command) async {
   final stopwatch = Stopwatch()..start();
 
-  final noFvm = command.args.remove('--no-fvm');
-
   var exitCode = 0;
   final failures = <String>[];
 
@@ -112,7 +110,6 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
       project: project,
       projectCount: projects.length,
       command: command,
-      noFvm: noFvm,
     );
 
     if (processExitCode != 0) {
@@ -155,7 +152,6 @@ Future<int> runInProject({
   required Project project,
   required int projectCount,
   required Command command,
-  required bool noFvm,
 }) async {
   final stopwatch = Stopwatch()..start();
 
@@ -165,7 +161,7 @@ Future<int> runInProject({
     return 0;
   }
 
-  final engine = resolveEngine(project, noFvm, command.args);
+  final engine = resolveEngine(project, command);
   final finalArgs = [
     if (!command.raw) ...[
       engine.name,
@@ -242,7 +238,6 @@ Future<int> runInProject({
       project: project.copyWith(engine: Engine.flutter),
       projectCount: projectCount,
       command: command,
-      noFvm: noFvm,
     );
   }
 
@@ -277,16 +272,18 @@ bool shouldKill(Project project, String line) {
   return false;
 }
 
-Engine resolveEngine(Project project, bool noFvm, List<String> args) {
+Engine resolveEngine(Project project, Command command) {
   final Engine? engine;
   final String? message;
-  if (args[0] == 'clean') {
+  if (command.args[0] == 'clean') {
     engine = Engine.flutter;
     message = 'Overriding engine to "flutter" for "clean" command';
-  } else if (args.length >= 2 && args[0] == 'test' && args[1] == '--coverage') {
+  } else if (command.args.length >= 2 &&
+      command.args[0] == 'test' &&
+      command.args[1] == '--coverage') {
     engine = Engine.flutter;
     message = 'Overriding engine to "flutter" for "test --coverage" command';
-  } else if (project.engine == Engine.fvm && noFvm) {
+  } else if (project.engine == Engine.fvm && command.noFvm) {
     engine = Engine.flutter;
     message = 'Project uses FVM, but FVM support is disabled: ${project.path}';
   } else {
