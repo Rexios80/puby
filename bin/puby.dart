@@ -5,6 +5,8 @@ import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 
+import 'link.dart';
+
 const decoder = Utf8Decoder();
 const convenienceCommands = <String, List<List<String>>>{
   'gen': [
@@ -61,6 +63,12 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
+  final projects = findProjects();
+  if (projects.isEmpty) {
+    print(redPen('No projects found in the current directory'));
+    exit(1);
+  }
+
   final firstArg = arguments.first;
 
   final bool raw;
@@ -68,7 +76,7 @@ void main(List<String> arguments) async {
   if (firstArg == 'exec') {
     commands.add(arguments.sublist(1));
     raw = true;
-  } else if (convenienceCommands.containsKey(firstArg)) {
+  }  else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
       commands.add(command + arguments.sublist(1));
     }
@@ -76,12 +84,6 @@ void main(List<String> arguments) async {
   } else {
     commands.add(['pub', ...arguments]);
     raw = false;
-  }
-
-  final projects = findProjects();
-  if (projects.isEmpty) {
-    print(redPen('No projects found in the current directory'));
-    exit(1);
   }
 
   var exitCode = 0;
