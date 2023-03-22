@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:pub_update_checker/pub_update_checker.dart';
@@ -5,8 +6,8 @@ import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
+import 'package:puby/task_queue.dart';
 import 'package:puby/time.dart';
-import 'package:quiver/iterables.dart';
 
 import 'link.dart';
 
@@ -19,7 +20,7 @@ const convenienceCommands = <String, List<List<String>>>{
       'build_runner',
       'build',
       '--delete-conflicting-outputs',
-    ]
+    ],
   ],
   'test': [
     ['test'],
@@ -124,10 +125,11 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   }
 
   if (command.parallel) {
-    final partitions = partition(projects, 10);
-    for (final partition in partitions) {
-      await Future.wait(partition.map(run));
+    final queue = TaskQueue();
+    for (final project in projects) {
+      unawaited(queue.add(() => run(project)));
     }
+    await queue.tasksComplete;
   } else {
     for (final project in projects) {
       await run(project);
