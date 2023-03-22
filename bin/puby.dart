@@ -28,7 +28,7 @@ const convenienceCommands = <String, List<List<String>>>{
   'reset': [
     ['clean'],
     ['pub', 'get'],
-  ]
+  ],
 };
 
 const help = '''
@@ -78,31 +78,40 @@ void main(List<String> arguments) async {
     raw = false;
   }
 
-  var exitCode = 0;
-  for (final command in commands) {
-    exitCode |= await runAll(command, raw);
-  }
-
-  exit(exitCode);
-}
-
-Future<int> runAll(List<String> args, bool raw) async {
-  final stopwatch = Stopwatch()..start();
-
-  final projects = await findProjects(
-    engineOverride: engineOverride(args),
-    noFvm: args.remove('--no-fvm'),
-  );
-
+  final projects = findProjects();
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
     exit(1);
   }
 
   var exitCode = 0;
+  for (final command in commands) {
+    exitCode |= await runInAllProjects(projects, command, raw);
+  }
+
+  exit(exitCode);
+}
+
+Future<int> runInAllProjects(
+  List<Project> projects,
+  List<String> args,
+  bool raw,
+) async {
+  // TODO: More granular stopwatch
+  final stopwatch = Stopwatch()..start();
+
+  final noFvm = args.remove('--no-fvm');
+
+  var exitCode = 0;
   final failures = <String>[];
   for (final project in projects) {
-    final processExitCode = await run(project, projects.length, args, raw);
+    final processExitCode = await run(
+      project: project,
+      projectCount: projects.length,
+      args: args,
+      noFvm: noFvm,
+      raw: raw,
+    );
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -133,22 +142,24 @@ Future<int> runAll(List<String> args, bool raw) async {
   return exitCode;
 }
 
-Future<int> run(
-  Project project,
-  int projectCount,
-  List<String> args,
-  bool raw,
-) async {
+Future<int> run({
+  required Project project,
+  required int projectCount,
+  required List<String> args,
+  required bool noFvm,
+  required bool raw,
+}) async {
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
   if (explicitExclude(project, args) ||
       defaultExclude(project, projectCount, args)) {
     return 0;
   }
 
+  final engine = resolveEngine(project, noFvm, args);
   final finalArgs = [
     if (!raw) ...[
-      project.engine.name,
-      ...project.engine.prefixArgs,
+      engine.name,
+      ...engine.prefixArgs,
     ],
     ...args,
   ];
@@ -209,10 +220,11 @@ Future<int> run(
     // reason for failure.
     print(yellowPen('\nRetrying with "flutter" engine'));
     return run(
-      project.copyWith(engine: Engine.flutter),
-      projectCount,
-      args,
-      raw,
+      project: project.copyWith(engine: Engine.flutter),
+      projectCount: projectCount,
+      args: args,
+      noFvm: noFvm,
+      raw: raw,
     );
   }
 
@@ -247,7 +259,7 @@ bool shouldKill(Project project, String line) {
   return false;
 }
 
-Engine? engineOverride(List<String> args) {
+Engine resolveEngine(Project project, bool noFvm, List<String> args) {
   final Engine? engine;
   final String? message;
   if (args[0] == 'clean') {
@@ -256,8 +268,11 @@ Engine? engineOverride(List<String> args) {
   } else if (args.length >= 2 && args[0] == 'test' && args[1] == '--coverage') {
     engine = Engine.flutter;
     message = 'Overriding engine to "flutter" for "test --coverage" command';
+  } else if (project.engine == Engine.fvm && noFvm) {
+    engine = Engine.flutter;
+    message = 'Project uses FVM, but FVM support is disabled: ${project.path}';
   } else {
-    engine = null;
+    engine = project.engine;
     message = null;
   }
 
@@ -309,10 +324,7 @@ bool explicitExclude(Project project, List<String> args) {
   return skip;
 }
 
-Future<List<Project>> findProjects({
-  Engine? engineOverride,
-  bool noFvm = false,
-}) async {
+List<Project> findProjects() {
   final pubspecEntities = Directory.current
       .listSync(recursive: true, followLinks: false)
       .where(
@@ -322,11 +334,7 @@ Future<List<Project>> findProjects({
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
-    final project = await Project.fromPubspecEntity(
-      pubspecEntity,
-      engineOverride: engineOverride,
-      noFvm: noFvm,
-    );
+    final project = Project.fromPubspecEntity(pubspecEntity);
     projects.add(project);
   }
   return projects;

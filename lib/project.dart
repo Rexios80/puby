@@ -32,11 +32,7 @@ class Project {
   });
 
   /// Create a [Project] from a pubspec file
-  static Future<Project> fromPubspecEntity(
-    File entity, {
-    Engine? engineOverride,
-    bool noFvm = false,
-  }) async {
+  static Project fromPubspecEntity(File entity) {
     final path = relative(entity.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
@@ -48,18 +44,8 @@ class Project {
       pubspec = null;
     }
 
-    bool usesFvm() {
-      if (!Directory('$path/.fvm').existsSync()) return false;
-      if (!noFvm) return true;
-
-      print(yellowPen('Project uses FVM, but FVM support is disabled: $path'));
-      return false;
-    }
-
     final Engine engine;
-    if (engineOverride != null) {
-      engine = engineOverride;
-    } else if (usesFvm()) {
+    if (Directory('$path/.fvm').existsSync()) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;

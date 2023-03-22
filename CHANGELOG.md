@@ -1,3 +1,6 @@
+## NEXT
+- Only search for projects once
+
 ## 1.26.0
 - Adds `puby exec` to run any command in all projects
 - Fixes a race condition with command output
