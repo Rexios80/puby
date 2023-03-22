@@ -76,7 +76,11 @@ void main(List<String> arguments) async {
   if (firstArg == 'exec') {
     commands.add(arguments.sublist(1));
     raw = true;
-  }  else if (convenienceCommands.containsKey(firstArg)) {
+  } else if (firstArg == 'link') {
+    linkDependencies(projects);
+    commands.add(['pub', 'get', '--offline']);
+    raw = false;
+  } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
       commands.add(command + arguments.sublist(1));
     }
