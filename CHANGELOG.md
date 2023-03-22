@@ -1,4 +1,4 @@
-## NEXT
+## 1.27.0
 - Adds `puby link` to link all locked dependencies
 - Only search for projects once
 - Fixes platform path separator issues
