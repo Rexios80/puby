@@ -1,6 +1,6 @@
 name: puby
 description: Run commands in all projects in the current directory. Handle monorepos with ease.
-version: 1.27.0
+version: 1.27.1
 homepage: https://github.com/Rexios80/puby
 
 environment:

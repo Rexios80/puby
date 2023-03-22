@@ -1,3 +1,6 @@
+## 1.27.1
+- Adds `puby link` to help output
+
 ## 1.27.0
 - Adds `puby link` to link all locked dependencies
 - Only search for projects once

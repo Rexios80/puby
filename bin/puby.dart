@@ -40,6 +40,7 @@ const convenienceCommands = <String, List<List<String>>>{
 const help = '''
 Commands:
   puby [options]          [engine] pub [options]
+  puby link               Warm the pub cache and run [engine] pub get --offline
   puby gen [options]      [engine] pub run build_runner build --delete-conflicting-outputs [options]
   puby test [options]     [engine] test [options]
   puby clean [options]    flutter clean [options]
