@@ -30,14 +30,6 @@ class LockedDependency extends Equatable {
 
     if (source == 'hosted') {
       return LockedDependency(name: name, version: version, url: url);
-    } else if (source == 'git') {
-      return LockedGitDependency(
-        name: name,
-        version: version,
-        url: url,
-        path: json['description']['path'] as String,
-        resolvedRef: json['description']['resolved-ref'] as String,
-      );
     } else {
       return null;
     }
@@ -45,40 +37,4 @@ class LockedDependency extends Equatable {
 
   @override
   List<Object?> get props => [name, version, url];
-}
-
-/// A locked dependency from git
-class LockedGitDependency extends LockedDependency {
-  /// The path of the dependency
-  final String path;
-
-  /// The resolved ref of the dependency
-  final String resolvedRef;
-
-  /// Constructor
-  LockedGitDependency({
-    required super.name,
-    required super.version,
-    required super.url,
-    required this.path,
-    required this.resolvedRef,
-  });
-
-  @override
-  List<Object?> get props => [...super.props, path, resolvedRef];
-}
-
-/// Dependencies available in the pub cache
-class AvailableDependencies {
-  /// Hosted dependencies
-  final Map<String, String> hosted;
-
-  /// Git dependencies
-  final Map<String, String> git;
-
-  /// Constructor
-  AvailableDependencies({
-    required this.hosted,
-    required this.git,
-  });
 }

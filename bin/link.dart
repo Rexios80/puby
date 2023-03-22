@@ -46,38 +46,22 @@ Future<void> linkDependencies(List<Project> projects) async {
   }
 
   final hostedCache = _readHostedCache();
-  final gitCache = _readGitCache();
 
   final missing = <LockedDependency>{};
   for (final package in locked.keys) {
     final locks = locked[package]!;
     for (final lock in locks) {
-      if (lock is LockedGitDependency) {
-        final name = '$package-${lock.resolvedRef}';
-        if (!gitCache.contains(name)) {
-          missing.add(lock);
-        }
-      } else {
-        final name = '$package-${lock.version}';
-        if (!(hostedCache[lock.url]?.contains(name) ?? false)) {
-          missing.add(lock);
-        }
+      final name = '$package-${lock.version}';
+      if (!(hostedCache[lock.url]?.contains(name) ?? false)) {
+        missing.add(lock);
       }
     }
   }
 
   final futures = missing.map((lock) async {
-    final String constraint;
-    if (lock is LockedGitDependency) {
-      constraint =
-          '${lock.name}:{"git":{"url":"${lock.url}","path":"${lock.path}","ref":"${lock.resolvedRef}"}}';
-    } else {
-      constraint = lock.version;
-    }
-
     final result = await Process.run(
       'dart',
-      ['pub', 'cache', 'add', lock.name, '--version', constraint],
+      ['pub', 'cache', 'add', lock.name, '--version', lock.version],
     );
 
     if (result.exitCode != 0) {
@@ -106,13 +90,4 @@ Map<String, HashSet<String>> _readHostedCache() {
   }
 
   return packages;
-}
-
-HashSet<String> _readGitCache() {
-  final git = Directory(p.join(pubCacheDirectory, 'git'));
-  if (!git.existsSync()) return HashSet();
-
-  return HashSet.from(
-    git.listSync().whereType<Directory>().map((e) => p.basename(e.path)),
-  );
 }
