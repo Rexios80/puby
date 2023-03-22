@@ -60,6 +60,12 @@ Future<void> linkDependencies(List<Project> projects) async {
     }
   }
 
+  if (missing.isEmpty) {
+    print('No missing dependencies');
+  } else {
+    print('Caching ${missing.length} missing dependencies...');
+  }
+
   final queue = TaskQueue();
   for (final lock in missing) {
     unawaited(
