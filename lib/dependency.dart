@@ -21,14 +21,15 @@ class LockedDependency extends Equatable {
   /// From json
   static LockedDependency? fromJson(Map<String, dynamic> json) {
     final source = json['source'] as String;
-    final description = json['description'];
-    if (description is! Map) return null;
-    final name = description['name'] as String?;
-    if (name == null) return null;
-    final version = json['version'] as String;
-    final url = (description['url'] as String).replaceAll('https://', '');
 
     if (source == 'hosted') {
+      final description = json['description'];
+      if (description is! Map) return null;
+      final name = description['name'] as String?;
+      if (name == null) return null;
+      final version = json['version'] as String;
+      final url = (description['url'] as String).replaceAll('https://', '');
+
       return LockedDependency(name: name, version: version, url: url);
     } else {
       return null;
