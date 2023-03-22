@@ -5,6 +5,8 @@ import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
+import 'package:puby/time.dart';
+import 'package:quiver/iterables.dart';
 
 import 'link.dart';
 
@@ -76,8 +78,10 @@ void main(List<String> arguments) async {
   if (firstArg == 'exec') {
     commands.add(Command(arguments.sublist(1), raw: true));
   } else if (firstArg == 'link') {
-    linkDependencies(projects);
-    commands.add(Command(['pub', 'get', '--offline']));
+    await linkDependencies(projects);
+    commands.add(
+      Command(['pub', 'get', '--offline'], parallel: true, silent: true),
+    );
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
       commands.add(Command(command + arguments.sublist(1)));
@@ -102,8 +106,9 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
 
   var exitCode = 0;
   final failures = <String>[];
-  for (final project in projects) {
-    final processExitCode = await run(
+
+  Future<void> run(Project project) async {
+    final processExitCode = await runInProject(
       project: project,
       projectCount: projects.length,
       command: command,
@@ -118,13 +123,18 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
     exitCode |= processExitCode;
   }
 
-  final elapsed = stopwatch.elapsedMilliseconds;
-  final String time;
-  if (elapsed > 1000) {
-    time = '${(elapsed / 1000).toStringAsFixed(1)}s';
+  if (command.parallel) {
+    final partitions = partition(projects, 10);
+    for (final partition in partitions) {
+      await Future.wait(partition.map(run));
+    }
   } else {
-    time = '${elapsed}ms';
+    for (final project in projects) {
+      await run(project);
+    }
   }
+
+  final time = stopwatch.prettyPrint();
 
   if (exitCode != 0) {
     print(redPen('\nOne or more commands failed ($time)'));
@@ -139,15 +149,15 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   return exitCode;
 }
 
-Future<int> run({
+Future<int> runInProject({
   required Project project,
   required int projectCount,
   required Command command,
   required bool noFvm,
 }) async {
   // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-  if (explicitExclude(project, command.args) ||
-      defaultExclude(project, projectCount, command.args)) {
+  if (explicitExclude(project, command) ||
+      defaultExclude(project, projectCount, command)) {
     return 0;
   }
 
@@ -162,11 +172,9 @@ Future<int> run({
 
   final argString = finalArgs.join(' ');
   final pathString = project.path == '.' ? 'current directory' : project.path;
-  print(
-    greenPen(
-      '\nRunning "$argString" in $pathString...',
-    ),
-  );
+  if (!command.silent) {
+    print(greenPen('\nRunning "$argString" in $pathString...'));
+  }
 
   final process = await Process.start(
     finalArgs.first,
@@ -182,7 +190,9 @@ Future<int> run({
       .takeWhile((_) => !killed)
       .map(decoder.convert)
       .listen((line) {
-    stdout.write(line);
+    if (!command.silent) {
+      stdout.write(line);
+    }
     if (!command.raw && shouldKill(project, line)) {
       killed = process.kill();
     }
@@ -191,7 +201,9 @@ Future<int> run({
       .takeWhile((_) => !killed)
       .map(decoder.convert)
       .listen((line) {
-    stderr.write(redPen(line));
+    if (!command.silent) {
+      stderr.write(redPen(line));
+    }
     err.add(line);
   }).asFuture();
 
@@ -203,6 +215,9 @@ Future<int> run({
 
   // Skip error handling if the command was successful or this is a raw command
   if (command.raw || processExitCode == 0) {
+    if (command.silent) {
+      print(greenPen('Ran "$argString" in $pathString'));
+    }
     return processExitCode;
   }
 
@@ -215,7 +230,7 @@ Future<int> run({
     // to know if it's dependencies require flutter. So retry if that's the
     // reason for failure.
     print(yellowPen('\nRetrying with "flutter" engine'));
-    return run(
+    return runInProject(
       project: project.copyWith(engine: Engine.flutter),
       projectCount: projectCount,
       command: command,
@@ -277,7 +292,7 @@ Engine resolveEngine(Project project, bool noFvm, List<String> args) {
   return engine;
 }
 
-bool defaultExclude(Project project, int projectCount, List<String> args) {
+bool defaultExclude(Project project, int projectCount, Command command) {
   final bool skip;
   final String? message;
   if (project.hidden) {
@@ -290,9 +305,9 @@ bool defaultExclude(Project project, int projectCount, List<String> args) {
     skip = true;
   } else if (project.engine.isFlutter &&
       project.example &&
-      args.length >= 2 &&
-      args[0] == 'pub' &&
-      args[1] == 'get') {
+      command.args.length >= 2 &&
+      command.args[0] == 'pub' &&
+      command.args[1] == 'get') {
     // Skip flutter pub get in example projects since flutter does it anyways
     // If the only project is an example, don't skip it
     message = 'Skipping flutter example project: ${project.path}';
@@ -302,17 +317,17 @@ bool defaultExclude(Project project, int projectCount, List<String> args) {
     skip = false;
   }
 
-  if (message != null) {
+  if (message != null && !command.silent) {
     print(yellowPen('\n$message'));
   }
   return skip;
 }
 
-bool explicitExclude(Project project, List<String> args) {
-  final argString = args.join(' ');
+bool explicitExclude(Project project, Command command) {
+  final argString = command.args.join(' ');
 
   final skip = project.config.excludes.any(argString.startsWith);
-  if (skip) {
+  if (skip && !command.silent) {
     print(yellowPen('\nSkipping project with exclusion: ${project.path}'));
   }
 

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:yaml/yaml.dart';
 
 /// Represents a locked pub dependency in a pubspec.lock file
 class LockedDependency extends Equatable {

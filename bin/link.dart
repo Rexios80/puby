@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:puby/dependency.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
+import 'package:puby/time.dart';
 import 'package:yaml/yaml.dart';
 
 final homeDirectory =
@@ -15,7 +16,10 @@ final pubCacheDirectory = Platform.environment['PUB_CACHE'] ??
         ? r'%LOCALAPPDATA%\Pub\Cache'
         : '$homeDirectory/.pub-cache');
 
-void linkDependencies(List<Project> projects) {
+Future<void> linkDependencies(List<Project> projects) async {
+  final stopwatch = Stopwatch()..start();
+  print('Warming cache...');
+
   final lockFiles = projects.map((e) => File(p.join(e.path, 'pubspec.lock')));
   final locked = <String, Set<LockedDependency>>{};
   for (final lockFile in lockFiles) {
@@ -44,8 +48,6 @@ void linkDependencies(List<Project> projects) {
   final hostedCache = _readHostedCache();
   final gitCache = _readGitCache();
 
-  print(hostedCache);
-
   final missing = <LockedDependency>{};
   for (final package in locked.keys) {
     final locks = locked[package]!;
@@ -57,8 +59,6 @@ void linkDependencies(List<Project> projects) {
         }
       } else {
         final name = '$package-${lock.version}';
-        print(lock.url);
-        print(hostedCache[lock.url]);
         if (!(hostedCache[lock.url]?.contains(name) ?? false)) {
           missing.add(lock);
         }
@@ -66,9 +66,7 @@ void linkDependencies(List<Project> projects) {
     }
   }
 
-  print(missing);
-
-  for (final lock in missing) {
+  final futures = missing.map((lock) async {
     final String constraint;
     if (lock is LockedGitDependency) {
       constraint =
@@ -77,8 +75,7 @@ void linkDependencies(List<Project> projects) {
       constraint = lock.version;
     }
 
-    print('Caching ${lock.name}:$constraint...');
-    final result = Process.runSync(
+    final result = await Process.run(
       'dart',
       ['pub', 'cache', 'add', lock.name, '--version', constraint],
     );
@@ -86,7 +83,10 @@ void linkDependencies(List<Project> projects) {
     if (result.exitCode != 0) {
       print(redPen(result.stderr));
     }
-  }
+  });
+  await Future.wait(futures);
+
+  print(greenPen('Cache warmed in ${stopwatch.prettyPrint()}\n'));
 }
 
 Map<String, HashSet<String>> _readHostedCache() {

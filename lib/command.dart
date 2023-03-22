@@ -9,10 +9,14 @@ class Command {
   /// Whether to run the command in parallel
   final bool parallel;
 
+  /// Whether to run the command silently
+  final bool silent;
+
   /// Constructor
   const Command(
     this.args, {
     this.raw = false,
     this.parallel = false,
+    this.silent = false,
   });
 }
