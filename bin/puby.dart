@@ -12,6 +12,7 @@ import 'package:puby/time.dart';
 import 'link.dart';
 
 const decoder = Utf8Decoder();
+final clean = Command(['clean'], parallel: true, silent: true);
 final convenienceCommands = <String, List<Command>>{
   'gen': [
     Command([
@@ -26,13 +27,13 @@ final convenienceCommands = <String, List<Command>>{
     Command(['test']),
   ],
   'clean': [
-    Command(['clean'], parallel: true, silent: true),
+    clean,
   ],
   'mup': [
     Command(['pub', 'upgrade', '--major-versions']),
   ],
   'reset': [
-    Command(['clean'], parallel: true, silent: true),
+    clean,
     Command(['pub', 'get']),
   ],
 };
