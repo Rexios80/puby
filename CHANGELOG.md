@@ -1,3 +1,6 @@
+## 1.28.0
+- Run `puby clean` in parallel
+
 ## 1.27.1
 - Adds `puby link` to help output
 

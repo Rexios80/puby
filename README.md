@@ -3,6 +3,7 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 ## Features
 - No configuration necessary. Run `puby` anywhere. It won't complain.
 - Execute `pub get` up to five times faster with `puby link`
+- Reclaim disk space with `puby clean`
 - Supports all project-level pub commands
 - Execute any command in all projects with `puby exec`
 - Determines the project engine (`dart`, `flutter`, `fvm`) automatically
