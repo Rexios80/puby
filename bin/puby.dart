@@ -12,28 +12,28 @@ import 'package:puby/time.dart';
 import 'link.dart';
 
 const decoder = Utf8Decoder();
-const convenienceCommands = <String, List<List<String>>>{
+final convenienceCommands = <String, List<Command>>{
   'gen': [
-    [
+    Command([
       'pub',
       'run',
       'build_runner',
       'build',
       '--delete-conflicting-outputs',
-    ],
+    ]),
   ],
   'test': [
-    ['test'],
+    Command(['test']),
   ],
   'clean': [
-    ['clean'],
+    Command(['clean'], parallel: true, silent: true),
   ],
   'mup': [
-    ['pub', 'upgrade', '--major-versions'],
+    Command(['pub', 'upgrade', '--major-versions']),
   ],
   'reset': [
-    ['clean'],
-    ['pub', 'get'],
+    Command(['clean'], parallel: true, silent: true),
+    Command(['pub', 'get']),
   ],
 };
 
@@ -68,6 +68,7 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
+  print('Finding projects...');
   final projects = findProjects();
   if (projects.isEmpty) {
     print(redPen('No projects found in the current directory'));
@@ -86,7 +87,8 @@ void main(List<String> arguments) async {
     );
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
-      commands.add(Command(command + arguments.sublist(1)));
+      command.args.addAll(arguments.sublist(1));
+      commands.add(command);
     }
   } else {
     commands.add(Command(['pub', ...arguments]));
@@ -292,7 +294,7 @@ Engine resolveEngine(Project project, Command command) {
     message = null;
   }
 
-  if (message != null) {
+  if (message != null && !command.silent) {
     print(yellowPen(message));
   }
   return engine;
