@@ -16,6 +16,7 @@ jobs:
           brew tap leoafarias/fvm
           brew install fvm
           echo "$HOME/fvm/default/bin" >> $GITHUB_PATH
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
           fvm install stable
           fvm global stable
       - name: Pub get
