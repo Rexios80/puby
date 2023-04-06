@@ -1,3 +1,6 @@
+## 1.29.0
+- Use `fvm` if `.fvm` configuration folder exists in any parent directory
+
 ## 1.28.0
 - Run `puby clean` in parallel
 
