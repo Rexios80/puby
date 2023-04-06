@@ -355,7 +355,7 @@ List<Project> findProjects() {
   final fvmPaths = entities
       .whereType<Directory>()
       .where((e) => e.path.endsWith('.fvm'))
-      .map((e) => p.relative(e.parent.path))
+      .map((e) => e.parent.path)
       .toList();
 
   final projects = <Project>[];

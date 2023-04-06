@@ -37,7 +37,8 @@ class Project {
     required File pubspecFile,
     required List<String> fvmPaths,
   }) {
-    final path = p.relative(pubspecFile.parent.path);
+    final absolutePath = pubspecFile.parent.path;
+    final path = p.relative(absolutePath);
     final config = PubyConfig.fromProjectPath(path);
 
     late final Pubspec? pubspec;
@@ -49,7 +50,7 @@ class Project {
     }
 
     final Engine engine;
-    if (fvmPaths.any(path.contains)) {
+    if (fvmPaths.any(absolutePath.contains)) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;
