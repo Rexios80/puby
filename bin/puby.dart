@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
