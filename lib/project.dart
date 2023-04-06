@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -32,20 +33,23 @@ class Project {
   });
 
   /// Create a [Project] from a pubspec file
-  static Project fromPubspecEntity(File entity) {
-    final path = p.relative(entity.parent.path);
+  static Project fromPubspec({
+    required File pubspecFile,
+    required List<String> fvmPaths,
+  }) {
+    final path = p.relative(pubspecFile.parent.path);
     final config = PubyConfig.fromProjectPath(path);
 
     late final Pubspec? pubspec;
     try {
-      pubspec = Pubspec.parse(entity.readAsStringSync());
+      pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
     } catch (e) {
       print(redPen('Error parsing pubspec: $path'));
       pubspec = null;
     }
 
     final Engine engine;
-    if (Directory(p.join(path, '.fvm')).existsSync()) {
+    if (fvmPaths.any(path.contains)) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;

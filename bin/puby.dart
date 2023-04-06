@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:path/path.dart' as p;
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
@@ -344,16 +347,23 @@ bool explicitExclude(Project project, Command command) {
 }
 
 List<Project> findProjects() {
-  final pubspecEntities = Directory.current
-      .listSync(recursive: true, followLinks: false)
-      .where(
-        (entity) => entity is File && entity.path.endsWith('pubspec.yaml'),
-      )
-      .cast<File>();
+  final entities =
+      Directory.current.listSync(recursive: true, followLinks: false);
+
+  final pubspecEntities =
+      entities.whereType<File>().where((e) => e.path.endsWith('pubspec.yaml'));
+  final fvmPaths = entities
+      .whereType<Directory>()
+      .where((e) => e.path.endsWith('.fvm'))
+      .map((e) => p.relative(e.parent.path))
+      .toList();
 
   final projects = <Project>[];
   for (final pubspecEntity in pubspecEntities) {
-    final project = Project.fromPubspecEntity(pubspecEntity);
+    final project = Project.fromPubspec(
+      pubspecFile: pubspecEntity,
+      fvmPaths: fvmPaths,
+    );
     projects.add(project);
   }
   return projects;
