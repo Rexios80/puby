@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:path/path.dart' as p;
 import 'package:puby/dependency.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
-import 'package:puby/task_queue.dart';
 import 'package:puby/time.dart';
 import 'package:yaml/yaml.dart';
 

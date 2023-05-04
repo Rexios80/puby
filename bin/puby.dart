@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
 import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
-import 'package:puby/task_queue.dart';
 import 'package:puby/time.dart';
 
 import 'link.dart';
