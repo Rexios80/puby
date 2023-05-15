@@ -1,3 +1,7 @@
+## 1.30.0
+- Fixes `--no-fvm` flag for convenience commands
+- Uses `TaskQueue` from `flutter_tools_task_queue`
+
 ## 1.29.0
 - Use `fvm` if `.fvm` configuration folder exists in any parent directory
 

@@ -89,7 +89,7 @@ void main(List<String> arguments) async {
     );
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
-      command.args.addAll(arguments.sublist(1));
+      command.addArgs(arguments.sublist(1));
       commands.add(command);
     }
   } else {

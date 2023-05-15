@@ -1,7 +1,9 @@
 /// A command and it's properties
 class Command {
+  final _args = <String>[];
+
   /// The command to run
-  final List<String> args;
+  List<String> get args => List.unmodifiable(_args);
 
   /// Whether to run the command as is
   final bool raw;
@@ -12,14 +14,27 @@ class Command {
   /// Whether to run the command silently
   final bool silent;
 
+  bool _noFvm = false;
+
   /// If fvm support should be disabled
-  final bool noFvm;
+  bool get noFvm => _noFvm;
 
   /// Constructor
   Command(
-    this.args, {
+    List<String> args, {
     this.raw = false,
     this.parallel = false,
     this.silent = false,
-  }) : noFvm = args.remove('--no-fvm');
+  }) {
+    addArgs(args);
+  }
+
+  /// Add arguments to the command
+  ///
+  /// Processes the arguments and sets the relevant fields
+  /// - [--no-fvm]: disables fvm support
+  void addArgs(List<String> args) {
+    _noFvm = _noFvm || args.remove('--no-fvm');
+    _args.addAll(args);
+  }
 }
