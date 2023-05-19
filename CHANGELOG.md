@@ -1,3 +1,6 @@
+## 1.31.0
+- Display the packages as they are cached by `puby link`
+
 ## 1.30.0
 - Fixes `--no-fvm` flag for convenience commands
 - Uses `TaskQueue` from `flutter_tools_task_queue`

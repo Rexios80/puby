@@ -77,6 +77,8 @@ Future<void> linkDependencies(List<Project> projects) async {
 
         if (result.exitCode != 0) {
           print(redPen(result.stderr));
+        } else {
+          print('Cached ${lock.name} ${lock.version}');
         }
       }),
     );
