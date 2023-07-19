@@ -15,7 +15,7 @@ final homeDirectory =
 
 final pubCacheDirectory = Platform.environment['PUB_CACHE'] ??
     (Platform.isWindows
-        ? r'%LOCALAPPDATA%\Pub\Cache'
+        ? Platform.environment['LOCALAPPDATA']! + r'\Pub\Cache'
         : '$homeDirectory/.pub-cache');
 
 Future<void> linkDependencies(List<Project> projects) async {
