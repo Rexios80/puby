@@ -1,3 +1,6 @@
+## 1.32.0
+- Fixes `puby link` on Windows
+
 ## 1.31.0
 - Display the packages as they are cached by `puby link`
 
