@@ -13,29 +13,41 @@ import 'package:puby/time.dart';
 import 'link.dart';
 
 const decoder = Utf8Decoder();
-final clean = Command(['clean'], parallel: true, silent: true);
+final clean = Command(
+  (engineArgs) => [...engineArgs, 'clean'],
+  parallel: true,
+  silent: true,
+);
+final link = Command(
+  (engineArgs) => [...engineArgs, 'pub', 'get', '--offline'],
+  parallel: true,
+  silent: true,
+);
 final convenienceCommands = <String, List<Command>>{
   'gen': [
-    Command([
-      'pub',
-      'run',
-      'build_runner',
-      'build',
-      '--delete-conflicting-outputs',
-    ]),
+    Command((engineArgs) => [
+          ...engineArgs,
+          'pub',
+          'run',
+          'build_runner',
+          'build',
+          '--delete-conflicting-outputs',
+        ]),
   ],
   'test': [
-    Command(['test']),
+    Command((engineArgs) => [...engineArgs, 'test']),
   ],
   'clean': [
     clean,
   ],
   'mup': [
-    Command(['pub', 'upgrade', '--major-versions']),
+    Command(
+      (engineArgs) => [...engineArgs, 'pub', 'upgrade', '--major-versions'],
+    ),
   ],
   'reset': [
     clean,
-    Command(['pub', 'get']),
+    Command((engineArgs) => [...engineArgs, 'pub', 'get']),
   ],
 };
 
@@ -54,6 +66,8 @@ Options:
   --no-fvm                Disable FVM support''';
 
 void main(List<String> arguments) async {
+  final stopwatch = Stopwatch()..start();
+
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
     print(
@@ -81,19 +95,17 @@ void main(List<String> arguments) async {
 
   final commands = <Command>[];
   if (firstArg == 'exec') {
-    commands.add(Command(arguments.sublist(1), raw: true));
+    commands.add(Command((engineArgs) => arguments.sublist(1)));
   } else if (firstArg == 'link') {
     await linkDependencies(projects);
-    commands.add(
-      Command(['pub', 'get', '--offline'], parallel: true, silent: true),
-    );
+    commands.add(link);
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
-      command.addArgs(arguments.sublist(1));
+      command.add(arguments.sublist(1));
       commands.add(command);
     }
   } else {
-    commands.add(Command(['pub', ...arguments]));
+    commands.add(Command((engineArgs) => [...engineArgs, 'pub', ...arguments]));
   }
 
   var exitCode = 0;
@@ -101,12 +113,19 @@ void main(List<String> arguments) async {
     exitCode |= await runInAllProjects(projects, command);
   }
 
+  stopwatch.stop();
+  final time = stopwatch.prettyPrint();
+
+  if (exitCode == 0) {
+    print(greenPen('\nAll commands succeeded ($time)'));
+  } else {
+    print(redPen('\nOne or more commands failed ($time)'));
+  }
+
   exit(exitCode);
 }
 
 Future<int> runInAllProjects(List<Project> projects, Command command) async {
-  final stopwatch = Stopwatch()..start();
-
   var exitCode = 0;
   final failures = <String>[];
 
@@ -137,17 +156,11 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
     }
   }
 
-  stopwatch.stop();
-  final time = stopwatch.prettyPrint();
-
   if (exitCode != 0) {
-    print(redPen('\nOne or more commands failed ($time)'));
-    print(redPen('Failures:'));
+    print(redPen('\nFailures:'));
     for (final failure in failures) {
       print(redPen('  $failure'));
     }
-  } else {
-    print(greenPen('\nAll commands succeeded ($time)'));
   }
 
   return exitCode;
@@ -167,13 +180,7 @@ Future<int> runInProject({
   }
 
   final engine = resolveEngine(project, command);
-  final finalArgs = [
-    if (!command.raw) ...[
-      engine.name,
-      ...engine.prefixArgs,
-    ],
-    ...command.args,
-  ];
+  final finalArgs = command.build(engine);
 
   final argString = finalArgs.join(' ');
   final pathString = project.path == '.' ? 'current directory' : project.path;
@@ -198,7 +205,7 @@ Future<int> runInProject({
     if (!command.silent) {
       stdout.write(line);
     }
-    if (!command.raw && shouldKill(project, line)) {
+    if (shouldKill(project, line)) {
       killed = process.kill();
     }
   }).asFuture();
@@ -219,8 +226,8 @@ Future<int> runInProject({
   await Future.wait([stdoutFuture, stderrFuture]);
 
   stopwatch.stop();
-  // Skip error handling if the command was successful or this is a raw command
-  if (command.raw || processExitCode == 0) {
+  // Skip error handling if the command was successful
+  if (processExitCode == 0) {
     print(
       greenPen(
         'Ran "$argString" in $pathString (${stopwatch.prettyPrint()})',
@@ -278,14 +285,14 @@ bool shouldKill(Project project, String line) {
 }
 
 Engine resolveEngine(Project project, Command command) {
+  final args = command.build(Engine.none);
+
   final Engine? engine;
   final String? message;
-  if (command.args[0] == 'clean') {
+  if (args[0] == 'clean') {
     engine = Engine.flutter;
     message = 'Overriding engine to "flutter" for "clean" command';
-  } else if (command.args.length >= 2 &&
-      command.args[0] == 'test' &&
-      command.args[1] == '--coverage') {
+  } else if (args.length >= 2 && args[0] == 'test' && args[1] == '--coverage') {
     engine = Engine.flutter;
     message = 'Overriding engine to "flutter" for "test --coverage" command';
   } else if (project.engine == Engine.fvm && command.noFvm) {
@@ -303,6 +310,8 @@ Engine resolveEngine(Project project, Command command) {
 }
 
 bool defaultExclude(Project project, int projectCount, Command command) {
+  final args = command.build(Engine.none);
+
   final bool skip;
   final String? message;
   if (project.hidden) {
@@ -315,9 +324,9 @@ bool defaultExclude(Project project, int projectCount, Command command) {
     skip = true;
   } else if (project.engine.isFlutter &&
       project.example &&
-      command.args.length >= 2 &&
-      command.args[0] == 'pub' &&
-      command.args[1] == 'get') {
+      args.length >= 2 &&
+      args[0] == 'pub' &&
+      args[1] == 'get') {
     // Skip flutter pub get in example projects since flutter does it anyways
     // If the only project is an example, don't skip it
     message = 'Skipping flutter example project: ${project.path}';
@@ -334,7 +343,7 @@ bool defaultExclude(Project project, int projectCount, Command command) {
 }
 
 bool explicitExclude(Project project, Command command) {
-  final argString = command.args.join(' ');
+  final argString = command.build(Engine.none).join(' ');
 
   final skip = project.config.excludes.any(argString.startsWith);
   if (skip && !command.silent) {

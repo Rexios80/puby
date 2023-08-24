@@ -1,12 +1,12 @@
+import 'package:puby/engine.dart';
+
+/// Build a command with the given engine args
+typedef ArgsBuilder = List<String> Function(List<String> engineArgs);
+
 /// A command and it's properties
 class Command {
-  final _args = <String>[];
-
-  /// The command to run
-  List<String> get args => List.unmodifiable(_args);
-
-  /// Whether to run the command as is
-  final bool raw;
+  /// Build this command's args with the given engine args
+  ArgsBuilder builder;
 
   /// Whether to run the command in parallel
   final bool parallel;
@@ -21,20 +21,20 @@ class Command {
 
   /// Constructor
   Command(
-    List<String> args, {
-    this.raw = false,
+    this.builder, {
     this.parallel = false,
     this.silent = false,
-  }) {
-    addArgs(args);
-  }
+  });
 
   /// Add arguments to the command
-  ///
-  /// Processes the arguments and sets the relevant fields
-  /// - [--no-fvm]: disables fvm support
-  void addArgs(List<String> args) {
+  void add(List<String> args) {
+    builder = (engineArgs) => builder(engineArgs) + args;
+  }
+
+  /// Generate the args used to run this command with the given [engine]
+  List<String> build(Engine engine) {
+    final args = builder(engine.args);
     _noFvm = _noFvm || args.remove('--no-fvm');
-    _args.addAll(args);
+    return args;
   }
 }
