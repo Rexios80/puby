@@ -1,3 +1,6 @@
+## 1.32.1
+- Adds more log lines to show that work is being done
+
 ## 1.32.0
 - Fixes `puby link` on Windows
 

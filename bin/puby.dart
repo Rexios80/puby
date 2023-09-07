@@ -77,6 +77,8 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
+  print(greenPen('Found ${projects.length} projects'));
+
   final firstArg = arguments.first;
 
   final commands = <Command>[];
@@ -98,6 +100,9 @@ void main(List<String> arguments) async {
 
   var exitCode = 0;
   for (final command in commands) {
+    if (command.parallel) {
+      print('Running "${command.args.join(' ')}" in parallel...');
+    }
     exitCode |= await runInAllProjects(projects, command);
   }
 
