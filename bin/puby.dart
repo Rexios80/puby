@@ -25,14 +25,16 @@ final link = Command(
 );
 final convenienceCommands = <String, List<Command>>{
   'gen': [
-    Command((engineArgs) => [
-          ...engineArgs,
-          'pub',
-          'run',
-          'build_runner',
-          'build',
-          '--delete-conflicting-outputs',
-        ]),
+    Command(
+      (engineArgs) => [
+        ...engineArgs,
+        'pub',
+        'run',
+        'build_runner',
+        'build',
+        '--delete-conflicting-outputs',
+      ],
+    ),
   ],
   'test': [
     Command((engineArgs) => [...engineArgs, 'test']),
@@ -103,7 +105,7 @@ void main(List<String> arguments) async {
     commands.add(link);
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
-      command.add(arguments.sublist(1));
+      command.addArgs((_) => arguments.sublist(1));
       commands.add(command);
     }
   } else {
@@ -113,7 +115,7 @@ void main(List<String> arguments) async {
   var exitCode = 0;
   for (final command in commands) {
     if (command.parallel) {
-      print('Running "${command.args.join(' ')}" in parallel...');
+      print('Running "${command.build(Engine.none).join(' ')}" in parallel...');
     }
     exitCode |= await runInAllProjects(projects, command);
   }
