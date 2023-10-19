@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 Future<ProcessResult> testCommand(
   List<String> arguments, {
   String workingDirectory = 'test_resources',
+  Map<String, String> environment = const {},
 }) {
   final levels = workingDirectory.split('/').length;
   final root = '../' * levels;
@@ -12,6 +13,7 @@ Future<ProcessResult> testCommand(
     'dart',
     ['${root}bin/puby.dart', ...arguments],
     workingDirectory: workingDirectory,
+    environment: environment,
   );
 }
 
