@@ -45,7 +45,7 @@ $ puby upgrade --major-versions
 
 This command is based on `flutter update-packages`. All of the dependencies required by all of the projects in the current directory are cataloged and cached if necessary, then `pub get --offline` can safely run in all the projects in parallel.
 
-This command no longer requires existing `pubspec.lock` files to function. It now uses the same version resolution strategy from the `pub` command internally and runs many times faster than the old implementation.
+This command no longer requires existing `pubspec.lock` files to function and instead uses the same version resolution strategy from the `pub` command to catalog dependencies.
 
 The `puby link` command can run _many times faster_ than `puby get`, so it is very useful for large mono-repos.
 
