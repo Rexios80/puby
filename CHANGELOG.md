@@ -1,5 +1,6 @@
 ## 1.33.0
 - Fixes `--no-fvm` flag for `puby link`
+- Updates for fvm 3.0.0
 
 ## 1.32.1
 - Adds more log lines to show that work is being done
