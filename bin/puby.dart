@@ -271,7 +271,8 @@ Future<int> runInProject({
 bool shouldKill(Project project, String line) {
   if (project.engine == Engine.fvm) {
     final flutterVersionNotInstalledMatch =
-        RegExp(r'Flutter "(.+?)" is not installed\.').firstMatch(line);
+        RegExp(r'Flutter SDK: SDK Version : (.+?) is not installed\.')
+            .firstMatch(line);
     if (flutterVersionNotInstalledMatch != null) {
       // FVM will ask for input from the user, kill the process to avoid
       // hanging
@@ -360,8 +361,8 @@ List<Project> findProjects() {
   final pubspecEntities =
       entities.whereType<File>().where((e) => e.path.endsWith('pubspec.yaml'));
   final fvmPaths = entities
-      .whereType<Directory>()
-      .where((e) => e.path.endsWith('.fvm'))
+      .whereType<File>()
+      .where((e) => e.path.endsWith('.fvmrc'))
       .map((e) => e.parent.path)
       .toList();
 

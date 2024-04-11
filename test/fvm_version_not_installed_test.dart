@@ -11,6 +11,6 @@ void main() {
     final stdout = result.stdout;
 
     expect(result.exitCode, isNot(0));
-    expectLine(stdout, ['Run `fvm install asdf` first']);
+    expectLine(stdout, ['Run `fvm install 1.17.0` first']);
   });
 }

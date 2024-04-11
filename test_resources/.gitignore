@@ -1,4 +1,4 @@
 .dart_tool
 !pubspec.lock
-**/.fvm/flutter_sdk
+**/.fvm
 !build_folder_test/build
