@@ -87,7 +87,11 @@ void main(List<String> arguments) async {
   } else if (firstArg == 'link') {
     await linkDependencies(projects);
     commands.add(
-      Command(['pub', 'get', '--offline'], parallel: true, silent: true),
+      Command(
+        ['pub', 'get', '--offline', ...arguments.skip(1)],
+        parallel: true,
+        silent: true,
+      ),
     );
   } else if (convenienceCommands.containsKey(firstArg)) {
     for (final command in convenienceCommands[firstArg]!) {
