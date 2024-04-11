@@ -1,4 +1,5 @@
 ## 1.33.0
+- The `puby link` command no longer requires existing `pubspec.lock` files to function
 - Fixes `--no-fvm` flag for `puby link`
 - Updates for fvm 3.0.0
 
