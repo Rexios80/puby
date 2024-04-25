@@ -8,11 +8,13 @@ class Command {
   /// Whether to run the command as is
   final bool raw;
 
-  /// Whether to run the command in parallel
+  /// Whether to run the command in all projects in parallel
   final bool parallel;
 
   /// Whether to run the command silently
-  final bool silent;
+  /// 
+  /// Right now this is the same as [parallel]
+  bool get silent => parallel;
 
   bool _noFvm = false;
 
@@ -24,7 +26,6 @@ class Command {
     List<String> args, {
     this.raw = false,
     this.parallel = false,
-    this.silent = false,
   }) {
     addArgs(args);
   }

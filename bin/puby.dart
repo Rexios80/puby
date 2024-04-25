@@ -14,7 +14,7 @@ import 'link.dart';
 import 'projects.dart';
 
 const decoder = Utf8Decoder();
-final clean = Command(['clean'], parallel: true, silent: true);
+final clean = Command(['clean'], parallel: true);
 final convenienceCommands = <String, List<Command>>{
   'gen': [
     Command([
@@ -91,7 +91,6 @@ void main(List<String> arguments) async {
       Command(
         ['pub', 'get', '--offline', ...arguments.skip(1)],
         parallel: true,
-        silent: true,
       ),
     );
   } else if (convenienceCommands.containsKey(firstArg)) {
