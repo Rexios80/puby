@@ -10,16 +10,16 @@ enum Engine {
   fvm;
 
   /// If the engine uses flutter directly or transitively
-  bool get isFlutter => this == Engine.flutter || this == Engine.fvm;
+  bool get isFlutter => {flutter, fvm}.contains(this);
 
-  /// The prefix arguments to run commands with
-  List<String> get prefixArgs {
+  /// The arguments required to call the engine
+  List<String> get args {
     switch (this) {
       case Engine.dart:
       case Engine.flutter:
-        return [];
+        return [name];
       case Engine.fvm:
-        return ['flutter'];
+        return ['fvm' 'flutter'];
     }
   }
 }

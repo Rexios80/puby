@@ -11,6 +11,7 @@ import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
 import 'link.dart';
+import 'projects.dart';
 
 const decoder = Utf8Decoder();
 final clean = Command(['clean'], parallel: true, silent: true);
@@ -169,23 +170,16 @@ Future<int> runInProject({
 }) async {
   final stopwatch = Stopwatch()..start();
 
-  // Fvm is a layer on top of flutter, so don't add the prefix args for these checks
-  if (explicitExclude(project, command) ||
-      defaultExclude(project, projectCount, command)) {
-    return 0;
-  }
+  final resolved = project.resolveWithCommand(command);
+  if (resolved.exclude) return 0;
 
-  final engine = resolveEngine(project, command);
   final finalArgs = [
-    if (!command.raw) ...[
-      engine.name,
-      ...engine.prefixArgs,
-    ],
+    if (!command.raw) ...resolved.engine.args,
     ...command.args,
   ];
 
   final argString = finalArgs.join(' ');
-  final pathString = project.path == '.' ? 'current directory' : project.path;
+  final pathString = resolved.path == '.' ? 'current directory' : resolved.path;
   if (!command.silent) {
     print(greenPen('\nRunning "$argString" in $pathString...'));
   }
@@ -193,7 +187,7 @@ Future<int> runInProject({
   final process = await Process.start(
     finalArgs.first,
     finalArgs.sublist(1),
-    workingDirectory: project.path,
+    workingDirectory: resolved.path,
     runInShell: true,
   );
 
@@ -207,7 +201,7 @@ Future<int> runInProject({
     if (!command.silent) {
       stdout.write(line);
     }
-    if (!command.raw && shouldKill(project, line)) {
+    if (!command.raw && shouldKill(resolved, line)) {
       killed = process.kill();
     }
   }).asFuture();
@@ -249,7 +243,7 @@ Future<int> runInProject({
     // reason for failure.
     print(yellowPen('\nRetrying with "flutter" engine'));
     return runInProject(
-      project: project.copyWith(engine: Engine.flutter),
+      project: resolved.copyWith(engine: Engine.flutter),
       projectCount: projectCount,
       command: command,
     );
@@ -285,94 +279,4 @@ bool shouldKill(Project project, String line) {
     }
   }
   return false;
-}
-
-Engine resolveEngine(Project project, Command command) {
-  final Engine? engine;
-  final String? message;
-  if (command.args[0] == 'clean') {
-    engine = Engine.flutter;
-    message = 'Overriding engine to "flutter" for "clean" command';
-  } else if (command.args.length >= 2 &&
-      command.args[0] == 'test' &&
-      command.args[1] == '--coverage') {
-    engine = Engine.flutter;
-    message = 'Overriding engine to "flutter" for "test --coverage" command';
-  } else if (project.engine == Engine.fvm && command.noFvm) {
-    engine = Engine.flutter;
-    message = 'Project uses FVM, but FVM support is disabled: ${project.path}';
-  } else {
-    engine = project.engine;
-    message = null;
-  }
-
-  if (message != null && !command.silent) {
-    print(yellowPen(message));
-  }
-  return engine;
-}
-
-bool defaultExclude(Project project, int projectCount, Command command) {
-  final bool skip;
-  final String? message;
-  if (project.hidden) {
-    // Skip hidden folders
-    message = 'Skipping hidden project: ${project.path}';
-    skip = true;
-  } else if (project.path.startsWith('build/') ||
-      project.path.contains('/build/')) {
-    message = 'Skipping project in build folder: ${project.path}';
-    skip = true;
-  } else if (project.engine.isFlutter &&
-      project.example &&
-      command.args.length >= 2 &&
-      command.args[0] == 'pub' &&
-      command.args[1] == 'get') {
-    // Skip flutter pub get in example projects since flutter does it anyways
-    // If the only project is an example, don't skip it
-    message = 'Skipping flutter example project: ${project.path}';
-    skip = true;
-  } else {
-    message = null;
-    skip = false;
-  }
-
-  if (message != null && !command.silent) {
-    print(yellowPen('\n$message'));
-  }
-  return skip;
-}
-
-bool explicitExclude(Project project, Command command) {
-  final argString = command.args.join(' ');
-
-  final skip = project.config.excludes.any(argString.startsWith);
-  if (skip && !command.silent) {
-    print(yellowPen('\nSkipping project with exclusion: ${project.path}'));
-  }
-
-  return skip;
-}
-
-List<Project> findProjects() {
-  final entities =
-      Directory.current.listSync(recursive: true, followLinks: false);
-
-  final pubspecEntities =
-      entities.whereType<File>().where((e) => e.path.endsWith('pubspec.yaml'));
-  final fvmPaths = entities
-      .whereType<File>()
-      .where((e) => e.path.endsWith('.fvmrc'))
-      .map((e) => e.parent.path)
-      .toList();
-
-  final projects = <Project>[];
-  for (final pubspecEntity in pubspecEntities) {
-    final project = Project.fromPubspec(
-      pubspecFile: pubspecEntity,
-      fvmPaths: fvmPaths,
-    );
-    projects.add(project);
-  }
-  return projects;
 }

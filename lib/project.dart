@@ -1,10 +1,5 @@
-import 'dart:io';
-
-import 'package:path/path.dart' as p;
-import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/config.dart';
 import 'package:puby/engine.dart';
-import 'package:puby/pens.dart';
 
 /// A dart project
 class Project {
@@ -23,62 +18,28 @@ class Project {
   /// If this project is in a hidden folder
   final bool hidden;
 
-  Project._({
+  /// If this project should be excluded from command execution
+  final bool exclude;
+
+  /// Create a [Project]
+  Project({
     required this.engine,
     required this.path,
     required this.config,
     required this.example,
     required this.hidden,
+    this.exclude = false,
   });
 
-  /// Create a [Project] from a pubspec file
-  static Project fromPubspec({
-    required File pubspecFile,
-    required List<String> fvmPaths,
-  }) {
-    final absolutePath = pubspecFile.parent.path;
-    final path = p.relative(absolutePath);
-    final config = PubyConfig.fromProjectPath(path);
-
-    late final Pubspec? pubspec;
-    try {
-      pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
-    } catch (e) {
-      print(redPen('Error parsing pubspec: $path'));
-      pubspec = null;
-    }
-
-    final Engine engine;
-    if (fvmPaths.any(absolutePath.contains)) {
-      engine = Engine.fvm;
-    } else if (pubspec?.dependencies['flutter'] != null) {
-      engine = Engine.flutter;
-    } else {
-      engine = Engine.dart;
-    }
-
-    final example = path.split(Platform.pathSeparator).last == 'example';
-    final hidden = path
-        .split(Platform.pathSeparator)
-        .any((e) => e.length > 1 && e.startsWith('.'));
-
-    return Project._(
-      engine: engine,
-      path: path,
-      config: config,
-      example: example,
-      hidden: hidden,
-    );
-  }
-
   /// Create a copy of this [Project] with the specified changes
-  Project copyWith({Engine? engine}) {
-    return Project._(
+  Project copyWith({Engine? engine, bool? exclude}) {
+    return Project(
       engine: engine ?? this.engine,
       path: path,
       config: config,
       example: example,
       hidden: hidden,
+      exclude: exclude ?? this.exclude,
     );
   }
 }
