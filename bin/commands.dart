@@ -116,6 +116,7 @@ extension ProjectCommandExtension on ProjectCommand {
       }
       if (!raw && Commands.shouldKill(resolved, this, line)) {
         killed = process.kill();
+        print('Killed process: $killed');
       }
     }).asFuture();
     final stderrFuture = process.stderr
