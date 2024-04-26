@@ -10,6 +10,8 @@ import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
 
+import 'commands.dart';
+
 List<Project> findProjects() {
   final pubspecEntities = Directory.current
       .listSync(recursive: true, followLinks: false)
@@ -144,18 +146,23 @@ extension ProjectExtension on Project {
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  Future<Version?> getFlutterVersionOverride() async {
+  Future<Version?> getFlutterVersionOverride(Command command) async {
     if (engine != Engine.fvm) return null;
 
     try {
       // TODO: Do this a better way (https://github.com/leoafarias/fvm/issues/710)
-      final result = await Process.run(
+      final process = await Process.start(
         'fvm',
         ['flutter', '--version', '--machine'],
         workingDirectory: path,
-      ).timeout(Duration(seconds: 1));
-      final versionString =
-          jsonDecode(result.stdout as String)['frameworkVersion'] as String?;
+      );
+      final stdout =
+          await process.stdout.map(Utf8Decoder().convert).map((line) {
+        if (Commands.shouldKill(this, command, line)) process.kill();
+        return line;
+      }).join('\n');
+
+      final versionString = jsonDecode(stdout)['frameworkVersion'] as String?;
       if (versionString == null) {
         throw 'Version string is null';
       }

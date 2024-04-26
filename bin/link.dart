@@ -15,6 +15,7 @@ import 'package:pub_hosted/src/source/cached.dart';
 import 'projects.dart';
 
 final _pubCache = SystemCache();
+final _command = Command(['pub', 'get', '--offline'], parallel: true);
 
 Future<void> linkDependencies(
   List<Project> projects, {
@@ -27,12 +28,11 @@ Future<void> linkDependencies(
   for (final project in projects) {
     unawaited(
       resolutionQueue.add(() async {
-        final resolved =
-            project.resolveWithCommand(Command(['pub', 'get', '--offline']));
+        final resolved = project.resolveWithCommand(_command);
         if (resolved.exclude) return;
 
         final flutterVersionOverride =
-            await resolved.getFlutterVersionOverride();
+            await resolved.getFlutterVersionOverride(_command);
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {
