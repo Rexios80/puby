@@ -12,7 +12,7 @@ class Command {
   final bool parallel;
 
   /// Whether to run the command silently
-  /// 
+  ///
   /// Right now this is the same as [parallel]
   bool get silent => parallel;
 
@@ -21,11 +21,15 @@ class Command {
   /// If fvm support should be disabled
   bool get noFvm => _noFvm;
 
+  /// If this command should be run only in the current working directory
+  final bool global;
+
   /// Constructor
   Command(
     List<String> args, {
     this.raw = false,
     this.parallel = false,
+    this.global = false,
   }) {
     addArgs(args);
   }

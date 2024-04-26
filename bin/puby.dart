@@ -10,35 +10,11 @@ import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
+import 'commands.dart';
 import 'link.dart';
 import 'projects.dart';
 
 const decoder = Utf8Decoder();
-final clean = Command(['clean'], parallel: true);
-final convenienceCommands = <String, List<Command>>{
-  'gen': [
-    Command([
-      'pub',
-      'run',
-      'build_runner',
-      'build',
-      '--delete-conflicting-outputs',
-    ]),
-  ],
-  'test': [
-    Command(['test']),
-  ],
-  'clean': [
-    clean,
-  ],
-  'mup': [
-    Command(['pub', 'upgrade', '--major-versions']),
-  ],
-  'reset': [
-    clean,
-    Command(['pub', 'get']),
-  ],
-};
 
 const help = '''
 Commands:
@@ -64,9 +40,11 @@ void main(List<String> arguments) async {
     );
   }
 
-  if (arguments.isEmpty ||
+  final showHelp = arguments.isEmpty ||
       arguments.first == '-h' ||
-      arguments.first == '--help') {
+      arguments.first == '--help';
+
+  if (showHelp) {
     print(magentaPen(help));
     exit(1);
   }
@@ -93,8 +71,8 @@ void main(List<String> arguments) async {
         parallel: true,
       ),
     );
-  } else if (convenienceCommands.containsKey(firstArg)) {
-    for (final command in convenienceCommands[firstArg]!) {
+  } else if (Commands.convenience.containsKey(firstArg)) {
+    for (final command in Commands.convenience[firstArg]!) {
       command.addArgs(arguments.sublist(1));
       commands.add(command);
     }
@@ -120,11 +98,8 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   final failures = <String>[];
 
   Future<void> run(Project project) async {
-    final processExitCode = await runInProject(
-      project: project,
-      projectCount: projects.length,
-      command: command,
-    );
+    final processExitCode =
+        await runInProject(project: project, command: command);
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -164,7 +139,6 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
 
 Future<int> runInProject({
   required Project project,
-  required int projectCount,
   required Command command,
 }) async {
   final stopwatch = Stopwatch()..start();
@@ -243,7 +217,6 @@ Future<int> runInProject({
     print(yellowPen('\nRetrying with "flutter" engine'));
     return runInProject(
       project: resolved.copyWith(engine: Engine.flutter),
-      projectCount: projectCount,
       command: command,
     );
   }

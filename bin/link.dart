@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
+import 'package:puby/command.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
@@ -11,9 +12,14 @@ import 'package:pub_hosted/src/entrypoint.dart';
 import 'package:pub_hosted/src/package_name.dart';
 import 'package:pub_hosted/src/source/cached.dart';
 
+import 'projects.dart';
+
 final _pubCache = SystemCache();
 
-Future<void> linkDependencies(List<Project> projects) async {
+Future<void> linkDependencies(
+  List<Project> projects, {
+  SolveType type = SolveType.get,
+}) async {
   final resolutionStopwatch = Stopwatch()..start();
   print('\nResolving all dependencies...');
   final dependencies = <PackageId>{};
@@ -21,17 +27,27 @@ Future<void> linkDependencies(List<Project> projects) async {
   for (final project in projects) {
     unawaited(
       resolutionQueue.add(() async {
-        final entry = Entrypoint(project.path, _pubCache);
+        final resolved =
+            project.resolveWithCommand(Command(['pub', 'get', '--offline']));
+        if (resolved.exclude) return;
+
+        final flutterVersionOverride = resolved.getFlutterVersionOverride();
+
+        final entry = Entrypoint(resolved.path, _pubCache);
         try {
           final result = await resolveVersions(
-            SolveType.get,
+            type,
             _pubCache,
             entry.workspaceRoot,
+            sdkOverrides: {
+              if (flutterVersionOverride != null)
+                'flutter': flutterVersionOverride,
+            },
           );
           dependencies.addAll(result.packages);
-          print('Resolved dependencies for ${project.path}');
+          print('Resolved dependencies for ${resolved.path}');
         } catch (e) {
-          print(redPen('Failed to resolve dependencies for ${project.path}'));
+          print(redPen('Failed to resolve dependencies for ${resolved.path}'));
           print(redPen(e));
         }
       }),

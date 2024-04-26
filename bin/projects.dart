@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/command.dart';
 import 'package:puby/config.dart';
@@ -99,6 +100,7 @@ extension ProjectExtension on Project {
         command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
+    final isOffline = command.args.contains('--offline');
 
     final bool skip;
     final String? message;
@@ -109,8 +111,9 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInFlutterExample) {
+    } else if (isPubGetInFlutterExample && !isOffline) {
       // Skip flutter pub get in example projects since flutter does it anyways
+      // Do not skip if this is an offline pub command
       message = 'Skipping flutter example project: $path';
       skip = true;
     } else {
@@ -141,7 +144,7 @@ extension ProjectExtension on Project {
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  String? getFlutterVersionOverride() {
+  Version? getFlutterVersionOverride() {
     if (engine != Engine.fvm) return null;
 
     final result = Process.runSync(
@@ -150,7 +153,12 @@ extension ProjectExtension on Project {
       workingDirectory: path,
     );
     try {
-      return jsonDecode(result.stdout as String)['frameworkVersion'] as String?;
+      final versionString =
+          jsonDecode(result.stdout as String)['frameworkVersion'] as String?;
+      if (versionString == null) {
+        throw 'Version string is null';
+      }
+      return Version.parse(versionString);
     } catch (e) {
       print(redPen('Unable to determine FVM Flutter version: $path'));
       return null;
