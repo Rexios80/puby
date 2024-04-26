@@ -12,16 +12,17 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 - Combined exit code for use in CI
 - Per-project command exclusions
 
-| Command                | Equivalent                                                                   |
-| ---------------------- | ---------------------------------------------------------------------------- |
-| `puby [options]`       | `[engine] pub [options]`                                                     |
-| `puby link`            | Warm the pub cache and run `[engine] pub get --offline` (see below)          |
-| `puby gen [options]`   | `[engine] pub run build_runner build --delete-conflicting-outputs [options]` |
-| `puby test [options]`  | `[engine] test [options]`                                                    |
-| `puby clean [options]` | `flutter clean [options]`                                                    |
-| `puby mup [options]`   | `[engine] pub upgrade --major-versions [options]`                            |
-| `puby reset`           | `puby clean && puby get`                                                     |
-| `puby exec [command]`  | `command`                                                                    |
+| Command               | Equivalent                                                          |
+| --------------------- | ------------------------------------------------------------------- |
+| `puby [args]`         | `[engine] pub [args]`                                               |
+| `puby link`           | Warm the pub cache and run `[engine] pub get --offline` (see below) |
+| `puby gen`            | `[engine] pub run build_runner build --delete-conflicting-outputs`  |
+| `puby test`           | `[engine] test`                                                     |
+| `puby clean`          | `flutter clean`                                                     |
+| `puby mup`            | `[engine] pub upgrade --major-versions`                             |
+| `puby reset`          | `puby clean && puby get`                                            |
+| `puby relink`         | `puby clean && puby link`                                           |
+| `puby exec [command]` | `command`                                                           |
 
 For projects configured with FVM, `fvm flutter` is used. FVM support can be disabled with the `--no-fvm` option.
 
