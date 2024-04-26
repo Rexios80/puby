@@ -87,10 +87,6 @@ Future<int> runInAllProjects(
 ) async {
   final stopwatch = Stopwatch()..start();
 
-  if (command.parallel) {
-    print('Running "${command.args.join(' ')}" in parallel...');
-  }
-
   var exitCode = 0;
   final failures = <String>[];
 
@@ -106,6 +102,8 @@ Future<int> runInAllProjects(
   }
 
   if (command.parallel) {
+    print('Running "${command.args.join(' ')}" in parallel...');
+
     final queue = TaskQueue();
     for (final project in projects) {
       unawaited(queue.add(() => run(project)));
