@@ -12,10 +12,10 @@ import 'package:pub_hosted/src/entrypoint.dart';
 import 'package:pub_hosted/src/package_name.dart';
 import 'package:pub_hosted/src/source/cached.dart';
 
+import 'commands.dart';
 import 'projects.dart';
 
 final _pubCache = SystemCache();
-final _command = ProjectCommand(['pub', 'get', '--offline'], parallel: true);
 
 Future<int> linkDependencies({
   required GlobalCommand command,
@@ -29,11 +29,11 @@ Future<int> linkDependencies({
   for (final project in projects) {
     unawaited(
       resolutionQueue.add(() async {
-        final resolved = project.resolveWithCommand(_command);
+        final resolved = project.resolveWithCommand(Commands.pubGetOffline);
         if (resolved.exclude) return;
 
         final flutterVersionOverride =
-            await resolved.getFlutterVersionOverride(_command);
+            await resolved.getFlutterVersionOverride(Commands.pubGetOffline);
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {

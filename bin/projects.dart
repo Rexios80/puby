@@ -162,7 +162,8 @@ extension ProjectExtension on Project {
         return line;
       }).join('\n');
 
-      final versionString = jsonDecode(stdout)['frameworkVersion'] as String?;
+      final versionString =
+          RegExp(r'"frameworkVersion": "(.+?)"').firstMatch(stdout)?.group(1);
       if (versionString == null) {
         throw 'Version string is null';
       }

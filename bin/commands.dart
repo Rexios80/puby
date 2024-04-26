@@ -12,6 +12,13 @@ import 'projects.dart';
 
 abstract class Commands {
   static final clean = ProjectCommand(['clean'], parallel: true);
+  static final link = GlobalCommand(
+    (command, projects) =>
+        linkDependencies(command: command, projects: projects),
+  );
+  static final pubGetOffline =
+      ProjectCommand(['pub', 'get', '--offline'], parallel: true);
+
   static final convenience = <String, List<Command>>{
     'gen': [
       ProjectCommand([
@@ -36,11 +43,13 @@ abstract class Commands {
       ProjectCommand(['pub', 'get']),
     ],
     'link': [
-      GlobalCommand(
-        (command, projects) =>
-            linkDependencies(command: command, projects: projects),
-      ),
-      ProjectCommand(['pub', 'get', '--offline'], parallel: true),
+      link,
+      pubGetOffline,
+    ],
+    'relink': [
+      clean,
+      link,
+      pubGetOffline,
     ],
   };
 

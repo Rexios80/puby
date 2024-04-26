@@ -73,7 +73,7 @@ void main(List<String> arguments) async {
     if (command is ProjectCommand) {
       exitCode |= await runInAllProjects(projects, command);
     } else if (command is GlobalCommand) {
-      // TODO
+      exitCode |= await command.run(projects: projects);
     }
   }
 
@@ -130,6 +130,8 @@ Future<int> runInAllProjects(
   } else {
     print(greenPen('All commands succeeded ($time)'));
   }
+
+  print('');
 
   return exitCode;
 }
