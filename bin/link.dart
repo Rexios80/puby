@@ -17,7 +17,7 @@ Future<int> linkDependencies({
   required List<Project> projects,
 }) async {
   final resolutionStopwatch = Stopwatch()..start();
-  print('\nResolving all dependencies...');
+  print('Resolving all dependencies...');
   final dependencies = <PackageId>{};
   final resolutionQueue = TaskQueue();
   for (final project in projects) {

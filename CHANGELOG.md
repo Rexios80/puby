@@ -1,3 +1,11 @@
+## 1.34.0
+- Adds `puby relink` as an alias for `puby clean && puby link`
+- `puby link` now respects the fvm flutter version during linking
+- `puby link` now respects excludes during linking
+- `Engine.fvm` is no longer overridden to `Engine.flutter` for commands such as `clean`
+- Removes extraneous dependency on `equatable`
+- Cleanup tests and fix testing in GitHub Actions
+
 ## 1.33.0
 - The `puby link` command no longer requires existing `pubspec.lock` files to function
 - Fixes `--no-fvm` flag for `puby link`
