@@ -7,7 +7,6 @@ import 'package:puby/project.dart';
 import 'package:puby/pub.dart';
 import 'package:puby/time.dart';
 
-import 'commands.dart';
 import 'projects.dart';
 
 final _pubCache = SystemCache();
@@ -23,11 +22,11 @@ Future<int> linkDependencies({
   for (final project in projects) {
     unawaited(
       resolutionQueue.add(() async {
-        final resolved = project.resolveWithCommand(Commands.pubGetOffline);
+        final resolved = project.resolveWithCommand(command);
         if (resolved.exclude) return;
 
         final flutterVersionOverride =
-            await resolved.getFlutterVersionOverride(Commands.pubGetOffline);
+            await resolved.getFlutterVersionOverride(command);
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {

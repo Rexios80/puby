@@ -23,6 +23,17 @@ void main() {
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'Resolved dependencies for']);
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get --offline']);
+    // The link should run in the example app
+    expectLine(
+      stdout,
+      ['flutter_puby_test/example', 'Resolved dependencies for'],
+    );
+    // The pub get should NOT run in the example app
+    expectLine(
+      stdout,
+      ['flutter_puby_test/example', 'flutter pub get --offline'],
+      matches: false,
+    );
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'Resolved dependencies for']);

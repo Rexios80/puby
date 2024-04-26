@@ -68,7 +68,7 @@ List<Project> findProjects() {
 }
 
 extension ProjectExtension on Project {
-  Engine _resolveEngine(ProjectCommand command) {
+  Engine _resolveEngine(Command command) {
     final isCleanCommand = command.args[0] == 'clean';
     final isTestCoverageCommand = command.args.length >= 2 &&
         command.args[0] == 'test' &&
@@ -96,13 +96,12 @@ extension ProjectExtension on Project {
     return newEngine;
   }
 
-  bool _defaultExclude(ProjectCommand command) {
+  bool _defaultExclude(Command command) {
     final isPubGetInFlutterExample = engine.isFlutter &&
         example &&
         command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
-    final isOffline = command.args.contains('--offline');
 
     final bool skip;
     final String? message;
@@ -113,9 +112,8 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInFlutterExample && !isOffline) {
+    } else if (isPubGetInFlutterExample) {
       // Skip flutter pub get in example projects since flutter does it anyways
-      // Do not skip if this is an offline pub command
       message = 'Skipping flutter example project: $path';
       skip = true;
     } else {
@@ -129,7 +127,7 @@ extension ProjectExtension on Project {
     return skip;
   }
 
-  bool _explicitExclude(ProjectCommand command) {
+  bool _explicitExclude(Command command) {
     final argString = command.args.join(' ');
 
     final skip = config.excludes.any(argString.startsWith);
@@ -140,13 +138,13 @@ extension ProjectExtension on Project {
     return skip;
   }
 
-  Project resolveWithCommand(ProjectCommand command) {
+  Project resolveWithCommand(Command command) {
     final resolvedEngine = _resolveEngine(command);
     final exclude = _defaultExclude(command) || _explicitExclude(command);
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  Future<Version?> getFlutterVersionOverride(ProjectCommand command) async {
+  Future<Version?> getFlutterVersionOverride(Command command) async {
     if (engine != Engine.fvm || command.noFvm) return null;
 
     try {

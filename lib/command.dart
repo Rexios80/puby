@@ -12,8 +12,11 @@ abstract class Command {
   /// If fvm support should be disabled
   bool get noFvm => _noFvm;
 
+  /// If output from this command should be displayed
+  final bool silent;
+
   /// Constructor
-  Command(List<String> args) {
+  Command(List<String> args, {required this.silent}) {
     addArgs(args);
   }
 
@@ -35,17 +38,12 @@ class ProjectCommand extends Command {
   /// Whether to run the command in all projects in parallel
   final bool parallel;
 
-  /// Whether to run the command silently
-  ///
-  /// Right now this is the same as [parallel]
-  bool get silent => parallel;
-
   /// Constructor
   ProjectCommand(
     super.args, {
     this.raw = false,
     this.parallel = false,
-  });
+  }) : super(silent: parallel);
 }
 
 /// A command to run in the working directory
@@ -55,7 +53,7 @@ class GlobalCommand extends Command {
       _run;
 
   /// Constructor
-  GlobalCommand(this._run) : super([]);
+  GlobalCommand(super.args, this._run) : super(silent: false);
 
   /// Run the command
   Future<int> run({required List<Project> projects}) => _run(this, projects);

@@ -13,6 +13,7 @@ import 'projects.dart';
 abstract class Commands {
   static final clean = ProjectCommand(['clean'], parallel: true);
   static final link = GlobalCommand(
+    ['link'],
     (command, projects) =>
         linkDependencies(command: command, projects: projects),
   );
@@ -54,7 +55,7 @@ abstract class Commands {
   };
 
   /// Check if we should continue after this line is received
-  static bool shouldKill(Project project, ProjectCommand command, String line) {
+  static bool shouldKill(Project project, Command command, String line) {
     if (project.engine == Engine.fvm) {
       final flutterVersionNotInstalledMatch =
           RegExp(r'Flutter SDK: SDK Version : (.+?) is not installed\.')

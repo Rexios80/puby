@@ -15,13 +15,13 @@ Future<ProcessResult> testCommand(
   );
 }
 
-void expectLine(dynamic stdout, List<String> matchers) {
+void expectLine(dynamic stdout, List<String> matchers, {bool matches = true}) {
   final lines = (stdout as String).split('\n');
   expect(
     lines.any(
       (line) =>
           matchers.fold(true, (prev, next) => prev && line.contains(next)),
     ),
-    isTrue,
+    matches,
   );
 }
