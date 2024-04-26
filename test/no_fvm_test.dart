@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -11,6 +13,12 @@ void main() {
     expectLine(
       stdout,
       ['fvm_puby_test', 'Project uses FVM, but FVM support is disabled'],
+    );
+    // Ensure the FVM Flutter version was not used
+    expect(
+      File('test_resources/fvm_puby_test/.dart_tool/version')
+          .readAsStringSync(),
+      isNot('3.10.0'),
     );
   });
 
