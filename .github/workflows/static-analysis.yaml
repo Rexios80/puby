@@ -17,8 +17,8 @@ jobs:
           brew install fvm
           echo "$HOME/fvm/default/bin" >> $GITHUB_PATH
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          fvm install 3.10.0
-          fvm install stable
+          fvm install 3.10.0 --setup
+          fvm install stable --setup
           fvm global stable
       - name: Pub get
         run: dart pub get
