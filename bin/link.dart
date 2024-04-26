@@ -4,13 +4,8 @@ import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:puby/command.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
+import 'package:puby/pub.dart';
 import 'package:puby/time.dart';
-
-import 'package:pub_hosted/src/solver.dart';
-import 'package:pub_hosted/src/system_cache.dart';
-import 'package:pub_hosted/src/entrypoint.dart';
-import 'package:pub_hosted/src/package_name.dart';
-import 'package:pub_hosted/src/source/cached.dart';
 
 import 'commands.dart';
 import 'projects.dart';
@@ -20,7 +15,6 @@ final _pubCache = SystemCache();
 Future<int> linkDependencies({
   required GlobalCommand command,
   required List<Project> projects,
-  SolveType type = SolveType.get,
 }) async {
   final resolutionStopwatch = Stopwatch()..start();
   print('\nResolving all dependencies...');
@@ -38,7 +32,7 @@ Future<int> linkDependencies({
         final entry = Entrypoint(resolved.path, _pubCache);
         try {
           final result = await resolveVersions(
-            type,
+            SolveType.get,
             _pubCache,
             entry.workspaceRoot,
             sdkOverrides: {
