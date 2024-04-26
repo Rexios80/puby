@@ -40,7 +40,7 @@ List<Project> findProjects() {
     }
 
     final Engine engine;
-    if (fvmPaths.contains(absolutePath)) {
+    if (fvmPaths.any(absolutePath.startsWith)) {
       engine = Engine.fvm;
     } else if (pubspec?.dependencies['flutter'] != null) {
       engine = Engine.flutter;

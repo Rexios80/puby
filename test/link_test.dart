@@ -26,12 +26,12 @@ void main() {
     // The link should run in the example app
     expectLine(
       stdout,
-      ['flutter_puby_test/example', 'Resolved dependencies for'],
+      [p.join('flutter_puby_test', 'example'), 'Resolved dependencies for'],
     );
     // The pub get should NOT run in the example app
     expectLine(
       stdout,
-      ['flutter_puby_test/example', 'flutter pub get --offline'],
+      [p.join('flutter_puby_test', 'example'), 'flutter pub get --offline'],
       matches: false,
     );
 

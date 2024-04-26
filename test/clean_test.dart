@@ -22,7 +22,10 @@ void main() {
     );
 
     // fvm
-    expectLine(stdout, ['fvm_puby_test', 'flutter clean']);
-    expectLine(stdout, [p.join('fvm_puby_test', 'example'), 'flutter clean']);
+    expectLine(stdout, ['fvm_puby_test', 'fvm flutter clean']);
+    expectLine(
+      stdout,
+      [p.join('fvm_puby_test', 'example'), 'fvm flutter clean'],
+    );
   });
 }

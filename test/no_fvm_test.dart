@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:test/test.dart';
+import 'package:path/path.dart' as p;
 
 import 'test_utils.dart';
+
+const message = 'Project uses FVM, but FVM support is disabled';
 
 void main() {
   test('--no-fvm', () async {
@@ -10,10 +13,7 @@ void main() {
     final stdout = result.stdout;
 
     expect(result.exitCode, 0);
-    expectLine(
-      stdout,
-      ['fvm_puby_test', 'Project uses FVM, but FVM support is disabled'],
-    );
+    expectLine(stdout, ['fvm_puby_test', message]);
     // Ensure the FVM Flutter version was not used
     expect(
       File('test_resources/fvm_puby_test/.dart_tool/version')
@@ -27,9 +27,16 @@ void main() {
     final stdout = result.stdout;
 
     expect(result.exitCode, 0);
-    expectLine(
-      stdout,
-      ['fvm_puby_test', 'Project uses FVM, but FVM support is disabled'],
-    );
+    expectLine(stdout, ['fvm_puby_test', message]);
+  });
+
+  test('--no-fvm on link command', () async {
+    final result = await testCommand(['link', '--no-fvm']);
+    final stdout = result.stdout;
+
+    expect(result.exitCode, 0);
+    expectLine(stdout, ['fvm_puby_test', message]);
+    expectLine(stdout, [p.join('fvm_puby_test', 'example'), message]);
+    expectLine(stdout, [p.join('fvm_puby_test', 'nested'), message]);
   });
 }

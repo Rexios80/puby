@@ -1,3 +1,8 @@
+## 1.35.0
+- `puby link` no longer runs `pub get --offline` in flutter example projects
+- Fixes `--no-fvm` flag for `puby link`
+- Fixes nested fvm project resolution
+
 ## 1.34.0
 - Adds `puby relink` as an alias for `puby clean && puby link`
 - `puby link` now respects the fvm flutter version during linking

@@ -3,6 +3,8 @@ import 'package:test/test.dart';
 
 import 'test_utils.dart';
 
+const argString = 'pub run build_runner build --delete-conflicting-outputs';
+
 void main() {
   test('[engine] gen', () async {
     final result = await testCommand(['gen']);
@@ -12,26 +14,17 @@ void main() {
     expect(result.exitCode, isNot(0));
 
     // dart
-    expectLine(stdout, [
-      'dart_puby_test',
-      'dart pub run build_runner build --delete-conflicting-outputs',
-    ]);
+    expectLine(stdout, ['dart_puby_test', 'dart $argString']);
     // Explicit exclusion
     expectLine(stdout, [p.join('dart_puby_test', 'example'), 'Skip']);
 
     // flutter
-    expectLine(stdout, [
-      'flutter_puby_test',
-      'flutter pub run build_runner build --delete-conflicting-outputs',
-    ]);
+    expectLine(stdout, ['flutter_puby_test', 'flutter $argString']);
     // Explicit exclusion
     expectLine(stdout, [p.join('flutter_puby_test', 'example'), 'Skip']);
 
     // fvm
-    expectLine(stdout, [
-      'fvm_puby_test',
-      'fvm flutter pub run build_runner build --delete-conflicting-outputs',
-    ]);
+    expectLine(stdout, ['fvm_puby_test', 'fvm flutter $argString']);
     // Explicit exclusion
     expectLine(stdout, [p.join('fvm_puby_test', 'example'), 'Skip']);
   });

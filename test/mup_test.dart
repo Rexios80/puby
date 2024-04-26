@@ -3,6 +3,8 @@ import 'package:test/test.dart';
 
 import 'test_utils.dart';
 
+const argString = 'pub upgrade --major-versions';
+
 void main() {
   test(
     '[engine] mup',
@@ -13,34 +15,25 @@ void main() {
       expect(result.exitCode, 0);
 
       // dart
-      expectLine(stdout, [
-        'dart_puby_test',
-        '"dart pub upgrade --major-versions"',
-      ]);
-      expectLine(stdout, [
-        p.join('dart_puby_test', 'example'),
-        '"dart pub upgrade --major-versions"',
-      ]);
+      expectLine(stdout, ['dart_puby_test', '"dart $argString"']);
+      expectLine(
+        stdout,
+        [p.join('dart_puby_test', 'example'), '"dart $argString"'],
+      );
 
       // flutter
-      expectLine(stdout, [
-        'flutter_puby_test',
-        '"flutter pub upgrade --major-versions"',
-      ]);
-      expectLine(stdout, [
-        p.join('flutter_puby_test', 'example'),
-        '"flutter pub upgrade --major-versions"',
-      ]);
+      expectLine(stdout, ['flutter_puby_test', '"flutter $argString"']);
+      expectLine(
+        stdout,
+        [p.join('flutter_puby_test', 'example'), '"flutter $argString"'],
+      );
 
       // fvm
-      expectLine(stdout, [
-        'fvm_puby_test',
-        '"fvm flutter pub upgrade --major-versions"',
-      ]);
-      expectLine(stdout, [
-        p.join('fvm_puby_test', 'example'),
-        '"fvm flutter pub upgrade --major-versions"',
-      ]);
+      expectLine(stdout, ['fvm_puby_test', '"fvm flutter $argString"']);
+      expectLine(
+        stdout,
+        [p.join('fvm_puby_test', 'example'), '"fvm flutter $argString"'],
+      );
     },
     timeout: Timeout.factor(1.5),
   );
