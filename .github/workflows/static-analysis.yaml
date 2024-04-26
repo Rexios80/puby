@@ -31,7 +31,7 @@ jobs:
       - name: Analyze
         run: dart analyze
       - name: Test
-        run: dart test --timeout 120s
+        run: dart test --timeout 120s --concurrency 1
       - name: Pana
         run: |
           dart pub global activate pana
