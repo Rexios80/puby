@@ -13,6 +13,7 @@ void main() {
     expect(result.exitCode, 0);
 
     // dart
+    expectLine(stdout, ['dart_puby_test', 'Resolved dependencies for']);
     expectLine(stdout, ['dart_puby_test', 'dart pub get --offline']);
     expectLine(
       stdout,
@@ -20,9 +21,11 @@ void main() {
     );
 
     // flutter
+    expectLine(stdout, ['flutter_puby_test', 'Resolved dependencies for']);
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get --offline']);
 
     // fvm
+    expectLine(stdout, ['fvm_puby_test', 'Resolved dependencies for']);
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter pub get --offline']);
     // Ensure the correct flutter version was used
     expect(
