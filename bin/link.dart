@@ -31,7 +31,8 @@ Future<void> linkDependencies(
             project.resolveWithCommand(Command(['pub', 'get', '--offline']));
         if (resolved.exclude) return;
 
-        final flutterVersionOverride = resolved.getFlutterVersionOverride();
+        final flutterVersionOverride =
+            await resolved.getFlutterVersionOverride();
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {

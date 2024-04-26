@@ -174,7 +174,7 @@ Future<int> runInProject({
     if (!command.silent) {
       stdout.write(line);
     }
-    if (!command.raw && shouldKill(resolved, line)) {
+    if (!command.raw && shouldKill(resolved, command, line)) {
       killed = process.kill();
     }
   }).asFuture();
@@ -234,7 +234,7 @@ Future<int> runInProject({
 }
 
 /// Check if we should continue after this line is received
-bool shouldKill(Project project, String line) {
+bool shouldKill(Project project, Command command, String line) {
   if (project.engine == Engine.fvm) {
     final flutterVersionNotInstalledMatch =
         RegExp(r'Flutter SDK: SDK Version : (.+?) is not installed\.')
@@ -242,11 +242,13 @@ bool shouldKill(Project project, String line) {
     if (flutterVersionNotInstalledMatch != null) {
       // FVM will ask for input from the user, kill the process to avoid
       // hanging
-      print(
-        redPen(
-          '\nRun `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
-        ),
-      );
+      if (!command.silent) {
+        print(
+          redPen(
+            '\nRun `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
+          ),
+        );
+      }
       return true;
     }
   }

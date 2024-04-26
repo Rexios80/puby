@@ -19,7 +19,7 @@ enum Engine {
       case Engine.flutter:
         return [name];
       case Engine.fvm:
-        return ['fvm' 'flutter'];
+        return ['fvm', 'flutter'];
     }
   }
 }

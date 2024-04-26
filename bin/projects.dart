@@ -144,15 +144,16 @@ extension ProjectExtension on Project {
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  Version? getFlutterVersionOverride() {
+  Future<Version?> getFlutterVersionOverride() async {
     if (engine != Engine.fvm) return null;
 
-    final result = Process.runSync(
-      'fvm',
-      ['flutter', '--version', '--machine'],
-      workingDirectory: path,
-    );
     try {
+      // TODO: Do this a better way (https://github.com/leoafarias/fvm/issues/710)
+      final result = await Process.run(
+        'fvm',
+        ['flutter', '--version', '--machine'],
+        workingDirectory: path,
+      ).timeout(Duration(seconds: 1));
       final versionString =
           jsonDecode(result.stdout as String)['frameworkVersion'] as String?;
       if (versionString == null) {

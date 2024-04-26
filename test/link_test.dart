@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -22,5 +24,11 @@ void main() {
 
     // fvm
     expectLine(stdout, ['fvm_puby_test', 'fvm flutter pub get --offline']);
+    // Ensure the correct flutter version was used
+    expect(
+      File('test_resources/fvm_puby_test/.dart_tool/version')
+          .readAsStringSync(),
+      '3.10.0',
+    );
   });
 }
