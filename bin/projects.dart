@@ -68,7 +68,7 @@ List<Project> findProjects() {
 }
 
 extension ProjectExtension on Project {
-  Engine _resolveEngine(Command command) {
+  Engine _resolveEngine(ProjectCommand command) {
     final isCleanCommand = command.args[0] == 'clean';
     final isTestCoverageCommand = command.args.length >= 2 &&
         command.args[0] == 'test' &&
@@ -96,7 +96,7 @@ extension ProjectExtension on Project {
     return newEngine;
   }
 
-  bool _defaultExclude(Command command) {
+  bool _defaultExclude(ProjectCommand command) {
     final isPubGetInFlutterExample = engine.isFlutter &&
         example &&
         command.args.length >= 2 &&
@@ -129,7 +129,7 @@ extension ProjectExtension on Project {
     return skip;
   }
 
-  bool _explicitExclude(Command command) {
+  bool _explicitExclude(ProjectCommand command) {
     final argString = command.args.join(' ');
 
     final skip = config.excludes.any(argString.startsWith);
@@ -140,14 +140,14 @@ extension ProjectExtension on Project {
     return skip;
   }
 
-  Project resolveWithCommand(Command command) {
+  Project resolveWithCommand(ProjectCommand command) {
     final resolvedEngine = _resolveEngine(command);
     final exclude = _defaultExclude(command) || _explicitExclude(command);
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  Future<Version?> getFlutterVersionOverride(Command command) async {
-    if (engine != Engine.fvm) return null;
+  Future<Version?> getFlutterVersionOverride(ProjectCommand command) async {
+    if (engine != Engine.fvm || command.noFvm) return null;
 
     try {
       // TODO: Do this a better way (https://github.com/leoafarias/fvm/issues/710)

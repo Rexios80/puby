@@ -15,7 +15,7 @@ import 'package:pub_hosted/src/source/cached.dart';
 import 'projects.dart';
 
 final _pubCache = SystemCache();
-final _command = Command(['pub', 'get', '--offline'], parallel: true);
+final _command = ProjectCommand(['pub', 'get', '--offline'], parallel: true);
 
 Future<void> linkDependencies(
   List<Project> projects, {

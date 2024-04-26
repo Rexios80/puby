@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
-import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
@@ -13,8 +11,6 @@ import 'package:puby/time.dart';
 import 'commands.dart';
 import 'link.dart';
 import 'projects.dart';
-
-const decoder = Utf8Decoder();
 
 const help = '''
 Commands:
@@ -62,11 +58,11 @@ void main(List<String> arguments) async {
 
   final commands = <Command>[];
   if (firstArg == 'exec') {
-    commands.add(Command(arguments.sublist(1), raw: true));
+    commands.add(ProjectCommand(arguments.sublist(1), raw: true));
   } else if (firstArg == 'link') {
     await linkDependencies(projects);
     commands.add(
-      Command(
+      ProjectCommand(
         ['pub', 'get', '--offline', ...arguments.skip(1)],
         parallel: true,
       ),
@@ -77,18 +73,25 @@ void main(List<String> arguments) async {
       commands.add(command);
     }
   } else {
-    commands.add(Command(['pub', ...arguments]));
+    commands.add(ProjectCommand(['pub', ...arguments]));
   }
 
   var exitCode = 0;
   for (final command in commands) {
-    exitCode |= await runInAllProjects(projects, command);
+    if (command is ProjectCommand) {
+      exitCode |= await runInAllProjects(projects, command);
+    } else if (command is GlobalCommand) {
+      // TODO
+    }
   }
 
   exit(exitCode);
 }
 
-Future<int> runInAllProjects(List<Project> projects, Command command) async {
+Future<int> runInAllProjects(
+  List<Project> projects,
+  ProjectCommand command,
+) async {
   final stopwatch = Stopwatch()..start();
 
   if (command.parallel) {
@@ -99,8 +102,7 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   final failures = <String>[];
 
   Future<void> run(Project project) async {
-    final processExitCode =
-        await runInProject(project: project, command: command);
+    final processExitCode = await command.runInProject(project);
 
     if (processExitCode != 0) {
       failures.add(project.path);
@@ -138,100 +140,4 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   }
 
   return exitCode;
-}
-
-Future<int> runInProject({
-  required Project project,
-  required Command command,
-}) async {
-  final stopwatch = Stopwatch()..start();
-
-  final resolved = project.resolveWithCommand(command);
-  if (resolved.exclude) return 0;
-
-  final finalArgs = [
-    if (!command.raw) ...resolved.engine.args,
-    ...command.args,
-  ];
-
-  final argString = finalArgs.join(' ');
-  final pathString = resolved.path == '.' ? 'current directory' : resolved.path;
-  if (!command.silent) {
-    print(greenPen('Running "$argString" in $pathString...'));
-  }
-
-  final process = await Process.start(
-    finalArgs.first,
-    finalArgs.sublist(1),
-    workingDirectory: resolved.path,
-    runInShell: true,
-  );
-
-  // Piping directly to stdout and stderr can cause unexpected behavior
-  var killed = false;
-  final err = <String>[];
-  final stdoutFuture = process.stdout
-      .takeWhile((_) => !killed)
-      .map(decoder.convert)
-      .listen((line) {
-    if (!command.silent) {
-      stdout.write(line);
-    }
-    if (!command.raw && Commands.shouldKill(resolved, command, line)) {
-      killed = process.kill();
-    }
-  }).asFuture();
-  final stderrFuture = process.stderr
-      .takeWhile((_) => !killed)
-      .map(decoder.convert)
-      .listen((line) {
-    if (!command.silent) {
-      stderr.write(redPen(line));
-    }
-    err.add(line);
-  }).asFuture();
-
-  final processExitCode = await process.exitCode;
-
-  // If we do not wait for these streams to finish, output could end up
-  // out of order
-  await Future.wait([stdoutFuture, stderrFuture]);
-
-  stopwatch.stop();
-  // Skip error handling if the command was successful or this is a raw command
-  if (command.raw || processExitCode == 0) {
-    print(
-      greenPen(
-        'Ran "$argString" in $pathString (${stopwatch.prettyPrint()})',
-      ),
-    );
-
-    return processExitCode;
-  }
-
-  if (err.any(
-    (e) => e.contains(
-      'Flutter users should run `flutter pub get` instead of `dart pub get`.',
-    ),
-  )) {
-    // If a project doesn't explicitly depend on flutter, it is not possible
-    // to know if it's dependencies require flutter. So retry if that's the
-    // reason for failure.
-    print(yellowPen('Retrying with "flutter" engine'));
-    return runInProject(
-      project: resolved.copyWith(engine: Engine.flutter),
-      command: command,
-    );
-  }
-
-  final unknownSubcommandMatch =
-      RegExp(r'Could not find a subcommand named "(.+?)" for ".+? pub"\.')
-          .firstMatch(err.join('\n'));
-  if (unknownSubcommandMatch != null) {
-    // Do not attempt to run in other projects if the command is unknown
-    print(redPen('Unknown command: ${unknownSubcommandMatch[1]}'));
-    exit(1);
-  }
-
-  return processExitCode;
 }
