@@ -31,7 +31,7 @@ jobs:
       - name: Analyze
         run: dart analyze
       - name: Test
-        run: dart test test/fvm_version_not_installed_test.dart
+        run: dart test --timeout 120s
       - name: Pana
         run: |
           dart pub global activate pana

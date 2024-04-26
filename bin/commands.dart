@@ -116,7 +116,6 @@ extension ProjectCommandExtension on ProjectCommand {
       }
       if (!raw && Commands.shouldKill(resolved, this, line)) {
         killed = process.kill();
-        print('Killed process: $killed');
       }
     }).asFuture();
     final stderrFuture = process.stderr
@@ -134,7 +133,8 @@ extension ProjectCommandExtension on ProjectCommand {
     if (!killed) {
       // If we do not wait for these streams to finish, output could end up
       // out of order
-      // Do not wait if the process was killed since the streams won't output
+      // Do not wait if the process was killed since the streams won't output,
+      // and these futures do not complete in some cases
       await Future.wait([stdoutFuture, stderrFuture]);
     }
 
