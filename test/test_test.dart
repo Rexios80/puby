@@ -22,7 +22,7 @@ void main() {
     expectLine(stdout, [p.join('flutter_puby_test', 'example'), 'Skip']);
 
     // fvm
-    expectLine(stdout, ['fvm_puby_test', 'flutter test --coverage']);
+    expectLine(stdout, ['fvm_puby_test', 'fvm flutter test --coverage']);
     // Explicit exclusion
     expectLine(stdout, [p.join('fvm_puby_test', 'example'), 'Skip']);
   });
