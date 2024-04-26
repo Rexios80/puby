@@ -82,9 +82,6 @@ void main(List<String> arguments) async {
 
   var exitCode = 0;
   for (final command in commands) {
-    if (command.parallel) {
-      print('Running "${command.args.join(' ')}" in parallel...');
-    }
     exitCode |= await runInAllProjects(projects, command);
   }
 
@@ -93,6 +90,10 @@ void main(List<String> arguments) async {
 
 Future<int> runInAllProjects(List<Project> projects, Command command) async {
   final stopwatch = Stopwatch()..start();
+
+  if (command.parallel) {
+    print('Running "${command.args.join(' ')}" in parallel...');
+  }
 
   var exitCode = 0;
   final failures = <String>[];
@@ -115,9 +116,11 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
       unawaited(queue.add(() => run(project)));
     }
     await queue.tasksComplete;
+    print('');
   } else {
     for (final project in projects) {
       await run(project);
+      print('');
     }
   }
 
@@ -125,13 +128,13 @@ Future<int> runInAllProjects(List<Project> projects, Command command) async {
   final time = stopwatch.prettyPrint();
 
   if (exitCode != 0) {
-    print(redPen('\nOne or more commands failed ($time)'));
+    print(redPen('One or more commands failed ($time)'));
     print(redPen('Failures:'));
     for (final failure in failures) {
       print(redPen('  $failure'));
     }
   } else {
-    print(greenPen('\nAll commands succeeded ($time)'));
+    print(greenPen('All commands succeeded ($time)'));
   }
 
   return exitCode;
@@ -154,7 +157,7 @@ Future<int> runInProject({
   final argString = finalArgs.join(' ');
   final pathString = resolved.path == '.' ? 'current directory' : resolved.path;
   if (!command.silent) {
-    print(greenPen('\nRunning "$argString" in $pathString...'));
+    print(greenPen('Running "$argString" in $pathString...'));
   }
 
   final process = await Process.start(
@@ -214,7 +217,7 @@ Future<int> runInProject({
     // If a project doesn't explicitly depend on flutter, it is not possible
     // to know if it's dependencies require flutter. So retry if that's the
     // reason for failure.
-    print(yellowPen('\nRetrying with "flutter" engine'));
+    print(yellowPen('Retrying with "flutter" engine'));
     return runInProject(
       project: resolved.copyWith(engine: Engine.flutter),
       command: command,
@@ -226,7 +229,7 @@ Future<int> runInProject({
           .firstMatch(err.join('\n'));
   if (unknownSubcommandMatch != null) {
     // Do not attempt to run in other projects if the command is unknown
-    print(redPen('\nUnknown command: ${unknownSubcommandMatch[1]}'));
+    print(redPen('Unknown command: ${unknownSubcommandMatch[1]}'));
     exit(1);
   }
 
@@ -245,7 +248,7 @@ bool shouldKill(Project project, Command command, String line) {
       if (!command.silent) {
         print(
           redPen(
-            '\nRun `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
+            'Run `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
           ),
         );
       }

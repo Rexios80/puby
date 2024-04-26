@@ -122,7 +122,7 @@ extension ProjectExtension on Project {
     }
 
     if (message != null && !command.silent) {
-      print(yellowPen('\n$message'));
+      print(yellowPen(message));
     }
     return skip;
   }
@@ -132,7 +132,7 @@ extension ProjectExtension on Project {
 
     final skip = config.excludes.any(argString.startsWith);
     if (skip && !command.silent) {
-      print(yellowPen('\nSkipping project with exclusion: $path'));
+      print(yellowPen('Skipping project with exclusion: $path'));
     }
 
     return skip;
