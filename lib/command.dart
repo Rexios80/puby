@@ -1,3 +1,5 @@
+import 'package:puby/project.dart';
+
 /// A command and it's properties
 abstract class Command {
   final _args = <String>[];
@@ -48,6 +50,13 @@ class ProjectCommand extends Command {
 
 /// A command to run in the working directory
 class GlobalCommand extends Command {
+  /// The function to run
+  final Future<int> Function(GlobalCommand command, List<Project> projects)
+      _run;
+
   /// Constructor
-  GlobalCommand(super.args);
+  GlobalCommand(this._run) : super([]);
+
+  /// Run the command
+  Future<int> run({required List<Project> projects}) => _run(this, projects);
 }

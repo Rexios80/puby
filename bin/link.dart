@@ -17,8 +17,9 @@ import 'projects.dart';
 final _pubCache = SystemCache();
 final _command = ProjectCommand(['pub', 'get', '--offline'], parallel: true);
 
-Future<void> linkDependencies(
-  List<Project> projects, {
+Future<int> linkDependencies({
+  required GlobalCommand command,
+  required List<Project> projects,
   SolveType type = SolveType.get,
 }) async {
   final resolutionStopwatch = Stopwatch()..start();
@@ -90,4 +91,6 @@ Future<void> linkDependencies(
   // Stop all stopwatches
   resolutionStopwatch.stop();
   downloadStopwatch.stop();
+
+  return 0;
 }

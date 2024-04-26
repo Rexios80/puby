@@ -7,6 +7,7 @@ import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
+import 'link.dart';
 import 'projects.dart';
 
 abstract class Commands {
@@ -33,6 +34,13 @@ abstract class Commands {
     'reset': [
       clean,
       ProjectCommand(['pub', 'get']),
+    ],
+    'link': [
+      GlobalCommand(
+        (command, projects) =>
+            linkDependencies(command: command, projects: projects),
+      ),
+      ProjectCommand(['pub', 'get', '--offline'], parallel: true),
     ],
   };
 

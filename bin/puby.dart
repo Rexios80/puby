@@ -9,7 +9,6 @@ import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
 import 'commands.dart';
-import 'link.dart';
 import 'projects.dart';
 
 const help = '''
@@ -52,23 +51,16 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
-  print(greenPen('Found ${projects.length} projects'));
+  print(greenPen('Found ${projects.length} projects\n'));
 
   final firstArg = arguments.first;
+  final convenienceCommand = Commands.convenience[firstArg];
 
   final commands = <Command>[];
   if (firstArg == 'exec') {
     commands.add(ProjectCommand(arguments.sublist(1), raw: true));
-  } else if (firstArg == 'link') {
-    await linkDependencies(projects);
-    commands.add(
-      ProjectCommand(
-        ['pub', 'get', '--offline', ...arguments.skip(1)],
-        parallel: true,
-      ),
-    );
-  } else if (Commands.convenience.containsKey(firstArg)) {
-    for (final command in Commands.convenience[firstArg]!) {
+  } else if (convenienceCommand != null) {
+    for (final command in convenienceCommand) {
       command.addArgs(arguments.sublist(1));
       commands.add(command);
     }
