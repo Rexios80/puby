@@ -129,11 +129,14 @@ extension ProjectCommandExtension on ProjectCommand {
       err.add(line);
     }).asFuture();
 
+    print('1');
     final processExitCode = await process.exitCode;
+    print('2');
 
     // If we do not wait for these streams to finish, output could end up
     // out of order
     await Future.wait([stdoutFuture, stderrFuture]);
+    print('3');
 
     stopwatch.stop();
     // Skip error handling if the command was successful or this is a raw command
