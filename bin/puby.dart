@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
+import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
 import 'commands.dart';
 import 'projects.dart';
+import 'fvm.dart';
 
 const help = '''
 Commands:
@@ -27,8 +28,6 @@ Commands:
 Options:
   --no-fvm                Disable FVM support''';
 
-final minFvmVersion = Version.parse('3.2.0');
-
 void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
@@ -37,30 +36,6 @@ void main(List<String> arguments) async {
         'There is an update available: $newVersion. Run `dart pub global activate puby` to update.',
       ),
     );
-  }
-
-  final fvmVersionResult = await Process.run('fvm', ['--version']);
-  final fvmInstalled = fvmVersionResult.exitCode == 0;
-  if (!fvmInstalled) {
-    print(
-      yellowPen(
-        '''
-FVM is not installed
-Commands in projects configured with FVM will fail''',
-      ),
-    );
-  } else {
-    final fvmVersion = Version.parse(fvmVersionResult.stdout.toString().trim());
-    if (fvmVersion < minFvmVersion) {
-      print(
-        yellowPen(
-          '''
-This version of puby expects FVM version $minFvmVersion or higher
-FVM version $fvmVersion is installed
-Commands in projects configured with FVM may fail''',
-        ),
-      );
-    }
   }
 
   final showHelp = arguments.isEmpty ||
@@ -80,6 +55,10 @@ Commands in projects configured with FVM may fail''',
   }
 
   print(greenPen('Found ${projects.length} projects\n'));
+
+  if (projects.any((e) => e.engine == Engine.fvm)) {
+    await fvmCheck();
+  }
 
   final firstArg = arguments.first;
   final convenienceCommand = Commands.convenience[firstArg];
