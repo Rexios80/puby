@@ -45,8 +45,8 @@ void main(List<String> arguments) async {
     print(
       yellowPen(
         '''
-FVM is not installed.
-Commands in projects configured with FVM will fail.''',
+FVM is not installed
+Commands in projects configured with FVM will fail''',
       ),
     );
   } else {
@@ -55,9 +55,9 @@ Commands in projects configured with FVM will fail.''',
       print(
         yellowPen(
           '''
-This version of puby expects FVM version $minFvmVersion or higher.
-FVM version $fvmVersion is installed.
-Commands in projects configured with FVM may fail.''',
+This version of puby expects FVM version $minFvmVersion or higher
+FVM version $fvmVersion is installed
+Commands in projects configured with FVM may fail''',
         ),
       );
     }
