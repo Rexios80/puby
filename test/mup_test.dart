@@ -29,10 +29,16 @@ void main() {
       );
 
       // fvm
-      expectLine(stdout, ['fvm_puby_test', '"fvm flutter $argString"']);
       expectLine(
         stdout,
-        [p.join('fvm_puby_test', 'example'), '"fvm flutter $argString"'],
+        ['fvm_puby_test', '"fvm flutter $argString --fvm-skip-input"'],
+      );
+      expectLine(
+        stdout,
+        [
+          p.join('fvm_puby_test', 'example'),
+          '"fvm flutter $argString --fvm-skip-input"',
+        ],
       );
     },
     timeout: Timeout.factor(1.5),
