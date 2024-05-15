@@ -20,15 +20,15 @@ Future<ProcessResult> testCommand(
 
   String handleLine(dynamic line) {
     final decoded = _decoder.convert(line);
-    if (debug) print(decoded);
+    if (debug) stdout.write(decoded);
     return decoded;
   }
 
-  final stdout = process.stdout.map(handleLine).join('\n');
-  final stderr = process.stderr.map(handleLine).join('\n');
+  final processStdout = process.stdout.map(handleLine).join('\n');
+  final processStderr = process.stderr.map(handleLine).join('\n');
 
   final exitCode = await process.exitCode;
-  return ProcessResult(0, exitCode, await stdout, await stderr);
+  return ProcessResult(0, exitCode, await processStdout, await processStderr);
 }
 
 void expectLine(dynamic stdout, List<String> matchers, {bool matches = true}) {

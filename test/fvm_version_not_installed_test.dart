@@ -10,7 +10,7 @@ void main() {
     );
     final stdout = result.stdout;
 
-    expect(result.exitCode, 64);
+    expect(result.exitCode, 69);
     expectLine(stdout, ['Flutter SDK: SDK Version : 1.17.0 is not installed.']);
   });
 }
