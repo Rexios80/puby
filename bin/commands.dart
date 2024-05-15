@@ -53,12 +53,6 @@ abstract class Commands {
       pubGetOffline,
     ],
   };
-
-  /// Check if we should continue after this line is received
-  static bool shouldKill(Project project, Command command, String line) {
-    // For now this does nothing
-    return false;
-  }
 }
 
 extension ProjectCommandExtension on ProjectCommand {
@@ -91,23 +85,13 @@ extension ProjectCommandExtension on ProjectCommand {
     );
 
     // Piping directly to stdout and stderr can cause unexpected behavior
-    var killed = false;
     final err = <String>[];
-    final stdoutFuture = process.stdout
-        .takeWhile((_) => !killed)
-        .map(_decoder.convert)
-        .listen((line) {
+    final stdoutFuture = process.stdout.map(_decoder.convert).listen((line) {
       if (!silent) {
         stdout.write(line);
       }
-      if (!raw && Commands.shouldKill(resolved, this, line)) {
-        killed = process.kill();
-      }
     }).asFuture();
-    final stderrFuture = process.stderr
-        .takeWhile((_) => !killed)
-        .map(_decoder.convert)
-        .listen((line) {
+    final stderrFuture = process.stderr.map(_decoder.convert).listen((line) {
       if (!silent) {
         stderr.write(redPen(line));
       }
@@ -116,13 +100,9 @@ extension ProjectCommandExtension on ProjectCommand {
 
     final processExitCode = await process.exitCode;
 
-    if (!killed) {
-      // If we do not wait for these streams to finish, output could end up
-      // out of order
-      // Do not wait if the process was killed since the streams won't output,
-      // and these futures do not complete in some cases
-      await Future.wait([stdoutFuture, stderrFuture]);
-    }
+    // If we do not wait for these streams to finish, output could end up
+    // out of order
+    await Future.wait([stdoutFuture, stderrFuture]);
 
     stopwatch.stop();
     // Skip error handling if the command was successful or this is a raw command
