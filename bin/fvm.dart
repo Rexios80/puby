@@ -22,7 +22,7 @@ Commands in projects configured with FVM may fail
     }
   } catch (e) {
     print(
-      yellowPen(
+      redPen(
         '''
 FVM is not installed
 Commands in projects configured with FVM will fail
