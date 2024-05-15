@@ -28,7 +28,12 @@ Future<ProcessResult> testCommand(
   final processStderr = process.stderr.map(handleLine).join('\n');
 
   final exitCode = await process.exitCode;
-  return ProcessResult(0, exitCode, await processStdout, await processStderr);
+  return ProcessResult(
+    process.pid,
+    exitCode,
+    await processStdout,
+    await processStderr,
+  );
 }
 
 void expectLine(dynamic stdout, List<String> matchers, {bool matches = true}) {
