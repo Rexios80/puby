@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:pub_semver/pub_semver.dart';
@@ -9,8 +8,6 @@ import 'package:puby/engine.dart';
 import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
-
-import 'commands.dart';
 
 List<Project> findProjects() {
   final pubspecEntities = Directory.current
@@ -148,18 +145,12 @@ extension ProjectExtension on Project {
     if (engine != Engine.fvm || command.noFvm) return null;
 
     try {
-      // TODO: Do this a better way (https://github.com/leoafarias/fvm/issues/710)
-      final process = await Process.start(
+      final result = await Process.run(
         'fvm',
-        ['flutter', '--version', '--machine'],
+        ['flutter', '--version', '--machine', '--fvm-skip-input'],
         workingDirectory: path,
       );
-      final stdout =
-          await process.stdout.map(Utf8Decoder().convert).map((line) {
-        if (Commands.shouldKill(this, command, line)) process.kill();
-        return line;
-      }).join('\n');
-
+      final stdout = result.stdout as String;
       final versionString =
           RegExp(r'"frameworkVersion": "(.+?)"').firstMatch(stdout)?.group(1);
       if (versionString == null) {
