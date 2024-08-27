@@ -82,6 +82,8 @@ extension ProjectCommandExtension on ProjectCommand {
       finalArgs.sublist(1),
       workingDirectory: resolved.path,
       runInShell: true,
+      // TODO: Use this when https://github.com/leoafarias/fvm/issues/710 lands
+      // mode: ProcessStartMode.inheritStdio,
     );
 
     // Piping directly to stdout and stderr can cause unexpected behavior
