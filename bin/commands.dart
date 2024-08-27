@@ -79,7 +79,7 @@ extension ProjectCommandExtension on ProjectCommand {
       finalArgs.sublist(1),
       workingDirectory: resolved.path,
       runInShell: true,
-      mode: silent ? ProcessStartMode.detached : ProcessStartMode.inheritStdio,
+      mode: silent ? ProcessStartMode.normal : ProcessStartMode.inheritStdio,
     );
 
     final exitCode = await process.exitCode;
