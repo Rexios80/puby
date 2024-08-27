@@ -43,7 +43,8 @@ Future<int> linkDependencies({
           print('Resolved dependencies for ${resolved.path}');
         } catch (e) {
           print(
-              red.wrap('Failed to resolve dependencies for ${resolved.path}'));
+            red.wrap('Failed to resolve dependencies for ${resolved.path}'),
+          );
           print(red.wrap(e.toString()));
         }
       }),
@@ -80,7 +81,8 @@ Future<int> linkDependencies({
   await downloadQueue.tasksComplete;
   print(
     green.wrap(
-        'Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n'),
+      'Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n',
+    ),
   );
 
   // Stop all stopwatches
