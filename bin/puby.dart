@@ -58,7 +58,7 @@ void main(List<String> arguments) async {
   print(green.wrap('Found ${projects.length} projects\n'));
 
   if (projects.any((e) => e.engine == Engine.fvm)) {
-    await fvmCheck();
+    fvmCheck();
   }
 
   final firstArg = arguments.first;

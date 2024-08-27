@@ -141,11 +141,11 @@ extension ProjectExtension on Project {
     return copyWith(engine: resolvedEngine, exclude: exclude);
   }
 
-  Future<Version?> getFlutterVersionOverride(Command command) async {
+  Version? getFlutterVersionOverride(Command command) {
     if (engine != Engine.fvm || command.noFvm) return null;
 
     try {
-      final result = await Process.run(
+      final result = Process.runSync(
         'fvm',
         ['flutter', '--version', '--machine', '--fvm-skip-input'],
         workingDirectory: path,

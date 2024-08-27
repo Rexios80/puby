@@ -5,9 +5,9 @@ import 'package:io/ansi.dart';
 
 final minFvmVersion = Version.parse('3.2.1');
 
-Future<void> fvmCheck() async {
+void fvmCheck() {
   try {
-    final fvmVersionResult = await Process.run('fvm', ['--version']);
+    final fvmVersionResult = Process.runSync('fvm', ['--version']);
     final fvmVersion = Version.parse(fvmVersionResult.stdout.toString().trim());
     if (fvmVersion < minFvmVersion) {
       print(

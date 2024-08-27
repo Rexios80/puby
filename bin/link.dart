@@ -26,7 +26,7 @@ Future<int> linkDependencies({
         if (resolved.exclude) return;
 
         final flutterVersionOverride =
-            await resolved.getFlutterVersionOverride(command);
+            resolved.getFlutterVersionOverride(command);
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {
@@ -42,7 +42,8 @@ Future<int> linkDependencies({
           dependencies.addAll(result.packages);
           print('Resolved dependencies for ${resolved.path}');
         } catch (e) {
-          print(red.wrap('Failed to resolve dependencies for ${resolved.path}'));
+          print(
+              red.wrap('Failed to resolve dependencies for ${resolved.path}'));
           print(red.wrap(e.toString()));
         }
       }),
@@ -78,7 +79,8 @@ Future<int> linkDependencies({
   }
   await downloadQueue.tasksComplete;
   print(
-    green.wrap('Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n'),
+    green.wrap(
+        'Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n'),
   );
 
   // Stop all stopwatches
