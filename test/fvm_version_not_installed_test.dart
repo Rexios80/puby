@@ -1,3 +1,4 @@
+import 'package:io/io.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -10,7 +11,7 @@ void main() {
     );
     final stdout = result.stdout;
 
-    expect(result.exitCode, 69);
+    expect(result.exitCode, ExitCode.unavailable.code);
     expectLine(stdout, ['Flutter SDK: SDK Version : 1.17.0 is not installed.']);
   });
 }

@@ -32,7 +32,7 @@ List<Project> findProjects() {
     try {
       pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
     } catch (e) {
-      print(yellow.wrap('Error parsing pubspec: $path'));
+      print(red.wrap('Error parsing pubspec: $path'));
       pubspec = null;
     }
 
