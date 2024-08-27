@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:puby/command.dart';
-import 'package:puby/pens.dart';
+import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:puby/pub.dart';
 import 'package:puby/time.dart';
@@ -42,15 +42,15 @@ Future<int> linkDependencies({
           dependencies.addAll(result.packages);
           print('Resolved dependencies for ${resolved.path}');
         } catch (e) {
-          print(redPen('Failed to resolve dependencies for ${resolved.path}'));
-          print(redPen(e));
+          print(red.wrap('Failed to resolve dependencies for ${resolved.path}'));
+          print(red.wrap(e.toString()));
         }
       }),
     );
   }
   await resolutionQueue.tasksComplete;
   print(
-    greenPen(
+    green.wrap(
       'Resolved all dependencies in ${resolutionStopwatch.prettyPrint()}',
     ),
   );
@@ -69,16 +69,16 @@ Future<int> linkDependencies({
           }
         } catch (e) {
           print(
-            redPen('Failed to download ${package.name} ${package.version}'),
+            red.wrap('Failed to download ${package.name} ${package.version}'),
           );
-          print(redPen(e));
+          print(red.wrap(e.toString()));
         }
       }),
     );
   }
   await downloadQueue.tasksComplete;
   print(
-    greenPen('Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n'),
+    green.wrap('Downloaded all packages in ${downloadStopwatch.prettyPrint()}\n'),
   );
 
   // Stop all stopwatches
