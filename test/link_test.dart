@@ -9,7 +9,7 @@ import 'test_utils.dart';
 void main() {
   test('puby link', () async {
     // Pub get must run before link will work in FVM projects
-    await testCommand(['get']);
+    await testCommand(['get'], debug: true);
     final result = await testCommand(['link'], debug: true);
     final stdout = result.stdout;
 
