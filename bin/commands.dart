@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:io/io.dart';
 import 'package:puby/command.dart';
 import 'package:io/ansi.dart';
+import 'package:puby/engine.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
@@ -64,7 +66,7 @@ abstract class Commands {
         // hanging
         if (!command.silent) {
           print(
-            redPen(
+            red.wrap(
               'Run `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
             ),
           );
@@ -88,7 +90,6 @@ extension ProjectCommandExtension on ProjectCommand {
     final finalArgs = [
       if (!raw) ...resolved.engine.prefixArgs,
       ...args,
-      if (!raw) ...resolved.engine.suffixArgs,
     ];
 
     final argString = finalArgs.join(' ');
@@ -124,12 +125,12 @@ extension ProjectCommandExtension on ProjectCommand {
         .map(_decoder.convert)
         .listen((line) {
       if (!silent) {
-        stderr.write(redPen(line));
+        stderr.write(red.wrap(line));
       }
       err.add(line);
     }).asFuture();
 
-    final processExitCode = await process.exitCode;
+    final exitCode = await process.exitCode;
 
     if (!killed) {
       // If we do not wait for these streams to finish, output could end up

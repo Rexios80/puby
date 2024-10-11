@@ -26,7 +26,7 @@ Future<int> linkDependencies({
         if (resolved.exclude) return;
 
         final flutterVersionOverride =
-            resolved.getFlutterVersionOverride(command);
+            await resolved.getFlutterVersionOverride(command);
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {
