@@ -3,6 +3,7 @@
 - Improves exit codes
 - Adds safety checks for FVM usage
 - Skips `pub get` in all example projects
+- Bumps Dart SDK constraint to `^3.0.0`
 
 ## 1.35.0
 - `puby link` no longer runs `pub get --offline` in flutter example projects
