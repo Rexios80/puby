@@ -35,7 +35,7 @@ void main() {
         stdout,
         [
           path.join('flutter_puby_test', 'example'),
-          'Resolved dependencies for'
+          'Resolved dependencies for',
         ],
       );
       // The pub get should NOT run in the example app
@@ -43,7 +43,7 @@ void main() {
         stdout,
         [
           path.join('flutter_puby_test', 'example'),
-          'flutter pub get --offline'
+          'flutter pub get --offline',
         ],
         matches: false,
       );
