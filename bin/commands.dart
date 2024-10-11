@@ -143,7 +143,7 @@ extension ProjectCommandExtension on ProjectCommand {
     stopwatch.stop();
 
     // Skip error handling if the command was successful or this is a raw command
-    if (raw || exitCode == 0) {
+    if (raw || exitCode == ExitCode.success.code) {
       print(
         green.wrap(
           'Ran "$argString" in $pathString (${stopwatch.prettyPrint()})',
