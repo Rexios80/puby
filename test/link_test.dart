@@ -8,7 +8,7 @@ import 'test_utils.dart';
 
 void main() {
   test('puby link', () async {
-    final result = await testCommand(['link']);
+    final result = await testCommand(['link'], debug: true);
     final stdout = result.stdout;
 
     expect(result.exitCode, ExitCode.success.code);

@@ -7,7 +7,7 @@ const argString = 'pub run build_runner build --delete-conflicting-outputs';
 
 void main() {
   test('[engine] gen', () async {
-    final result = await testCommand(['gen']);
+    final result = await testCommand(['gen'], debug: true);
     final stdout = result.stdout;
 
     expect(result.exitCode, isNot(ExitCode.success.code));
