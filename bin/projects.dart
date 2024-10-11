@@ -97,8 +97,7 @@ extension ProjectExtension on Project {
   }
 
   bool _defaultExclude(Command command) {
-    final isPubGetInFlutterExample = engine.isFlutter &&
-        example &&
+    final isPubGetInExample = example &&
         command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
@@ -112,9 +111,9 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInFlutterExample) {
-      // Skip flutter pub get in example projects since flutter does it anyways
-      message = 'Skipping flutter example project: $path';
+    } else if (isPubGetInExample) {
+      // Skip pub get in example projects since it happens anyways
+      message = 'Skipping example project: $path';
       skip = true;
     } else {
       message = null;
