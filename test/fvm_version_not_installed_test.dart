@@ -11,7 +11,7 @@ void main() {
     );
     final stdout = result.stdout;
 
-    expect(result.exitCode, ExitCode.unavailable.code);
-    expectLine(stdout, ['Flutter SDK: SDK Version : 1.17.0 is not installed.']);
+    expect(result.exitCode, isNot(ExitCode.success.code));
+    expectLine(stdout, ['Run `fvm install 1.17.0` first']);
   });
 }

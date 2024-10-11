@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -10,14 +11,16 @@ void main() {
     final result = await testCommand(['link']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 0);
+    expect(result.exitCode, ExitCode.success.code);
 
     // dart
     expectLine(stdout, ['dart_puby_test', 'Resolved dependencies for']);
     expectLine(stdout, ['dart_puby_test', 'dart pub get --offline']);
+    // The pub get should NOT run in the example app
     expectLine(
       stdout,
       [p.join('dart_puby_test', 'example'), 'dart pub get --offline'],
+      matches: false,
     );
 
     // flutter

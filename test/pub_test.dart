@@ -1,3 +1,4 @@
+import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -8,14 +9,15 @@ void main() {
     final result = await testCommand(['get']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 0);
+    expect(result.exitCode, ExitCode.success.code);
 
     // project in build folder
     expectLine(stdout, [p.join('build_folder_test', 'build', 'web'), 'Skip']);
 
     // dart
     expectLine(stdout, ['dart_puby_test', 'dart pub get']);
-    expectLine(stdout, [p.join('dart_puby_test', 'example'), 'dart pub get']);
+    // Default exclusion
+    expectLine(stdout, [p.join('dart_puby_test', 'example'), 'Skip']);
 
     // flutter
     expectLine(stdout, ['flutter_puby_test', 'flutter pub get']);

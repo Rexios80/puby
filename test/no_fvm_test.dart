@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
 
@@ -12,7 +13,7 @@ void main() {
     final result = await testCommand(['get', '--no-fvm']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 0);
+    expect(result.exitCode, ExitCode.success.code);
     expectLine(stdout, ['fvm_puby_test', message]);
     // Ensure the FVM Flutter version was not used
     expect(
@@ -26,7 +27,7 @@ void main() {
     final result = await testCommand(['mup', '--no-fvm']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 0);
+    expect(result.exitCode, ExitCode.success.code);
     expectLine(stdout, ['fvm_puby_test', message]);
   });
 
@@ -34,7 +35,7 @@ void main() {
     final result = await testCommand(['link', '--no-fvm']);
     final stdout = result.stdout;
 
-    expect(result.exitCode, 0);
+    expect(result.exitCode, ExitCode.success.code);
     expectLine(stdout, ['fvm_puby_test', message]);
     expectLine(stdout, [p.join('fvm_puby_test', 'example'), message]);
     expectLine(stdout, [p.join('fvm_puby_test', 'nested'), message]);

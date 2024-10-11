@@ -1,3 +1,4 @@
+import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -9,7 +10,7 @@ void main() {
     final stdout = result.stdout;
 
     // Since these projects have no tests, the command should fail
-    expect(result.exitCode, isNot(0));
+    expect(result.exitCode, isNot(ExitCode.success.code));
 
     // dart
     expectLine(stdout, ['dart_puby_test', 'flutter test --coverage']);
