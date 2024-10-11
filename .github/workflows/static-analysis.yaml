@@ -25,7 +25,10 @@ jobs:
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
           fvm install 3.10.0 --setup
           fvm install stable --setup
+          fvm global 3.10.0
+          flutter doctor
           fvm global stable
+          flutter doctor
       - name: Pub get
         run: dart pub get
       - name: Format
