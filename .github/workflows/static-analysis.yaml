@@ -29,7 +29,9 @@ jobs:
       - name: Format
         run: dart format . --set-exit-if-changed
       - name: Analyze
-        run: dart analyze
+        run: dart analyze --fatal-infos
+      - name: custom_lint
+        run: dart run custom_lint
       - name: Test
         run: dart test --timeout 120s --concurrency 1
       - name: Pana
