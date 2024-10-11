@@ -19,11 +19,12 @@ exclude:
           },
         },
       );
+      final stdout = result.stdout;
 
       // Since the code generation doesn't actually run the command should succeed
       expect(result.exitCode, ExitCode.success.code);
 
-      expectLine(result, [path.join('puby_yaml_test'), 'Skip']);
+      expectLine(stdout, [path.join('puby_yaml_test'), 'Skip']);
     });
   });
 }

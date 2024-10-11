@@ -55,7 +55,7 @@ Future<PubyProcessResult> testCommand(
   );
 }
 
-void expectLine(dynamic stdout, List<String> matchers, {bool matches = true}) {
+void expectLine(String stdout, List<String> matchers, {bool matches = true}) {
   final lines = (stdout as String).split('\n');
   expect(
     lines.any(
