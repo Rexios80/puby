@@ -8,7 +8,9 @@ import 'test_utils.dart';
 
 void main() {
   test('puby link', () async {
-    final result = await testCommand(['link'], debug: true);
+    // A pub get must be done before link will work
+    await testCommand(['get']);
+    final result = await testCommand(['link']);
     final stdout = result.stdout;
 
     expect(result.exitCode, ExitCode.success.code);
