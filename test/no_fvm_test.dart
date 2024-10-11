@@ -18,7 +18,12 @@ void main() {
     // Ensure the FVM Flutter version was not used
     expect(
       File(
-        path.join('test_resources', 'fvm_puby_test', '.dart_tool', 'version'),
+        path.join(
+          result.workingDirectory,
+          'fvm_puby_test',
+          '.dart_tool',
+          'version',
+        ),
       ).readAsStringSync(),
       isNot('3.10.0'),
     );

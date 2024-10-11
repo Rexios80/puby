@@ -9,7 +9,21 @@ final _decoder = Utf8Decoder();
 // Map of project name to file paths to file contents
 typedef TestProjects = Map<String, Map<String, String>>;
 
-Future<ProcessResult> testCommand(
+class PubyProcessResult {
+  final String workingDirectory;
+  final int exitCode;
+  final String stdout;
+  final String stderr;
+
+  PubyProcessResult(
+    this.workingDirectory,
+    this.exitCode,
+    this.stdout,
+    this.stderr,
+  );
+}
+
+Future<PubyProcessResult> testCommand(
   List<String> arguments, {
   TestProjects? projects,
   bool debug = false,
@@ -33,8 +47,8 @@ Future<ProcessResult> testCommand(
   final processStderr = process.stderr.map(handleLine).join('\n');
 
   final exitCode = await process.exitCode;
-  return ProcessResult(
-    process.pid,
+  return PubyProcessResult(
+    workingDirectory,
     exitCode,
     await processStdout,
     await processStderr,

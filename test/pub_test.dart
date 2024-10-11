@@ -21,7 +21,7 @@ void main() {
       );
     });
 
-    test('invlaid pubspec', () async {
+    test('handles invlaid pubspec', () async {
       final result = await testCommand(
         ['get'],
         projects: {
@@ -37,7 +37,7 @@ void main() {
       expectLine(stdout, ['invalid_pubspec_test', 'Error parsing pubspec']);
     });
 
-    group('exclusions', () {
+    group('excludes', () {
       test('project in build folder', () async {
         final result = await testCommand(
           ['get'],

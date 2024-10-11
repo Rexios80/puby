@@ -44,7 +44,12 @@ void main() {
     // Ensure the correct flutter version was used
     expect(
       File(
-        path.join('test_resources', 'fvm_puby_test', '.dart_tool', 'version'),
+        path.join(
+          result.workingDirectory,
+          'fvm_puby_test',
+          '.dart_tool',
+          'version',
+        ),
       ).readAsStringSync(),
       '3.10.0',
     );
