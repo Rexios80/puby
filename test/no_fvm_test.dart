@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:io/io.dart';
 import 'package:test/test.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 
 import 'test_utils.dart';
 
@@ -17,8 +17,9 @@ void main() {
     expectLine(stdout, ['fvm_puby_test', message]);
     // Ensure the FVM Flutter version was not used
     expect(
-      File('test_resources/fvm_puby_test/.dart_tool/version')
-          .readAsStringSync(),
+      File(
+        path.join('test_resources', 'fvm_puby_test', '.dart_tool', 'version'),
+      ).readAsStringSync(),
       isNot('3.10.0'),
     );
   });
@@ -37,7 +38,7 @@ void main() {
 
     expect(result.exitCode, ExitCode.success.code);
     expectLine(stdout, ['fvm_puby_test', message]);
-    expectLine(stdout, [p.join('fvm_puby_test', 'example'), message]);
-    expectLine(stdout, [p.join('fvm_puby_test', 'nested'), message]);
+    expectLine(stdout, [path.join('fvm_puby_test', 'example'), message]);
+    expectLine(stdout, [path.join('fvm_puby_test', 'nested'), message]);
   });
 }
