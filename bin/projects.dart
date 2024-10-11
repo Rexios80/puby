@@ -6,7 +6,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/command.dart';
 import 'package:puby/config.dart';
 import 'package:puby/engine.dart';
-import 'package:puby/pens.dart';
+import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
 
@@ -31,18 +31,18 @@ List<Project> findProjects() {
     final path = p.relative(absolutePath);
     final config = PubyConfig.fromProjectPath(path);
 
-    late final Pubspec? pubspec;
+    final Pubspec pubspec;
     try {
       pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
     } catch (e) {
-      print(redPen('Error parsing pubspec: $path'));
-      pubspec = null;
+      print(red.wrap('Error parsing pubspec: $path'));
+      continue;
     }
 
     final Engine engine;
     if (fvmPaths.any(absolutePath.startsWith)) {
       engine = Engine.fvm;
-    } else if (pubspec?.dependencies['flutter'] != null) {
+    } else if (pubspec.dependencies['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
@@ -91,14 +91,13 @@ extension ProjectExtension on Project {
     }
 
     if (message != null && !command.silent) {
-      print(yellowPen(message));
+      print(yellow.wrap(message));
     }
     return newEngine;
   }
 
   bool _defaultExclude(Command command) {
-    final isPubGetInFlutterExample = engine.isFlutter &&
-        example &&
+    final isPubGetInExample = example &&
         command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
@@ -112,9 +111,9 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInFlutterExample) {
-      // Skip flutter pub get in example projects since flutter does it anyways
-      message = 'Skipping flutter example project: $path';
+    } else if (isPubGetInExample) {
+      // Skip pub get in example projects since it happens anyways
+      message = 'Skipping example project: $path';
       skip = true;
     } else {
       message = null;
@@ -122,7 +121,7 @@ extension ProjectExtension on Project {
     }
 
     if (message != null && !command.silent) {
-      print(yellowPen(message));
+      print(yellow.wrap(message));
     }
     return skip;
   }
@@ -132,7 +131,7 @@ extension ProjectExtension on Project {
 
     final skip = config.excludes.any(argString.startsWith);
     if (skip && !command.silent) {
-      print(yellowPen('Skipping project with exclusion: $path'));
+      print(yellow.wrap('Skipping project with exclusion: $path'));
     }
 
     return skip;
@@ -167,7 +166,7 @@ extension ProjectExtension on Project {
       }
       return Version.parse(versionString);
     } catch (e) {
-      print(redPen('Unable to determine FVM Flutter version: $path'));
+      print(red.wrap('Unable to determine FVM Flutter version: $path'));
       return null;
     }
   }

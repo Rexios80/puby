@@ -1,3 +1,4 @@
+import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -12,7 +13,7 @@ void main() {
       final result = await testCommand(['mup']);
       final stdout = result.stdout;
 
-      expect(result.exitCode, 0);
+      expect(result.exitCode, ExitCode.success.code);
 
       // dart
       expectLine(stdout, ['dart_puby_test', '"dart $argString"']);

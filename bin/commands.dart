@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:puby/command.dart';
+import 'package:io/ansi.dart';
 import 'package:puby/engine.dart';
-import 'package:puby/pens.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
@@ -65,7 +66,7 @@ abstract class Commands {
         // hanging
         if (!command.silent) {
           print(
-            redPen(
+            red.wrap(
               'Run `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
             ),
           );
@@ -87,7 +88,7 @@ extension ProjectCommandExtension on ProjectCommand {
     if (resolved.exclude) return 0;
 
     final finalArgs = [
-      if (!raw) ...resolved.engine.args,
+      if (!raw) ...resolved.engine.prefixArgs,
       ...args,
     ];
 
@@ -95,7 +96,7 @@ extension ProjectCommandExtension on ProjectCommand {
     final pathString =
         resolved.path == '.' ? 'current directory' : resolved.path;
     if (!silent) {
-      print(greenPen('Running "$argString" in $pathString...'));
+      print(green.wrap('Running "$argString" in $pathString...'));
     }
 
     final process = await Process.start(
@@ -124,12 +125,12 @@ extension ProjectCommandExtension on ProjectCommand {
         .map(_decoder.convert)
         .listen((line) {
       if (!silent) {
-        stderr.write(redPen(line));
+        stderr.write(red.wrap(line));
       }
       err.add(line);
     }).asFuture();
 
-    final processExitCode = await process.exitCode;
+    final exitCode = await process.exitCode;
 
     if (!killed) {
       // If we do not wait for these streams to finish, output could end up
@@ -140,38 +141,20 @@ extension ProjectCommandExtension on ProjectCommand {
     }
 
     stopwatch.stop();
+
     // Skip error handling if the command was successful or this is a raw command
-    if (raw || processExitCode == 0) {
+    if (raw || exitCode == ExitCode.success.code) {
       print(
-        greenPen(
+        green.wrap(
           'Ran "$argString" in $pathString (${stopwatch.prettyPrint()})',
         ),
       );
-
-      return processExitCode;
-    }
-
-    if (err.any(
-      (e) => e.contains(
-        'Flutter users should run `flutter pub get` instead of `dart pub get`.',
-      ),
-    )) {
-      // If a project doesn't explicitly depend on flutter, it is not possible
-      // to know if it's dependencies require flutter. So retry if that's the
-      // reason for failure.
-      print(yellowPen('Retrying with "flutter" engine'));
-      return runInProject(resolved.copyWith(engine: Engine.flutter));
-    }
-
-    final unknownSubcommandMatch =
-        RegExp(r'Could not find a subcommand named "(.+?)" for ".+? pub"\.')
-            .firstMatch(err.join('\n'));
-    if (unknownSubcommandMatch != null) {
+    } else if (exitCode == ExitCode.usage.code) {
       // Do not attempt to run in other projects if the command is unknown
-      print(redPen('Unknown command: ${unknownSubcommandMatch[1]}'));
-      exit(1);
+      print(red.wrap('Unknown command. Exiting...'));
+      exit(exitCode);
     }
 
-    return processExitCode;
+    return exitCode;
   }
 }
