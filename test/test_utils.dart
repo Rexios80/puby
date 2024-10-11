@@ -56,7 +56,7 @@ Future<PubyProcessResult> testCommand(
 }
 
 void expectLine(String stdout, List<String> matchers, {bool matches = true}) {
-  final lines = (stdout as String).split('\n');
+  final lines = stdout.split('\n');
   expect(
     lines.any(
       (line) =>
