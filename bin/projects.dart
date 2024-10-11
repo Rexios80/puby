@@ -31,18 +31,18 @@ List<Project> findProjects() {
     final path = p.relative(absolutePath);
     final config = PubyConfig.fromProjectPath(path);
 
-    late final Pubspec? pubspec;
+    final Pubspec pubspec;
     try {
       pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
     } catch (e) {
       print(red.wrap('Error parsing pubspec: $path'));
-      pubspec = null;
+      continue;
     }
 
     final Engine engine;
     if (fvmPaths.any(absolutePath.startsWith)) {
       engine = Engine.fvm;
-    } else if (pubspec?.dependencies['flutter'] != null) {
+    } else if (pubspec.dependencies['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
