@@ -27,13 +27,13 @@ jobs:
       - name: Pub get
         run: dart pub get
       - name: Format
-        run: dart format . --set-exit-if-changed
+        run: dart format --set-exit-if-changed .
       - name: Analyze
         run: dart analyze --fatal-infos
       - name: custom_lint
         run: dart run custom_lint
       - name: Test
-        run: dart test --timeout 120s --concurrency 1
+        run: dart test --timeout 120s
       - name: Pana
         run: |
           dart pub global activate pana
