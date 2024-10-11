@@ -12,6 +12,7 @@ import 'package:puby/time.dart';
 
 import 'commands.dart';
 import 'projects.dart';
+import 'fvm.dart';
 
 const help = '''
 Commands:
@@ -55,6 +56,10 @@ void main(List<String> arguments) async {
   }
 
   print(green.wrap('Found ${projects.length} projects\n'));
+
+  if (projects.any((e) => e.engine == Engine.fvm)) {
+    fvmCheck();
+  }
 
   final firstArg = arguments.first;
   final convenienceCommand = Commands.convenience[firstArg];
