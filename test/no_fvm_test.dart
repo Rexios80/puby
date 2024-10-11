@@ -9,41 +9,43 @@ import 'test_utils.dart';
 const message = 'Project uses FVM, but FVM support is disabled';
 
 void main() {
-  test('--no-fvm', () async {
-    final result = await testCommand(['get', '--no-fvm']);
-    final stdout = result.stdout;
+  group('--no-fvm', () {
+    test('on pub get', () async {
+      final result = await testCommand(['get', '--no-fvm']);
+      final stdout = result.stdout;
 
-    expect(result.exitCode, ExitCode.success.code);
-    expectLine(stdout, ['fvm_puby_test', message]);
-    // Ensure the FVM Flutter version was not used
-    expect(
-      File(
-        path.join(
-          result.workingDirectory,
-          'fvm_puby_test',
-          '.dart_tool',
-          'version',
-        ),
-      ).readAsStringSync(),
-      isNot('3.10.0'),
-    );
-  });
+      expect(result.exitCode, ExitCode.success.code);
+      expectLine(stdout, ['fvm_puby_test', message]);
+      // Ensure the FVM Flutter version was not used
+      expect(
+        File(
+          path.join(
+            result.workingDirectory,
+            'fvm_puby_test',
+            '.dart_tool',
+            'version',
+          ),
+        ).readAsStringSync(),
+        isNot('3.10.0'),
+      );
+    });
 
-  test('--no-fvm on convenience command', () async {
-    final result = await testCommand(['mup', '--no-fvm']);
-    final stdout = result.stdout;
+    test('on convenience command', () async {
+      final result = await testCommand(['mup', '--no-fvm']);
+      final stdout = result.stdout;
 
-    expect(result.exitCode, ExitCode.success.code);
-    expectLine(stdout, ['fvm_puby_test', message]);
-  });
+      expect(result.exitCode, ExitCode.success.code);
+      expectLine(stdout, ['fvm_puby_test', message]);
+    });
 
-  test('--no-fvm on link command', () async {
-    final result = await testCommand(['link', '--no-fvm']);
-    final stdout = result.stdout;
+    test('on link command', () async {
+      final result = await testCommand(['link', '--no-fvm']);
+      final stdout = result.stdout;
 
-    expect(result.exitCode, ExitCode.success.code);
-    expectLine(stdout, ['fvm_puby_test', message]);
-    expectLine(stdout, [path.join('fvm_puby_test', 'example'), message]);
-    expectLine(stdout, [path.join('fvm_puby_test', 'nested'), message]);
+      expect(result.exitCode, ExitCode.success.code);
+      expectLine(stdout, ['fvm_puby_test', message]);
+      expectLine(stdout, [path.join('fvm_puby_test', 'example'), message]);
+      expectLine(stdout, [path.join('fvm_puby_test', 'nested'), message]);
+    });
   });
 }
