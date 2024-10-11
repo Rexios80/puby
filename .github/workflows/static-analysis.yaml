@@ -26,9 +26,9 @@ jobs:
           fvm install 3.10.0 --setup
           fvm install stable --setup
           fvm global 3.10.0
-          flutter doctor
+          fvm flutter doctor
           fvm global stable
-          flutter doctor
+          fvm flutter doctor
       - name: Pub get
         run: dart pub get
       - name: Format
