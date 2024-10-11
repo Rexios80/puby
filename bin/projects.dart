@@ -6,7 +6,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/command.dart';
 import 'package:puby/config.dart';
 import 'package:puby/engine.dart';
-import 'package:puby/pens.dart';
+import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
 
@@ -35,7 +35,7 @@ List<Project> findProjects() {
     try {
       pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
     } catch (e) {
-      print(redPen('Error parsing pubspec: $path'));
+      print(red.wrap('Error parsing pubspec: $path'));
       pubspec = null;
     }
 
@@ -91,7 +91,7 @@ extension ProjectExtension on Project {
     }
 
     if (message != null && !command.silent) {
-      print(yellowPen(message));
+      print(yellow.wrap(message));
     }
     return newEngine;
   }
@@ -122,7 +122,7 @@ extension ProjectExtension on Project {
     }
 
     if (message != null && !command.silent) {
-      print(yellowPen(message));
+      print(yellow.wrap(message));
     }
     return skip;
   }
@@ -132,7 +132,7 @@ extension ProjectExtension on Project {
 
     final skip = config.excludes.any(argString.startsWith);
     if (skip && !command.silent) {
-      print(yellowPen('Skipping project with exclusion: $path'));
+      print(yellow.wrap('Skipping project with exclusion: $path'));
     }
 
     return skip;
@@ -167,7 +167,7 @@ extension ProjectExtension on Project {
       }
       return Version.parse(versionString);
     } catch (e) {
-      print(redPen('Unable to determine FVM Flutter version: $path'));
+      print(red.wrap('Unable to determine FVM Flutter version: $path'));
       return null;
     }
   }

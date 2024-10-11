@@ -1,17 +1,38 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
 
+final _decoder = Utf8Decoder();
+
 Future<ProcessResult> testCommand(
   List<String> arguments, {
   String workingDirectory = 'test_resources',
-}) {
+  bool debug = false,
+}) async {
   final levels = workingDirectory.split('/').length;
   final root = '../' * levels;
-  return Process.run(
+  final process = await Process.start(
     'dart',
     ['${root}bin/puby.dart', ...arguments],
     workingDirectory: workingDirectory,
+  );
+
+  String handleLine(dynamic line) {
+    final decoded = _decoder.convert(line);
+    if (debug) stdout.write(decoded);
+    return decoded;
+  }
+
+  final processStdout = process.stdout.map(handleLine).join('\n');
+  final processStderr = process.stderr.map(handleLine).join('\n');
+
+  final exitCode = await process.exitCode;
+  return ProcessResult(
+    process.pid,
+    exitCode,
+    await processStdout,
+    await processStderr,
   );
 }
 

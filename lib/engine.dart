@@ -13,7 +13,7 @@ enum Engine {
   bool get isFlutter => {flutter, fvm}.contains(this);
 
   /// The arguments required to call the engine
-  List<String> get args {
+  List<String> get prefixArgs {
     switch (this) {
       case Engine.dart:
       case Engine.flutter:

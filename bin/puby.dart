@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
+import 'package:io/io.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
-import 'package:puby/pens.dart';
+import 'package:puby/engine.dart';
+import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
@@ -30,7 +32,7 @@ void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check();
   if (newVersion != null) {
     print(
-      yellowPen(
+      yellow.wrap(
         'There is an update available: $newVersion. Run `dart pub global activate puby` to update.',
       ),
     );
@@ -41,18 +43,18 @@ void main(List<String> arguments) async {
       arguments.first == '--help';
 
   if (showHelp) {
-    print(magentaPen(help));
-    exit(1);
+    print(magenta.wrap(help));
+    exit(ExitCode.success.code);
   }
 
   print('Finding projects...');
   final projects = findProjects();
   if (projects.isEmpty) {
-    print(redPen('No projects found in the current directory'));
-    exit(1);
+    print(red.wrap('No projects found in the current directory'));
+    exit(ExitCode.usage.code);
   }
 
-  print(greenPen('Found ${projects.length} projects\n'));
+  print(green.wrap('Found ${projects.length} projects\n'));
 
   final firstArg = arguments.first;
   final convenienceCommand = Commands.convenience[firstArg];
@@ -121,13 +123,13 @@ Future<int> runInAllProjects(
   final time = stopwatch.prettyPrint();
 
   if (exitCode != 0) {
-    print(redPen('One or more commands failed ($time)'));
-    print(redPen('Failures:'));
+    print(red.wrap('One or more commands failed ($time)'));
+    print(red.wrap('Failures:'));
     for (final failure in failures) {
-      print(redPen('  $failure'));
+      print(red.wrap('  $failure'));
     }
   } else {
-    print(greenPen('All commands succeeded ($time)'));
+    print(green.wrap('All commands succeeded ($time)'));
   }
 
   print('');
