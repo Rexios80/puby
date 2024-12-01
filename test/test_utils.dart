@@ -28,7 +28,7 @@ Future<PubyProcessResult> testCommand(
   TestProjects? projects,
   bool debug = false,
 }) async {
-  final workingDirectory = createTestResources(projects ?? defaultProjects);
+  final workingDirectory = createTestResources(projects ?? defaultProjects());
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
 
   final process = await Process.start(
@@ -127,31 +127,70 @@ String fvmrc(String version) => '''
   "flavors": {}
 }''';
 
-final dartProject = {
-  'dart_puby_test': {
-    'pubspec.yaml': pubspec('dart_puby_test'),
-    'example/pubspec.yaml': pubspec('example'),
-  },
-};
+TestProjects dartProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'dart_puby_test': {
+        'pubspec.yaml': pubspec(
+          'dart_puby_test',
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example'),
+      },
+    };
 
-final flutterProject = {
-  'flutter_puby_test': {
-    'pubspec.yaml': pubspec('flutter_puby_test', flutter: true),
-    'example/pubspec.yaml': pubspec('example', flutter: true),
-  },
-};
+TestProjects flutterProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'flutter_puby_test': {
+        'pubspec.yaml': pubspec(
+          'flutter_puby_test',
+          flutter: true,
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example', flutter: true),
+      },
+    };
 
-final fvmProject = {
-  'fvm_puby_test': {
-    'pubspec.yaml': pubspec('fvm_puby_test', flutter: true),
-    'example/pubspec.yaml': pubspec('example', flutter: true),
-    'nested/pubspec.yaml': pubspec('nested', flutter: true),
-    '.fvmrc': fvmrc('3.10.0'),
-  },
-};
+TestProjects fvmProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'fvm_puby_test': {
+        'pubspec.yaml': pubspec(
+          'fvm_puby_test',
+          flutter: true,
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example', flutter: true),
+        'nested/pubspec.yaml': pubspec('nested', flutter: true),
+        '.fvmrc': fvmrc('3.10.0'),
+      },
+    };
 
-final defaultProjects = {
-  ...dartProject,
-  ...flutterProject,
-  ...fvmProject,
-};
+TestProjects defaultProjects({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      ...dartProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+      ...flutterProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+      ...fvmProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+    };

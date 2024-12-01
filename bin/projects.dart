@@ -9,6 +9,7 @@ import 'package:puby/engine.dart';
 import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 import 'commands.dart';
 
@@ -51,7 +52,16 @@ List<Project> findProjects() {
         .split(Platform.pathSeparator)
         .any((e) => e.length > 1 && e.startsWith('.'));
 
-    final hasBuildRunner = pubspec.devDependencies.containsKey('build_runner');
+    var dependencies = <String>{};
+    try {
+      final lockFile = File(p.join(absolutePath, 'pubspec.lock'));
+      final lockFileContent = lockFile.readAsStringSync();
+      final packagesMap = loadYaml(lockFileContent)['packages'] as YamlMap;
+      dependencies = packagesMap.keys.cast<String>().toSet();
+    } catch (e) {
+      // This is handled elsewhere
+    }
+
     final fvm = fvmPaths.any(absolutePath.startsWith);
 
     final project = Project(
@@ -60,7 +70,7 @@ List<Project> findProjects() {
       config: config,
       example: example,
       hidden: hidden,
-      hasBuildRunner: hasBuildRunner,
+      dependencies: dependencies,
       fvm: fvm,
     );
 
@@ -105,9 +115,14 @@ extension ProjectExtension on Project {
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
 
-    final isBuildRunner = command.args.length >= 2 &&
-        command.args[0] == 'run' &&
-        command.args[1] == 'build_runner';
+    final String? dartRunPackage;
+    if (command.args.length >= 3 &&
+        command.args[0] == 'dart' &&
+        command.args[1] == 'run') {
+      dartRunPackage = command.args[2];
+    } else {
+      dartRunPackage = null;
+    }
 
     final bool skip;
     final String? message;
@@ -122,9 +137,10 @@ extension ProjectExtension on Project {
       // Skip pub get in example projects since it happens anyways
       message = 'Skipping example project: $path';
       skip = true;
-    } else if (isBuildRunner && !hasBuildRunner) {
-      // Skip build_runner commands if the project doesn't use build_runner
-      message = 'Skipping project without build_runner: $path';
+    } else if (dartRunPackage != null &&
+        !dependencies.contains(dartRunPackage)) {
+      // Skip dart run commands if the project doesn't have the package
+      message = 'Skipping project without $dartRunPackage dependency: $path';
       skip = true;
     } else {
       message = null;

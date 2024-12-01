@@ -75,16 +75,16 @@ void main() {
         }
 
         test('dart', () async {
-          await skipsExample(dartProject);
+          await skipsExample(dartProject());
         });
 
         test('flutter', () async {
-          await skipsExample(flutterProject);
+          await skipsExample(flutterProject());
         });
 
         test('fvm', () async {
           await skipsExample(
-            fvmProject,
+            fvmProject(),
             // This is different because of the older Flutter version
             match: 'Resolving dependencies in ./example...',
           );

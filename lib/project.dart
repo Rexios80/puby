@@ -21,8 +21,8 @@ class Project {
   /// If this project should be excluded from command execution
   final bool exclude;
 
-  /// If this project uses build_runner
-  final bool hasBuildRunner;
+  /// All of dependencies for this project including transitive
+  final Set<String> dependencies;
 
   /// If this project is configured with FVM
   final bool fvm;
@@ -41,7 +41,7 @@ class Project {
     required this.example,
     required this.hidden,
     this.exclude = false,
-    required this.hasBuildRunner,
+    required this.dependencies,
     required this.fvm,
   });
 
@@ -54,7 +54,7 @@ class Project {
       example: example,
       hidden: hidden,
       exclude: exclude ?? this.exclude,
-      hasBuildRunner: hasBuildRunner,
+      dependencies: dependencies,
       fvm: fvm,
     );
   }
