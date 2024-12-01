@@ -68,7 +68,7 @@ Benchmark setup:
 
 ## Notes on `puby gen` and `puby run`
 
-Commands that map to `dart run [package]` will not run in projects that do not depend on the required package. For example, `puby gen` will skip projects that do not depend on `build_runner`.
+Commands that map to `dart run [package]` will not run in projects that do not depend on the required package. For example, `puby gen` will skip projects that do not depend on `build_runner`. Transitive dependencies are included in this check.
 
 ## Notes on `puby exec`
 
