@@ -15,11 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-      - name: Cache FVM Flutter versions
-        uses: actions/cache@v4
-        with:
-          path: ~/.fvm/versions
-          key: fvm-versions
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install FVM
