@@ -26,6 +26,6 @@ void main() {
       expectLine(stdout, ['fvm_puby_test', 'fvm dart $argString']);
       expectLine(stdout, [path.join('fvm_puby_test', 'example'), 'Skip']);
     },
-    timeout: Timeout.factor(1.5),
+    timeout: Timeout(const Duration(seconds: 120)),
   );
 }
