@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 
@@ -39,7 +40,8 @@ Future<PubyProcessResult> testCommand(
       workingDirectory: workingDirectory,
     );
     if (result.exitCode != 0) {
-      throw Exception(result.stderr);
+      print(result.stdout);
+      exit(ExitCode.software.code);
     }
   }
 
