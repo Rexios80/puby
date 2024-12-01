@@ -9,6 +9,7 @@ import 'package:puby/engine.dart';
 import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 import 'commands.dart';
 
@@ -40,9 +41,7 @@ List<Project> findProjects() {
     }
 
     final Engine engine;
-    if (fvmPaths.any(absolutePath.startsWith)) {
-      engine = Engine.fvm;
-    } else if (pubspec.dependencies['flutter'] != null) {
+    if (pubspec.dependencies['flutter'] != null) {
       engine = Engine.flutter;
     } else {
       engine = Engine.dart;
@@ -53,12 +52,26 @@ List<Project> findProjects() {
         .split(Platform.pathSeparator)
         .any((e) => e.length > 1 && e.startsWith('.'));
 
+    var dependencies = <String>{};
+    try {
+      final lockFile = File(p.join(absolutePath, 'pubspec.lock'));
+      final lockFileContent = lockFile.readAsStringSync();
+      final packagesMap = loadYaml(lockFileContent)['packages'] as YamlMap;
+      dependencies = packagesMap.keys.cast<String>().toSet();
+    } catch (e) {
+      // This is handled elsewhere
+    }
+
+    final fvm = fvmPaths.any(absolutePath.startsWith);
+
     final project = Project(
       engine: engine,
       path: path,
       config: config,
       example: example,
       hidden: hidden,
+      dependencies: dependencies,
+      fvm: fvm,
     );
 
     projects.add(project);
@@ -68,23 +81,21 @@ List<Project> findProjects() {
 }
 
 extension ProjectExtension on Project {
-  Engine _resolveEngine(Command command) {
-    final isCleanCommand = command.args[0] == 'clean';
+  Engine _resolveEngine(ProjectCommand command) {
+    final commandEngine = command.engine;
     final isTestCoverageCommand = command.args.length >= 2 &&
         command.args[0] == 'test' &&
-        command.args[1] == '--coverage';
+        command.args.contains('--coverage');
 
     final Engine newEngine;
     final String? message;
-    if (isCleanCommand && !engine.isFlutter) {
-      newEngine = Engine.flutter;
-      message = 'Overriding engine to "flutter" for "clean" command';
-    } else if (isTestCoverageCommand && !engine.isFlutter) {
+    if (commandEngine != null && engine != commandEngine) {
+      newEngine = commandEngine;
+      message =
+          'Overriding engine to "${commandEngine.name}" for "${command.args.first}" command';
+    } else if (isTestCoverageCommand && engine != Engine.flutter) {
       newEngine = Engine.flutter;
       message = 'Overriding engine to "flutter" for "test --coverage" command';
-    } else if (engine == Engine.fvm && command.noFvm) {
-      newEngine = Engine.flutter;
-      message = 'Project uses FVM, but FVM support is disabled: $path';
     } else {
       newEngine = engine;
       message = null;
@@ -102,6 +113,13 @@ extension ProjectExtension on Project {
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
 
+    final String? dartRunPackage;
+    if (command.args.length >= 2 && command.args[0] == 'run') {
+      dartRunPackage = command.args[1];
+    } else {
+      dartRunPackage = null;
+    }
+
     final bool skip;
     final String? message;
     if (hidden) {
@@ -114,6 +132,11 @@ extension ProjectExtension on Project {
     } else if (isPubGetInExample) {
       // Skip pub get in example projects since it happens anyways
       message = 'Skipping example project: $path';
+      skip = true;
+    } else if (dartRunPackage != null &&
+        !dependencies.contains(dartRunPackage)) {
+      // Skip dart run commands if the project doesn't have the package
+      message = 'Skipping project without $dartRunPackage dependency: $path';
       skip = true;
     } else {
       message = null;
@@ -138,13 +161,29 @@ extension ProjectExtension on Project {
   }
 
   Project resolveWithCommand(Command command) {
-    final resolvedEngine = _resolveEngine(command);
+    final Engine resolvedEngine;
+    if (command is ProjectCommand) {
+      resolvedEngine = _resolveEngine(command);
+    } else {
+      resolvedEngine = engine;
+    }
     final exclude = _defaultExclude(command) || _explicitExclude(command);
-    return copyWith(engine: resolvedEngine, exclude: exclude);
+
+    if (fvm && command.noFvm && !command.silent) {
+      print(
+        yellow.wrap('Project uses FVM, but FVM support is disabled: $path'),
+      );
+    }
+
+    return copyWith(
+      engine: resolvedEngine,
+      exclude: exclude,
+      fvm: fvm && !command.noFvm,
+    );
   }
 
   Future<Version?> getFlutterVersionOverride(Command command) async {
-    if (engine != Engine.fvm || command.noFvm) return null;
+    if (!fvm || command.noFvm) return null;
 
     try {
       // TODO: Do this a better way (https://github.com/leoafarias/fvm/issues/710)

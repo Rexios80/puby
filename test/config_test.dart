@@ -11,7 +11,10 @@ void main() {
         ['gen'],
         projects: {
           'puby_yaml_test': {
-            'pubspec.yaml': pubspec('puby_yaml_test'),
+            'pubspec.yaml': pubspec(
+              'puby_yaml_test',
+              devDependencies: {'build_runner: any'},
+            ),
             'puby.yaml': '''
 exclude:
   - pub run build_runner

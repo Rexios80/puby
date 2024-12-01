@@ -26,10 +26,20 @@ class PubyProcessResult {
 Future<PubyProcessResult> testCommand(
   List<String> arguments, {
   TestProjects? projects,
+  bool link = false,
   bool debug = false,
 }) async {
-  final workingDirectory = createTestResources(projects ?? defaultProjects);
+  final workingDirectory = createTestResources(projects ?? defaultProjects());
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
+
+  if (link) {
+    // puby link was not working in the test environment
+    await Process.run(
+      'dart',
+      [puby, 'get'],
+      workingDirectory: workingDirectory,
+    );
+  }
 
   final process = await Process.start(
     'dart',
@@ -82,7 +92,12 @@ String createTestResources(Map<String, Map<String, String>> projects) {
   return directory.path;
 }
 
-String pubspec(String name, {bool flutter = false}) {
+String pubspec(
+  String name, {
+  bool flutter = false,
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) {
   var pubspec = '''
 name: $name
 
@@ -90,12 +105,27 @@ environment:
   sdk: ^3.0.0
 ''';
 
+  if (flutter || dependencies.isNotEmpty) {
+    pubspec += '\ndependencies:\n';
+  }
+
   if (flutter) {
     pubspec += '''
-dependencies:
   flutter:
     sdk: flutter
 ''';
+  }
+
+  for (final dependency in dependencies) {
+    pubspec += '  $dependency\n';
+  }
+
+  if (devDependencies.isNotEmpty) {
+    pubspec += '\ndev_dependencies:\n';
+  }
+
+  for (final dependency in devDependencies) {
+    pubspec += '  $dependency\n';
   }
 
   return pubspec;
@@ -107,31 +137,70 @@ String fvmrc(String version) => '''
   "flavors": {}
 }''';
 
-final dartProject = {
-  'dart_puby_test': {
-    'pubspec.yaml': pubspec('dart_puby_test'),
-    'example/pubspec.yaml': pubspec('example'),
-  },
-};
+TestProjects dartProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'dart_puby_test': {
+        'pubspec.yaml': pubspec(
+          'dart_puby_test',
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example'),
+      },
+    };
 
-final flutterProject = {
-  'flutter_puby_test': {
-    'pubspec.yaml': pubspec('flutter_puby_test', flutter: true),
-    'example/pubspec.yaml': pubspec('example', flutter: true),
-  },
-};
+TestProjects flutterProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'flutter_puby_test': {
+        'pubspec.yaml': pubspec(
+          'flutter_puby_test',
+          flutter: true,
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example', flutter: true),
+      },
+    };
 
-final fvmProject = {
-  'fvm_puby_test': {
-    'pubspec.yaml': pubspec('fvm_puby_test', flutter: true),
-    'example/pubspec.yaml': pubspec('example', flutter: true),
-    'nested/pubspec.yaml': pubspec('nested', flutter: true),
-    '.fvmrc': fvmrc('3.10.0'),
-  },
-};
+TestProjects fvmProject({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      'fvm_puby_test': {
+        'pubspec.yaml': pubspec(
+          'fvm_puby_test',
+          flutter: true,
+          dependencies: dependencies,
+          devDependencies: devDependencies,
+        ),
+        'example/pubspec.yaml': pubspec('example', flutter: true),
+        'nested/pubspec.yaml': pubspec('nested', flutter: true),
+        '.fvmrc': fvmrc('3.10.0'),
+      },
+    };
 
-final defaultProjects = {
-  ...dartProject,
-  ...flutterProject,
-  ...fvmProject,
-};
+TestProjects defaultProjects({
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) =>
+    {
+      ...dartProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+      ...flutterProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+      ...fvmProject(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+      ),
+    };

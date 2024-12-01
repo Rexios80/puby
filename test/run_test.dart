@@ -4,26 +4,24 @@ import 'package:path/path.dart' as path;
 
 import 'test_utils.dart';
 
-const argString = 'run build_runner build --delete-conflicting-outputs';
-
 void main() {
   test(
-    'puby gen',
+    'puby run',
     () async {
       final result = await testCommand(
-        ['gen'],
-        projects: defaultProjects(devDependencies: {'build_runner: any'}),
+        ['run', 'custom_lint'],
+        projects: defaultProjects(devDependencies: {'custom_lint: any'}),
         link: true,
       );
       final stdout = result.stdout;
 
       expect(result.exitCode, ExitCode.success.code);
 
-      expectLine(stdout, ['dart_puby_test', 'dart $argString']);
+      expectLine(stdout, ['dart_puby_test', 'dart run custom_lint']);
       expectLine(stdout, [path.join('dart_puby_test', 'example'), 'Skip']);
-      expectLine(stdout, ['flutter_puby_test', 'dart $argString']);
+      expectLine(stdout, ['flutter_puby_test', 'dart run custom_lint']);
       expectLine(stdout, [path.join('flutter_puby_test', 'example'), 'Skip']);
-      expectLine(stdout, ['fvm_puby_test', 'fvm dart $argString']);
+      expectLine(stdout, ['fvm_puby_test', 'fvm dart run custom_lint']);
       expectLine(stdout, [path.join('fvm_puby_test', 'example'), 'Skip']);
     },
     timeout: Timeout(const Duration(seconds: 120)),

@@ -12,7 +12,8 @@ import 'link.dart';
 import 'projects.dart';
 
 abstract class Commands {
-  static final clean = ProjectCommand(['clean'], parallel: true);
+  static final clean =
+      ProjectCommand(['clean'], parallel: true, engine: Engine.flutter);
   static final link = GlobalCommand(
     ['link'],
     (command, projects) =>
@@ -23,13 +24,18 @@ abstract class Commands {
 
   static final convenience = <String, List<Command>>{
     'gen': [
-      ProjectCommand([
-        'pub',
-        'run',
-        'build_runner',
-        'build',
-        '--delete-conflicting-outputs',
-      ]),
+      ProjectCommand(
+        [
+          'run',
+          'build_runner',
+          'build',
+          '--delete-conflicting-outputs',
+        ],
+        engine: Engine.dart,
+      ),
+    ],
+    'run': [
+      ProjectCommand(['run'], engine: Engine.dart),
     ],
     'test': [
       ProjectCommand(['test']),
@@ -57,7 +63,7 @@ abstract class Commands {
 
   /// Check if we should continue after this line is received
   static bool shouldKill(Project project, Command command, String line) {
-    if (project.engine == Engine.fvm) {
+    if (project.fvm) {
       final flutterVersionNotInstalledMatch =
           RegExp(r'Flutter SDK: SDK Version : (.+?) is not installed\.')
               .firstMatch(line);
@@ -88,7 +94,7 @@ extension ProjectCommandExtension on ProjectCommand {
     if (resolved.exclude) return 0;
 
     final finalArgs = [
-      if (!raw) ...resolved.engine.prefixArgs,
+      if (!raw) ...resolved.prefixArgs,
       ...args,
     ];
 

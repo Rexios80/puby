@@ -12,19 +12,20 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 - Combined exit code for use in CI
 - Per-project command exclusions
 
-| Command               | Equivalent                                                          |
-| --------------------- | ------------------------------------------------------------------- |
-| `puby [args]`         | `[engine] pub [args]`                                               |
-| `puby link`           | Warm the pub cache and run `[engine] pub get --offline` (see below) |
-| `puby gen`            | `[engine] pub run build_runner build --delete-conflicting-outputs`  |
-| `puby test`           | `[engine] test`                                                     |
-| `puby clean`          | `flutter clean`                                                     |
-| `puby mup`            | `[engine] pub upgrade --major-versions`                             |
-| `puby reset`          | `puby clean && puby get`                                            |
-| `puby relink`         | `puby clean && puby link`                                           |
-| `puby exec [command]` | `command`                                                           |
+| Command               | Equivalent                                                 |
+| --------------------- | ---------------------------------------------------------- |
+| `puby [args]`         | `[engine] pub [args]`                                      |
+| `puby link`           | Warm the pub cache and run `[engine] pub get --offline`    |
+| `puby gen`            | `dart run build_runner build --delete-conflicting-outputs` |
+| `puby run`            | `dart run`                                                 |
+| `puby test`           | `[engine] test`                                            |
+| `puby clean`          | `flutter clean`                                            |
+| `puby mup`            | `[engine] pub upgrade --major-versions`                    |
+| `puby reset`          | `puby clean && puby get`                                   |
+| `puby relink`         | `puby clean && puby link`                                  |
+| `puby exec [command]` | `command`                                                  |
 
-For projects configured with FVM, `fvm flutter` is used. FVM support can be disabled with the `--no-fvm` option.
+For projects configured with FVM, `fvm flutter` and `fvm dart` are used. FVM support can be disabled with the `--no-fvm` option.
 
 ## Use as an executable
 
@@ -64,6 +65,10 @@ Benchmark setup:
 - Gigabit internet connection
 - Run `puby clean && dart pub cache clean` before each run
 - `melos bootstrap` is run with a [custom branch of flutter/packages](https://github.com/Rexios80/packages_flutter/tree/puby_benchmarking) with the required setup
+
+## Notes on `puby gen` and `puby run`
+
+Commands that map to `dart run [package]` will not run in projects that do not depend on the required package. For example, `puby gen` will skip projects that do not depend on `build_runner`. Transitive dependencies are included in this check, however a `pub get` must be run in the project at least once for the check to work.
 
 ## Notes on `puby exec`
 

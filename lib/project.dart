@@ -21,6 +21,18 @@ class Project {
   /// If this project should be excluded from command execution
   final bool exclude;
 
+  /// All of dependencies for this project including transitive
+  final Set<String> dependencies;
+
+  /// If this project is configured with FVM
+  final bool fvm;
+
+  /// The arguments to prefix to any commands run in this project
+  List<String> get prefixArgs => [
+        if (fvm) 'fvm',
+        engine.name,
+      ];
+
   /// Create a [Project]
   Project({
     required this.engine,
@@ -29,10 +41,12 @@ class Project {
     required this.example,
     required this.hidden,
     this.exclude = false,
+    required this.dependencies,
+    required this.fvm,
   });
 
   /// Create a copy of this [Project] with the specified changes
-  Project copyWith({Engine? engine, bool? exclude}) {
+  Project copyWith({Engine? engine, bool? exclude, bool? fvm}) {
     return Project(
       engine: engine ?? this.engine,
       path: path,
@@ -40,6 +54,8 @@ class Project {
       example: example,
       hidden: hidden,
       exclude: exclude ?? this.exclude,
+      dependencies: dependencies,
+      fvm: fvm ?? this.fvm,
     );
   }
 }
