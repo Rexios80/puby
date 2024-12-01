@@ -1,5 +1,6 @@
 import 'package:io/io.dart';
 import 'package:test/test.dart';
+import 'package:path/path.dart' as path;
 
 import 'test_utils.dart';
 
@@ -19,11 +20,11 @@ void main() {
       expect(result.exitCode, ExitCode.success.code);
 
       expectLine(stdout, ['dart_puby_test', 'dart $argString']);
-      expectLine(stdout, ['dart_puby_test/example', 'Skip']);
+      expectLine(stdout, [path.join('dart_puby_test', 'example'), 'Skip']);
       expectLine(stdout, ['flutter_puby_test', 'dart $argString']);
-      expectLine(stdout, ['flutter_puby_test/example', 'Skip']);
+      expectLine(stdout, [path.join('flutter_puby_test', 'example'), 'Skip']);
       expectLine(stdout, ['fvm_puby_test', 'fvm dart $argString']);
-      expectLine(stdout, ['fvm_puby_test/example', 'Skip']);
+      expectLine(stdout, [path.join('fvm_puby_test', 'example'), 'Skip']);
     },
     timeout: Timeout.factor(1.5),
   );
