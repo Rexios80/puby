@@ -7,12 +7,12 @@ const argString = 'run build_runner build --delete-conflicting-outputs';
 
 void main() {
   test(
-    '[engine] gen',
+    'puby gen',
     () async {
       final result = await testCommand(
         ['gen'],
         projects: defaultProjects(devDependencies: {'build_runner: any'}),
-        debug: true,
+        link: true,
       );
       final stdout = result.stdout;
 

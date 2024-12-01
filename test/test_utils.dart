@@ -26,10 +26,19 @@ class PubyProcessResult {
 Future<PubyProcessResult> testCommand(
   List<String> arguments, {
   TestProjects? projects,
+  bool link = false,
   bool debug = false,
 }) async {
   final workingDirectory = createTestResources(projects ?? defaultProjects());
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
+
+  if (link) {
+    await Process.run(
+      'dart',
+      [puby, 'link'],
+      workingDirectory: workingDirectory,
+    );
+  }
 
   final process = await Process.start(
     'dart',

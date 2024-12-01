@@ -91,7 +91,8 @@ extension ProjectExtension on Project {
     final String? message;
     if (commandEngine != null) {
       newEngine = commandEngine;
-      message = 'Overriding engine to "${commandEngine.name}" for command';
+      message =
+          'Overriding engine to "${commandEngine.name}" for "${command.args.first}" command';
     } else if (isTestCoverageCommand && engine != Engine.flutter) {
       newEngine = Engine.flutter;
       message = 'Overriding engine to "flutter" for "test --coverage" command';
@@ -116,13 +117,15 @@ extension ProjectExtension on Project {
         command.args[1] == 'get';
 
     final String? dartRunPackage;
-    if (command.args.length >= 3 &&
-        command.args[0] == 'dart' &&
-        command.args[1] == 'run') {
-      dartRunPackage = command.args[2];
+    if (command.args.length >= 2 &&
+        command.args[0] == 'run') {
+      dartRunPackage = command.args[1];
     } else {
       dartRunPackage = null;
     }
+
+    print(command.args);
+    print(dartRunPackage);
 
     final bool skip;
     final String? message;
