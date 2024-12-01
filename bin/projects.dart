@@ -89,7 +89,7 @@ extension ProjectExtension on Project {
 
     final Engine newEngine;
     final String? message;
-    if (commandEngine != null) {
+    if (commandEngine != null && engine != commandEngine) {
       newEngine = commandEngine;
       message =
           'Overriding engine to "${commandEngine.name}" for "${command.args.first}" command';
