@@ -12,7 +12,6 @@ void main() {
         ['run', 'custom_lint'],
         projects: defaultProjects(devDependencies: {'custom_lint: any'}),
         link: true,
-        debug: true,
       );
       final stdout = result.stdout;
 
