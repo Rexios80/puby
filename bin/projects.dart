@@ -120,9 +120,6 @@ extension ProjectExtension on Project {
       dartRunPackage = null;
     }
 
-    print(command.args);
-    print(dartRunPackage);
-
     final bool skip;
     final String? message;
     if (hidden) {
