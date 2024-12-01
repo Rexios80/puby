@@ -35,7 +35,7 @@ Future<PubyProcessResult> testCommand(
   if (link) {
     final result = await Process.run(
       'dart',
-      [puby, 'link'],
+      [puby, 'get'],
       workingDirectory: workingDirectory,
     );
     if (result.exitCode != 0) {
