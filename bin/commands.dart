@@ -37,6 +37,9 @@ abstract class Commands {
     'run': [
       ProjectCommand(['run'], engine: Engine.dart),
     ],
+    'test': [
+      ProjectCommand(['test']),
+    ],
     'clean': [
       clean,
     ],

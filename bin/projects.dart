@@ -85,7 +85,7 @@ extension ProjectExtension on Project {
     final commandEngine = command.engine;
     final isTestCoverageCommand = command.args.length >= 2 &&
         command.args[0] == 'test' &&
-        command.args[1] == '--coverage';
+        command.args.contains('--coverage');
 
     final Engine newEngine;
     final String? message;
@@ -96,9 +96,6 @@ extension ProjectExtension on Project {
     } else if (isTestCoverageCommand && engine != Engine.flutter) {
       newEngine = Engine.flutter;
       message = 'Overriding engine to "flutter" for "test --coverage" command';
-    } else if (fvm && command.noFvm) {
-      newEngine = Engine.flutter;
-      message = 'Project uses FVM, but FVM support is disabled: $path';
     } else {
       newEngine = engine;
       message = null;
@@ -117,8 +114,7 @@ extension ProjectExtension on Project {
         command.args[1] == 'get';
 
     final String? dartRunPackage;
-    if (command.args.length >= 2 &&
-        command.args[0] == 'run') {
+    if (command.args.length >= 2 && command.args[0] == 'run') {
       dartRunPackage = command.args[1];
     } else {
       dartRunPackage = null;
@@ -175,7 +171,18 @@ extension ProjectExtension on Project {
       resolvedEngine = engine;
     }
     final exclude = _defaultExclude(command) || _explicitExclude(command);
-    return copyWith(engine: resolvedEngine, exclude: exclude);
+
+    if (fvm && command.noFvm && !command.silent) {
+      print(
+        yellow.wrap('Project uses FVM, but FVM support is disabled: $path'),
+      );
+    }
+
+    return copyWith(
+      engine: resolvedEngine,
+      exclude: exclude,
+      fvm: fvm && !command.noFvm,
+    );
   }
 
   Future<Version?> getFlutterVersionOverride(Command command) async {

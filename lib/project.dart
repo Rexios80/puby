@@ -46,7 +46,7 @@ class Project {
   });
 
   /// Create a copy of this [Project] with the specified changes
-  Project copyWith({Engine? engine, bool? exclude}) {
+  Project copyWith({Engine? engine, bool? exclude, bool? fvm}) {
     return Project(
       engine: engine ?? this.engine,
       path: path,
@@ -55,7 +55,7 @@ class Project {
       hidden: hidden,
       exclude: exclude ?? this.exclude,
       dependencies: dependencies,
-      fvm: fvm,
+      fvm: fvm ?? this.fvm,
     );
   }
 }
