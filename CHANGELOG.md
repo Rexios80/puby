@@ -1,3 +1,10 @@
+## 1.37.0
+
+- When running `build_runner` commands, `puby` now excludes projects without the dependency
+- The `puby gen` command always uses the `dart` engine
+- `puby run` now maps to `dart run` instead of `[engine] run`
+- Projects configured with FVM will now use `fvm dart`
+
 ## 1.36.0
 
 - Improves exit codes

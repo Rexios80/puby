@@ -16,7 +16,8 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 | --------------------- | ------------------------------------------------------------------- |
 | `puby [args]`         | `[engine] pub [args]`                                               |
 | `puby link`           | Warm the pub cache and run `[engine] pub get --offline` (see below) |
-| `puby gen`            | `[engine] pub run build_runner build --delete-conflicting-outputs`  |
+| `puby gen`            | `dart run build_runner build --delete-conflicting-outputs`          |
+| `puby run`            | `dart run`                                                          |
 | `puby test`           | `[engine] test`                                                     |
 | `puby clean`          | `flutter clean`                                                     |
 | `puby mup`            | `[engine] pub upgrade --major-versions`                             |
@@ -24,7 +25,7 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 | `puby relink`         | `puby clean && puby link`                                           |
 | `puby exec [command]` | `command`                                                           |
 
-For projects configured with FVM, `fvm flutter` is used. FVM support can be disabled with the `--no-fvm` option.
+For projects configured with FVM, `fvm flutter` and `fvm dart` are used. FVM support can be disabled with the `--no-fvm` option.
 
 ## Use as an executable
 

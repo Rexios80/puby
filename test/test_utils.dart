@@ -82,7 +82,12 @@ String createTestResources(Map<String, Map<String, String>> projects) {
   return directory.path;
 }
 
-String pubspec(String name, {bool flutter = false}) {
+String pubspec(
+  String name, {
+  bool flutter = false,
+  Set<String> dependencies = const {},
+  Set<String> devDependencies = const {},
+}) {
   var pubspec = '''
 name: $name
 
@@ -90,12 +95,27 @@ environment:
   sdk: ^3.0.0
 ''';
 
+  if (flutter || dependencies.isNotEmpty) {
+    pubspec += '\ndependencies:\n';
+  }
+
   if (flutter) {
     pubspec += '''
-dependencies:
   flutter:
     sdk: flutter
 ''';
+  }
+
+  for (final dependency in dependencies) {
+    pubspec += '  $dependency\n';
+  }
+
+  if (devDependencies.isNotEmpty) {
+    pubspec += '\ndev_dependencies:\n';
+  }
+
+  for (final dependency in devDependencies) {
+    pubspec += '  $dependency\n';
   }
 
   return pubspec;

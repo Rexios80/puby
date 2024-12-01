@@ -5,7 +5,6 @@ import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:io/io.dart';
 import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
-import 'package:puby/engine.dart';
 import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
@@ -18,7 +17,8 @@ const help = '''
 Commands:
   puby [args]            [engine] pub [args]
   puby link              Warm the pub cache and run [engine] pub get --offline
-  puby gen               [engine] pub run build_runner build --delete-conflicting-outputs
+  puby gen               dart run build_runner build --delete-conflicting-outputs
+  puby run               dart run
   puby test              [engine] test
   puby clean             flutter clean
   puby mup               [engine] pub upgrade --major-versions
@@ -57,7 +57,7 @@ void main(List<String> arguments) async {
 
   print(green.wrap('Found ${projects.length} projects\n'));
 
-  if (projects.any((e) => e.engine == Engine.fvm)) {
+  if (projects.any((e) => e.fvm)) {
     fvmCheck();
   }
 

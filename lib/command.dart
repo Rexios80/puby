@@ -1,3 +1,4 @@
+import 'package:puby/engine.dart';
 import 'package:puby/project.dart';
 
 /// A command and it's properties
@@ -38,11 +39,15 @@ class ProjectCommand extends Command {
   /// Whether to run the command in all projects in parallel
   final bool parallel;
 
+  /// The engine to use for this command ignoring project config
+  final Engine? engine;
+
   /// Constructor
   ProjectCommand(
     super.args, {
     this.raw = false,
     this.parallel = false,
+    this.engine,
   }) : super(silent: parallel);
 }
 

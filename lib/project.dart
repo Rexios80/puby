@@ -21,6 +21,18 @@ class Project {
   /// If this project should be excluded from command execution
   final bool exclude;
 
+  /// If this project uses build_runner
+  final bool hasBuildRunner;
+
+  /// If this project is configured with FVM
+  final bool fvm;
+
+  /// The arguments to prefix to any commands run in this project
+  List<String> get prefixArgs => [
+        if (fvm) 'fvm',
+        engine.name,
+      ];
+
   /// Create a [Project]
   Project({
     required this.engine,
@@ -29,6 +41,8 @@ class Project {
     required this.example,
     required this.hidden,
     this.exclude = false,
+    required this.hasBuildRunner,
+    required this.fvm,
   });
 
   /// Create a copy of this [Project] with the specified changes
@@ -40,6 +54,8 @@ class Project {
       example: example,
       hidden: hidden,
       exclude: exclude ?? this.exclude,
+      hasBuildRunner: hasBuildRunner,
+      fvm: fvm,
     );
   }
 }
