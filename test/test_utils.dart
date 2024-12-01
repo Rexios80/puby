@@ -33,11 +33,14 @@ Future<PubyProcessResult> testCommand(
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
 
   if (link) {
-    await Process.run(
+    final result = await Process.run(
       'dart',
       [puby, 'link'],
       workingDirectory: workingDirectory,
     );
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
   }
 
   final process = await Process.start(
