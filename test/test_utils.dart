@@ -41,7 +41,7 @@ Future<PubyProcessResult> testCommand(
     );
     if (result.exitCode != 0) {
       print(result.stdout);
-      exit(ExitCode.software.code);
+      throw Exception('Failed to link projects');
     }
   }
 
