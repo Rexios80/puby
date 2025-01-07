@@ -17,7 +17,7 @@ void main() {
             ),
             'puby.yaml': '''
 exclude:
-  - pub run build_runner
+  - run build_runner
 ''',
           },
         },

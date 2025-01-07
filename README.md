@@ -88,12 +88,12 @@ Add command exclusions to prevent them from running in a project
 ```yaml
 exclude:
   - test
-  - pub run build_runner
+  - run build_runner
 ```
 
 Exclusions match from the start of a command, and the entire exclusion string must be present. Here are some examples:
 
-| Exclusion              | Example command excluded              |
-| ---------------------- | ------------------------------------- |
-| `test`                 | `[engine] test --coverage`            |
-| `pub run build_runner` | `[engine] pub run build_runner build` |
+| Exclusion          | Example command excluded      |
+| ------------------ | ----------------------------- |
+| `test`             | `[engine] test --coverage`    |
+| `run build_runner` | `dart run build_runner build` |
