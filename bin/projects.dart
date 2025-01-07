@@ -52,14 +52,38 @@ List<Project> findProjects() {
         .split(Platform.pathSeparator)
         .any((e) => e.length > 1 && e.startsWith('.'));
 
-    var dependencies = <String>{};
-    try {
-      final lockFile = File(p.join(absolutePath, 'pubspec.lock'));
-      final lockFileContent = lockFile.readAsStringSync();
+    final Set<String> dependencies;
+
+    final projectLockFile = File(p.join(absolutePath, 'pubspec.lock'));
+    final workspaceRefParent = p.join(absolutePath, '.dart_tool', 'pub');
+    final workspaceRefFile =
+        File(p.join(workspaceRefParent, 'workspace_ref.json'));
+    final pubspecDependencies = {
+      ...pubspec.dependencies.keys,
+      ...pubspec.devDependencies.keys,
+    };
+
+    Set<String> dependenciesFromLockFile(File file) {
+      final lockFileContent = file.readAsStringSync();
       final packagesMap = loadYaml(lockFileContent)['packages'] as YamlMap;
-      dependencies = packagesMap.keys.cast<String>().toSet();
-    } catch (e) {
-      // This is handled elsewhere
+      return packagesMap.keys.cast<String>().toSet();
+    }
+
+    if (projectLockFile.existsSync()) {
+      dependencies = dependenciesFromLockFile(projectLockFile);
+    } else if (workspaceRefFile.existsSync()) {
+      final workspaceRefContent = workspaceRefFile.readAsStringSync();
+      final json = jsonDecode(workspaceRefContent) as Map<String, dynamic>;
+      final workspaceRoot = json['workspaceRoot'] as String;
+      final workspaceLockFile =
+          File(p.join(workspaceRefParent, workspaceRoot, 'pubspec.lock'));
+      if (workspaceLockFile.existsSync()) {
+        dependencies = dependenciesFromLockFile(workspaceLockFile);
+      } else {
+        dependencies = pubspecDependencies;
+      }
+    } else {
+      dependencies = pubspecDependencies;
     }
 
     final fvm = fvmPaths.any(absolutePath.startsWith);

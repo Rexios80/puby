@@ -7,6 +7,7 @@ import 'package:pub_update_checker/pub_update_checker.dart';
 import 'package:puby/command.dart';
 import 'package:io/ansi.dart';
 import 'package:puby/project.dart';
+import 'package:puby/text.dart';
 import 'package:puby/time.dart';
 
 import 'commands.dart';
@@ -55,7 +56,10 @@ void main(List<String> arguments) async {
     exit(ExitCode.usage.code);
   }
 
-  print(green.wrap('Found ${projects.length} projects\n'));
+  final numProjects = projects.length;
+  print(
+    green.wrap('Found $numProjects ${pluralize('project', numProjects)}\n'),
+  );
 
   if (projects.any((e) => e.fvm)) {
     fvmCheck();
