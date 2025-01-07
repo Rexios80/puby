@@ -2,7 +2,6 @@
 
 - Adds support for workspaces
 - Fixes grammar when only one project is found
-- Only skips examples that have a parent project
 
 ## 1.37.0
 
