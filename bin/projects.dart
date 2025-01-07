@@ -74,7 +74,7 @@ List<Project> findProjects({Directory? directory}) {
     }
 
     final splitPath = path.split(Platform.pathSeparator);
-    final example = splitPath.last == 'example';
+    final isExampleFolder = splitPath.last == 'example';
     final hidden = splitPath.any((e) => e.length > 1 && e.startsWith('.'));
 
     final Set<String> dependencies;
@@ -118,12 +118,13 @@ List<Project> findProjects({Directory? directory}) {
     final parentIntermediate = projectIntermediates[absoluteParentPath];
     final parentDependencyResolutionStrategy =
         parentIntermediate?.dependencyResolutionStrategy;
+    final hasParent = parentIntermediate != null;
 
     final project = Project(
       engine: engine,
       path: path,
       config: config,
-      example: example,
+      example: isExampleFolder && hasParent,
       hidden: hidden,
       dependencies: dependencies,
       fvm: fvm,

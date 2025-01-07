@@ -99,6 +99,23 @@ void main() {
           // is not a workspace member
           expectLine(stdout, ['dart_puby_test/example', 'dart pub get']);
         });
+
+        test('standalone example folder', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'example': {
+                'pubspec.yaml': pubspec('example'),
+              },
+            },
+          );
+          final stdout = result.stdout;
+
+          expect(result.exitCode, ExitCode.success.code);
+
+          // pub get should run in standalone example
+          expectLine(stdout, ['Running "dart pub get" in example...']);
+        });
       });
 
       test('workspace members', () async {
