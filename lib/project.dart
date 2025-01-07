@@ -94,7 +94,7 @@ class Project {
   }
 }
 
-/// Dependency resolution strategies
+/// Types of projects
 enum ProjectType {
   /// This is a standalone project
   standalone,
