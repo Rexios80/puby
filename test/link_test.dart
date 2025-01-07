@@ -82,6 +82,10 @@ void main() {
 
       expectLine(stdout, ['Resolved dependencies for .']);
       expectLine(stdout, ['dart_puby_test', 'Skip']);
+      expect(
+        stdout,
+        isNot(contains('Resolved dependencies for dart_puby_test\n')),
+      );
     });
   });
 }
