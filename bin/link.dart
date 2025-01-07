@@ -26,6 +26,7 @@ Future<int> linkDependencies({
         DependencyResolutionStrategy.workspace) {
       print(yellow.wrap('Skipping workspace member: ${project.path}'));
     }
+
     unawaited(
       resolutionQueue.add(() async {
         final resolved = project.resolveWithCommand(command);

@@ -13,13 +13,13 @@ void main() {
         ['asdf'],
         entities: dartProject(includeExample: false),
       );
-      expect(result1.stdout, contains('Found 1 project'));
+      expect(result1.stdout, contains('Found 1 project\n'));
 
       final result2 = await testCommand(
         ['asdf'],
         entities: dartProject(),
       );
-      expect(result2.stdout, contains('Found 2 projects'));
+      expect(result2.stdout, contains('Found 2 projects\n'));
     });
 
     group('finds dependencies', () {
