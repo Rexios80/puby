@@ -82,6 +82,23 @@ void main() {
         test('fvm', () async {
           await skipsExample(fvmProject());
         });
+
+        test('workspace member example', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'pubspec.yaml': workspacePubspec,
+              ...dartProject(workspace: true),
+            },
+          );
+          final stdout = result.stdout;
+
+          expect(result.exitCode, ExitCode.success.code);
+
+          // pub get should run in workspace member example where the example
+          // is not a workspace member
+          expectLine(stdout, ['dart_puby_test/example', 'dart pub get']);
+        });
       });
 
       test('workspace members', () async {

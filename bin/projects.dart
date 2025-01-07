@@ -27,11 +27,11 @@ List<Project> findProjects({Directory? directory}) {
       .map((e) => e.parent.path)
       .toSet();
 
-  final projects = <Project>[];
+  // Absolute project path to intermediate
+  final projectIntermediates = <String, ProjectIntermediate>{};
   for (final pubspecEntity in pubspecEntities) {
     final absolutePath = pubspecEntity.parent.path;
     final path = p.relative(absolutePath);
-    final config = PubyConfig.fromProjectPath(path);
 
     final Pubspec pubspec;
     final YamlMap pubspecYaml;
@@ -44,6 +44,28 @@ List<Project> findProjects({Directory? directory}) {
       continue;
     }
 
+    final dependencyResolutionStrategy =
+        pubspecYaml['resolution'] == 'workspace'
+            ? DependencyResolutionStrategy.workspace
+            : DependencyResolutionStrategy.standalone;
+
+    projectIntermediates[absolutePath] = ProjectIntermediate(
+      absolutePath: absolutePath,
+      path: path,
+      pubspec: pubspec,
+      dependencyResolutionStrategy: dependencyResolutionStrategy,
+    );
+  }
+
+  final projects = <Project>[];
+  for (final ProjectIntermediate(
+        :absolutePath,
+        :path,
+        :pubspec,
+        :dependencyResolutionStrategy,
+      ) in projectIntermediates.values) {
+    final config = PubyConfig.fromProjectPath(path);
+
     final Engine engine;
     if (pubspec.dependencies['flutter'] != null) {
       engine = Engine.flutter;
@@ -51,10 +73,9 @@ List<Project> findProjects({Directory? directory}) {
       engine = Engine.dart;
     }
 
-    final example = path.split(Platform.pathSeparator).last == 'example';
-    final hidden = path
-        .split(Platform.pathSeparator)
-        .any((e) => e.length > 1 && e.startsWith('.'));
+    final splitPath = path.split(Platform.pathSeparator);
+    final example = splitPath.last == 'example';
+    final hidden = splitPath.any((e) => e.length > 1 && e.startsWith('.'));
 
     final Set<String> dependencies;
 
@@ -91,11 +112,12 @@ List<Project> findProjects({Directory? directory}) {
     }
 
     final fvm = fvmPaths.any(absolutePath.startsWith);
-
-    final dependencyResolutionStrategy =
-        pubspecYaml['resolution'] == 'workspace'
-            ? DependencyResolutionStrategy.workspace
-            : DependencyResolutionStrategy.standalone;
+    final splitAbsolutePath = p.split(absolutePath);
+    final absoluteParentPath =
+        p.joinAll(splitAbsolutePath.take(splitAbsolutePath.length - 1));
+    final parentIntermediate = projectIntermediates[absoluteParentPath];
+    final parentDependencyResolutionStrategy =
+        parentIntermediate?.dependencyResolutionStrategy;
 
     final project = Project(
       engine: engine,
@@ -106,6 +128,7 @@ List<Project> findProjects({Directory? directory}) {
       dependencies: dependencies,
       fvm: fvm,
       dependencyResolutionStrategy: dependencyResolutionStrategy,
+      parentDependencyResolutionStrategy: parentDependencyResolutionStrategy,
     );
 
     projects.add(project);
@@ -149,6 +172,8 @@ extension ProjectExtension on Project {
     final isPubGetInExample = isPubGet && example;
     final isPubGetInWorkspaceMember = isPubGet &&
         dependencyResolutionStrategy == DependencyResolutionStrategy.workspace;
+    final standaloneParent = parentDependencyResolutionStrategy ==
+        DependencyResolutionStrategy.standalone;
 
     final String? dartRunPackage;
     if (command.args.length >= 2 && command.args[0] == 'run') {
@@ -166,8 +191,9 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInExample) {
+    } else if (isPubGetInExample && standaloneParent) {
       // Skip pub get in example projects since it happens anyways
+      // Do not skip if parent is a workspace member
       message = 'Skipping example project: $path';
       skip = true;
     } else if (isPubGetInWorkspaceMember) {
