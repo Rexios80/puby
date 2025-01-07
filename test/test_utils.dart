@@ -6,9 +6,6 @@ import 'package:path/path.dart' as path;
 
 final _decoder = Utf8Decoder();
 
-// Map of project name to file paths to file contents
-typedef TestProjects = Map<String, Map<String, String>>;
-
 class PubyProcessResult {
   final String workingDirectory;
   final int exitCode;
@@ -25,11 +22,11 @@ class PubyProcessResult {
 
 Future<PubyProcessResult> testCommand(
   List<String> arguments, {
-  TestProjects? projects,
+  Map<String, Object>? entities,
   bool link = false,
   bool debug = false,
 }) async {
-  final workingDirectory = createTestResources(projects ?? defaultProjects());
+  final workingDirectory = createTestResources(entities ?? defaultProjects());
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
 
   if (link) {
@@ -76,17 +73,21 @@ void expectLine(String stdout, List<String> matchers, {bool matches = true}) {
   );
 }
 
-String createTestResources(Map<String, Map<String, String>> projects) {
+String createTestResources(Map<String, Object> entities) {
   final directory = Directory.systemTemp.createTempSync('test_resources');
-  for (final MapEntry(:key, :value) in projects.entries) {
-    final project = key;
-    final files = value;
-    for (final MapEntry(:key, :value) in files.entries) {
-      final file = key;
-      final content = value;
-      File(path.join(directory.path, project, file))
+  for (final MapEntry(key: entityName, value: entityContent)
+      in entities.entries) {
+    if (entityContent is String) {
+      File(path.join(directory.path, entityName))
         ..createSync(recursive: true)
-        ..writeAsStringSync(content);
+        ..writeAsStringSync(entityContent);
+    } else if (entityContent is Map<String, String>) {
+      for (final MapEntry(key: filePath, value: fileContent)
+          in entityContent.entries) {
+        File(path.join(directory.path, entityName, filePath))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(fileContent);
+      }
     }
   }
   return directory.path;
@@ -95,6 +96,7 @@ String createTestResources(Map<String, Map<String, String>> projects) {
 String pubspec(
   String name, {
   bool flutter = false,
+  bool workspace = false,
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
 }) {
@@ -102,8 +104,12 @@ String pubspec(
 name: $name
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
 ''';
+
+  if (workspace) {
+    pubspec += '\nresolution: workspace\n';
+  }
 
   if (flutter || dependencies.isNotEmpty) {
     pubspec += '\ndependencies:\n';
@@ -131,62 +137,82 @@ environment:
   return pubspec;
 }
 
+const workspacePubspec = '''
+name: workspace
+environment:
+  sdk: ^3.5.0
+
+workspace:
+  - dart_puby_test
+''';
+
 String fvmrc(String version) => '''
 {
   "flutter": "$version",
   "flavors": {}
 }''';
 
-TestProjects dartProject({
+Map<String, Object> dartProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
+  bool workspace = false,
 }) =>
     {
       'dart_puby_test': {
         'pubspec.yaml': pubspec(
           'dart_puby_test',
+          workspace: workspace,
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example'),
+        if (includeExample) 'example/pubspec.yaml': pubspec('example'),
       },
     };
 
-TestProjects flutterProject({
+Map<String, Object> flutterProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
+  bool workspace = false,
 }) =>
     {
       'flutter_puby_test': {
         'pubspec.yaml': pubspec(
           'flutter_puby_test',
           flutter: true,
+          workspace: workspace,
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example', flutter: true),
+        if (includeExample)
+          'example/pubspec.yaml': pubspec('example', flutter: true),
       },
     };
 
-TestProjects fvmProject({
+Map<String, Object> fvmProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
+  bool workspace = false,
 }) =>
     {
       'fvm_puby_test': {
         'pubspec.yaml': pubspec(
           'fvm_puby_test',
           flutter: true,
+          workspace: workspace,
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example', flutter: true),
+        if (includeExample)
+          'example/pubspec.yaml': pubspec('example', flutter: true),
         'nested/pubspec.yaml': pubspec('nested', flutter: true),
-        '.fvmrc': fvmrc('3.10.0'),
+        '.fvmrc': fvmrc('3.24.0'),
       },
     };
 
-TestProjects defaultProjects({
+Map<String, Object> defaultProjects({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
 }) =>

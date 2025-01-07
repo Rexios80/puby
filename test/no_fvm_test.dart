@@ -26,7 +26,7 @@ void main() {
             'version',
           ),
         ).readAsStringSync(),
-        isNot('3.10.0'),
+        isNot('3.24.0'),
       );
     });
 

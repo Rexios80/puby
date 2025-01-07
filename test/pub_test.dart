@@ -24,7 +24,7 @@ void main() {
     test('handles invlaid pubspec', () async {
       final result = await testCommand(
         ['get'],
-        projects: {
+        entities: {
           'invalid_pubspec_test': {
             'pubspec.yaml': 'invalid',
           },
@@ -41,7 +41,7 @@ void main() {
       test('project in build folder', () async {
         final result = await testCommand(
           ['get'],
-          projects: {
+          entities: {
             'build_folder_test': {
               'build/web/pubspec.yaml': pubspec('web'),
             },
@@ -59,36 +59,105 @@ void main() {
 
       group('example projects', () {
         Future<void> skipsExample(
-          TestProjects projects, {
-          String match = 'Resolving dependencies in `./example`...',
+          Map<String, Object> entities, {
+          String? skippedPath,
         }) async {
-          final result = await testCommand(['get'], projects: projects);
+          skippedPath ??= path.join(entities.keys.first, 'example');
+
+          final result = await testCommand(['get'], entities: entities);
           final stdout = result.stdout;
 
           expect(result.exitCode, ExitCode.success.code);
 
           expectLine(
             stdout,
-            [path.join(projects.keys.first, 'example'), 'Skip'],
+            [path.join(skippedPath), 'Skip'],
           );
-          expectLine(stdout, [match]);
+          expectLine(stdout, ['Resolving dependencies in `./example`...']);
         }
 
-        test('dart', () async {
-          await skipsExample(dartProject());
+        group('skip example', () {
+          test('dart', () async {
+            await skipsExample(dartProject());
+          });
+
+          test('flutter', () async {
+            await skipsExample(flutterProject());
+          });
+
+          test('fvm', () async {
+            await skipsExample(fvmProject());
+          });
+
+          test('workspace', () async {
+            await skipsExample(
+              {
+                'pubspec.yaml': workspacePubspec,
+                'example': {
+                  'pubspec.yaml': pubspec('example'),
+                },
+                ...dartProject(workspace: true, includeExample: false),
+              },
+              skippedPath: 'example',
+            );
+          });
         });
 
-        test('flutter', () async {
-          await skipsExample(flutterProject());
-        });
+        test('workspace member example', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'pubspec.yaml': workspacePubspec,
+              ...dartProject(workspace: true),
+            },
+          );
+          final stdout = result.stdout;
 
-        test('fvm', () async {
-          await skipsExample(
-            fvmProject(),
-            // This is different because of the older Flutter version
-            match: 'Resolving dependencies in ./example...',
+          expect(result.exitCode, ExitCode.success.code);
+
+          // pub get should run in workspace member example where the example
+          // is not a workspace member
+          expectLine(
+            stdout,
+            [path.join('dart_puby_test', 'example'), 'dart pub get'],
           );
         });
+
+        test('standalone example', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'example': {
+                'pubspec.yaml': pubspec('example'),
+              },
+            },
+          );
+          final stdout = result.stdout;
+
+          expect(result.exitCode, ExitCode.success.code);
+
+          // pub get should run in standalone example
+          expectLine(stdout, ['Running "dart pub get" in example...']);
+        });
+      });
+
+      test('workspace members', () async {
+        final result = await testCommand(
+          ['get'],
+          entities: {
+            'pubspec.yaml': workspacePubspec,
+            ...dartProject(workspace: true),
+          },
+        );
+        final stdout = result.stdout;
+
+        expect(result.exitCode, ExitCode.success.code);
+
+        // Pub get should run in the workspace
+        expectLine(stdout, ['Running "dart pub get" in current directory...']);
+
+        // Pub get should NOT run in workspace members
+        expectLine(stdout, ['dart_puby_test', 'Skip']);
       });
     });
   });

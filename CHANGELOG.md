@@ -1,3 +1,8 @@
+## 1.38.0
+
+- Adds support for workspaces
+- Fixes grammar when only one project is found
+
 ## 1.37.0
 
 - `puby gen` and `puby run` now map to `dart run` instead of `[engine] pub run`

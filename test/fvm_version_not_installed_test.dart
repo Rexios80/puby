@@ -7,7 +7,7 @@ void main() {
   test('FVM version not installed', () async {
     final result = await testCommand(
       ['get'],
-      projects: {
+      entities: {
         'fvm_version_not_installed_test': {
           'pubspec.yaml': pubspec('fvm_version_not_installed_test'),
           '.fvmrc': fvmrc('1.17.0'),

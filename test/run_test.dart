@@ -10,7 +10,7 @@ void main() {
     () async {
       final result = await testCommand(
         ['run', 'custom_lint'],
-        projects: defaultProjects(devDependencies: {'custom_lint: any'}),
+        entities: defaultProjects(devDependencies: {'custom_lint: any'}),
         link: true,
       );
       final stdout = result.stdout;

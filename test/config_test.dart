@@ -9,7 +9,7 @@ void main() {
     test('exclude', () async {
       final result = await testCommand(
         ['gen'],
-        projects: {
+        entities: {
           'puby_yaml_test': {
             'pubspec.yaml': pubspec(
               'puby_yaml_test',
@@ -17,7 +17,7 @@ void main() {
             ),
             'puby.yaml': '''
 exclude:
-  - pub run build_runner
+  - run build_runner
 ''',
           },
         },

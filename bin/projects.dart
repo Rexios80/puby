@@ -13,32 +13,62 @@ import 'package:yaml/yaml.dart';
 
 import 'commands.dart';
 
-List<Project> findProjects() {
-  final pubspecEntities = Directory.current
+List<Project> findProjects({Directory? directory}) {
+  directory ??= Directory.current;
+  final pubspecEntities = directory
       .listSync(recursive: true, followLinks: false)
       .whereType<File>()
       .where((e) => e.path.endsWith('pubspec.yaml'));
 
-  final fvmPaths = Directory.current
+  final fvmPaths = directory
       .listSync(recursive: true, followLinks: false)
       .whereType<File>()
       .where((e) => e.path.endsWith('.fvmrc'))
       .map((e) => e.parent.path)
       .toSet();
 
-  final projects = <Project>[];
+  // Absolute project path to intermediate
+  final projectIntermediates = <String, ProjectIntermediate>{};
   for (final pubspecEntity in pubspecEntities) {
     final absolutePath = pubspecEntity.parent.path;
     final path = p.relative(absolutePath);
-    final config = PubyConfig.fromProjectPath(path);
 
     final Pubspec pubspec;
+    final YamlMap pubspecYaml;
     try {
-      pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
+      final pubspecContent = pubspecEntity.readAsStringSync();
+      pubspec = Pubspec.parse(pubspecContent);
+      pubspecYaml = loadYaml(pubspecContent) as YamlMap;
     } catch (e) {
       print(red.wrap('Error parsing pubspec: $path'));
       continue;
     }
+
+    final ProjectType type;
+    if (pubspecYaml.containsKey('workspace')) {
+      type = ProjectType.workspace;
+    } else if (pubspecYaml['resolution'] == 'workspace') {
+      type = ProjectType.workspaceMember;
+    } else {
+      type = ProjectType.standalone;
+    }
+
+    projectIntermediates[absolutePath] = ProjectIntermediate(
+      absolutePath: absolutePath,
+      path: path,
+      pubspec: pubspec,
+      type: type,
+    );
+  }
+
+  final projects = <Project>[];
+  for (final ProjectIntermediate(
+        :absolutePath,
+        :path,
+        :pubspec,
+        :type,
+      ) in projectIntermediates.values) {
+    final config = PubyConfig.fromProjectPath(path);
 
     final Engine engine;
     if (pubspec.dependencies['flutter'] != null) {
@@ -47,22 +77,50 @@ List<Project> findProjects() {
       engine = Engine.dart;
     }
 
-    final example = path.split(Platform.pathSeparator).last == 'example';
-    final hidden = path
-        .split(Platform.pathSeparator)
-        .any((e) => e.length > 1 && e.startsWith('.'));
+    final splitPath = path.split(Platform.pathSeparator);
+    final example = splitPath.last == 'example';
+    final hidden = splitPath.any((e) => e.length > 1 && e.startsWith('.'));
 
-    var dependencies = <String>{};
-    try {
-      final lockFile = File(p.join(absolutePath, 'pubspec.lock'));
-      final lockFileContent = lockFile.readAsStringSync();
+    final Set<String> dependencies;
+
+    final projectLockFile = File(p.join(absolutePath, 'pubspec.lock'));
+    final workspaceRefParent = p.join(absolutePath, '.dart_tool', 'pub');
+    final workspaceRefFile =
+        File(p.join(workspaceRefParent, 'workspace_ref.json'));
+    final pubspecDependencies = {
+      ...pubspec.dependencies.keys,
+      ...pubspec.devDependencies.keys,
+    };
+
+    Set<String> dependenciesFromLockFile(File file) {
+      final lockFileContent = file.readAsStringSync();
       final packagesMap = loadYaml(lockFileContent)['packages'] as YamlMap;
-      dependencies = packagesMap.keys.cast<String>().toSet();
-    } catch (e) {
-      // This is handled elsewhere
+      return packagesMap.keys.cast<String>().toSet();
+    }
+
+    if (projectLockFile.existsSync()) {
+      dependencies = dependenciesFromLockFile(projectLockFile);
+    } else if (workspaceRefFile.existsSync()) {
+      final workspaceRefContent = workspaceRefFile.readAsStringSync();
+      final json = jsonDecode(workspaceRefContent) as Map<String, dynamic>;
+      final workspaceRoot = json['workspaceRoot'] as String;
+      final workspaceLockFile =
+          File(p.join(workspaceRefParent, workspaceRoot, 'pubspec.lock'));
+      if (workspaceLockFile.existsSync()) {
+        dependencies = dependenciesFromLockFile(workspaceLockFile);
+      } else {
+        dependencies = pubspecDependencies;
+      }
+    } else {
+      dependencies = pubspecDependencies;
     }
 
     final fvm = fvmPaths.any(absolutePath.startsWith);
+    final splitAbsolutePath = p.split(absolutePath);
+    final absoluteParentPath =
+        p.joinAll(splitAbsolutePath.take(splitAbsolutePath.length - 1));
+    final parentIntermediate = projectIntermediates[absoluteParentPath];
+    final parentType = parentIntermediate?.type;
 
     final project = Project(
       engine: engine,
@@ -72,6 +130,8 @@ List<Project> findProjects() {
       hidden: hidden,
       dependencies: dependencies,
       fvm: fvm,
+      type: type,
+      parentType: parentType,
     );
 
     projects.add(project);
@@ -108,8 +168,7 @@ extension ProjectExtension on Project {
   }
 
   bool _defaultExclude(Command command) {
-    final isPubGetInExample = example &&
-        command.args.length >= 2 &&
+    final isPubGet = command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
 
@@ -129,9 +188,16 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInExample) {
+    } else if (isPubGet &&
+        example &&
+        {ProjectType.standalone, ProjectType.workspace}.contains(parentType)) {
       // Skip pub get in example projects since it happens anyways
+      // Do not skip if parent is a workspace member
       message = 'Skipping example project: $path';
+      skip = true;
+    } else if (isPubGet && type == ProjectType.workspaceMember) {
+      // Skip pub get in workspace members since they resolve with the workspace
+      message = 'Skipping workspace member: $path';
       skip = true;
     } else if (dartRunPackage != null &&
         !dependencies.contains(dartRunPackage)) {
