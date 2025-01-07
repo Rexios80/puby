@@ -62,7 +62,7 @@ void main() {
               'version',
             ),
           ).readAsStringSync(),
-          '3.10.0',
+          '3.24.0',
         );
       },
       timeout: const Timeout(Duration(seconds: 120)),

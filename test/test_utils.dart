@@ -208,7 +208,7 @@ Map<String, Object> fvmProject({
         if (includeExample)
           'example/pubspec.yaml': pubspec('example', flutter: true),
         'nested/pubspec.yaml': pubspec('nested', flutter: true),
-        '.fvmrc': fvmrc('3.10.0'),
+        '.fvmrc': fvmrc('3.24.0'),
       },
     };
 

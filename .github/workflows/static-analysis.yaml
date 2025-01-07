@@ -23,9 +23,9 @@ jobs:
           brew install fvm
           echo "$HOME/fvm/default/bin" >> $GITHUB_PATH
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          fvm install 3.10.0 --setup
+          fvm install 3.24.0 --setup
           fvm install stable --setup
-          fvm global 3.10.0
+          fvm global 3.24.0
           fvm flutter doctor
           fvm global stable
           fvm flutter doctor

@@ -58,10 +58,7 @@ void main() {
       });
 
       group('example projects', () {
-        Future<void> skipsExample(
-          Map<String, Object> entities, {
-          String match = 'Resolving dependencies in `./example`...',
-        }) async {
+        Future<void> skipsExample(Map<String, Object> entities) async {
           final result = await testCommand(['get'], entities: entities);
           final stdout = result.stdout;
 
@@ -71,7 +68,7 @@ void main() {
             stdout,
             [path.join(entities.keys.first, 'example'), 'Skip'],
           );
-          expectLine(stdout, [match]);
+          expectLine(stdout, ['Resolving dependencies in `./example`...']);
         }
 
         test('dart', () async {
@@ -83,11 +80,7 @@ void main() {
         });
 
         test('fvm', () async {
-          await skipsExample(
-            fvmProject(),
-            // This is different because of the older Flutter version
-            match: 'Resolving dependencies in ./example...',
-          );
+          await skipsExample(fvmProject());
         });
       });
 
