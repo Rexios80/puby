@@ -24,6 +24,7 @@ Future<int> linkDependencies({
     // Skip workspace members (the workspace will resolve them)
     if (project.type == ProjectType.workspaceMember) {
       print(yellow.wrap('Skipping workspace member: ${project.path}'));
+      continue;
     }
 
     unawaited(
