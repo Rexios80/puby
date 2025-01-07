@@ -140,6 +140,7 @@ String fvmrc(String version) => '''
 TestProjects dartProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
 }) =>
     {
       'dart_puby_test': {
@@ -148,13 +149,14 @@ TestProjects dartProject({
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example'),
+        if (includeExample) 'example/pubspec.yaml': pubspec('example'),
       },
     };
 
 TestProjects flutterProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
 }) =>
     {
       'flutter_puby_test': {
@@ -164,13 +166,15 @@ TestProjects flutterProject({
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example', flutter: true),
+        if (includeExample)
+          'example/pubspec.yaml': pubspec('example', flutter: true),
       },
     };
 
 TestProjects fvmProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
+  bool includeExample = true,
 }) =>
     {
       'fvm_puby_test': {
@@ -180,7 +184,8 @@ TestProjects fvmProject({
           dependencies: dependencies,
           devDependencies: devDependencies,
         ),
-        'example/pubspec.yaml': pubspec('example', flutter: true),
+        if (includeExample)
+          'example/pubspec.yaml': pubspec('example', flutter: true),
         'nested/pubspec.yaml': pubspec('nested', flutter: true),
         '.fvmrc': fvmrc('3.10.0'),
       },

@@ -13,13 +13,14 @@ import 'package:yaml/yaml.dart';
 
 import 'commands.dart';
 
-List<Project> findProjects() {
-  final pubspecEntities = Directory.current
+List<Project> findProjects({Directory? directory}) {
+  directory ??= Directory.current;
+  final pubspecEntities = directory
       .listSync(recursive: true, followLinks: false)
       .whereType<File>()
       .where((e) => e.path.endsWith('pubspec.yaml'));
 
-  final fvmPaths = Directory.current
+  final fvmPaths = directory
       .listSync(recursive: true, followLinks: false)
       .whereType<File>()
       .where((e) => e.path.endsWith('.fvmrc'))
