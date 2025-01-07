@@ -13,15 +13,15 @@ class ProjectIntermediate {
   /// The parsed pubspec
   final Pubspec pubspec;
 
-  /// The dependency resolution strategy for this project
-  final DependencyResolutionStrategy dependencyResolutionStrategy;
+  /// The type of project this is
+  final ProjectType type;
 
   /// Constructor
   const ProjectIntermediate({
     required this.absolutePath,
     required this.path,
     required this.pubspec,
-    required this.dependencyResolutionStrategy,
+    required this.type,
   });
 }
 
@@ -51,11 +51,11 @@ class Project {
   /// If this project is configured with FVM
   final bool fvm;
 
-  /// The dependency resolution strategy for this project
-  final DependencyResolutionStrategy dependencyResolutionStrategy;
+  /// The type of project this is
+  final ProjectType type;
 
-  /// The parent project's dependency resolution strategy
-  final DependencyResolutionStrategy? parentDependencyResolutionStrategy;
+  /// The parent project's type
+  final ProjectType? parentType;
 
   /// The arguments to prefix to any commands run in this project
   List<String> get prefixArgs => [
@@ -73,8 +73,8 @@ class Project {
     this.exclude = false,
     required this.dependencies,
     required this.fvm,
-    required this.dependencyResolutionStrategy,
-    this.parentDependencyResolutionStrategy,
+    required this.type,
+    this.parentType,
   });
 
   /// Create a copy of this [Project] with the specified changes
@@ -88,17 +88,20 @@ class Project {
       exclude: exclude ?? this.exclude,
       dependencies: dependencies,
       fvm: fvm ?? this.fvm,
-      dependencyResolutionStrategy: dependencyResolutionStrategy,
-      parentDependencyResolutionStrategy: parentDependencyResolutionStrategy,
+      type: type,
+      parentType: parentType,
     );
   }
 }
 
 /// Dependency resolution strategies
-enum DependencyResolutionStrategy {
-  /// Resolve this project as a standalone project
+enum ProjectType {
+  /// This is a standalone project
   standalone,
 
-  /// Resolve this project with its workspace
-  workspace;
+  /// This is a workspace
+  workspace,
+
+  /// This is a workspace member
+  workspaceMember;
 }

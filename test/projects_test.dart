@@ -71,11 +71,7 @@ void main() {
 
           final dependencies =
               findProjects(directory: Directory(workingDirectory))
-                  .firstWhere(
-                    (e) =>
-                        e.dependencyResolutionStrategy ==
-                        DependencyResolutionStrategy.workspace,
-                  )
+                  .firstWhere((e) => e.type == ProjectType.workspaceMember)
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
           expect(dependencies, isNot(contains('custom_lint')));
@@ -96,11 +92,7 @@ void main() {
 
           final dependencies =
               findProjects(directory: Directory(result.workingDirectory))
-                  .firstWhere(
-                    (e) =>
-                        e.dependencyResolutionStrategy ==
-                        DependencyResolutionStrategy.workspace,
-                  )
+                  .firstWhere((e) => e.type == ProjectType.workspaceMember)
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
           expect(dependencies, contains('custom_lint'));

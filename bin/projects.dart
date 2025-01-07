@@ -44,16 +44,20 @@ List<Project> findProjects({Directory? directory}) {
       continue;
     }
 
-    final dependencyResolutionStrategy =
-        pubspecYaml['resolution'] == 'workspace'
-            ? DependencyResolutionStrategy.workspace
-            : DependencyResolutionStrategy.standalone;
+    final ProjectType type;
+    if (pubspecYaml.containsKey('workspace')) {
+      type = ProjectType.workspace;
+    } else if (pubspecYaml['resolution'] == 'workspace') {
+      type = ProjectType.workspaceMember;
+    } else {
+      type = ProjectType.standalone;
+    }
 
     projectIntermediates[absolutePath] = ProjectIntermediate(
       absolutePath: absolutePath,
       path: path,
       pubspec: pubspec,
-      dependencyResolutionStrategy: dependencyResolutionStrategy,
+      type: type,
     );
   }
 
@@ -62,7 +66,7 @@ List<Project> findProjects({Directory? directory}) {
         :absolutePath,
         :path,
         :pubspec,
-        :dependencyResolutionStrategy,
+        :type,
       ) in projectIntermediates.values) {
     final config = PubyConfig.fromProjectPath(path);
 
@@ -116,8 +120,7 @@ List<Project> findProjects({Directory? directory}) {
     final absoluteParentPath =
         p.joinAll(splitAbsolutePath.take(splitAbsolutePath.length - 1));
     final parentIntermediate = projectIntermediates[absoluteParentPath];
-    final parentDependencyResolutionStrategy =
-        parentIntermediate?.dependencyResolutionStrategy;
+    final parentType = parentIntermediate?.type;
 
     final project = Project(
       engine: engine,
@@ -127,8 +130,8 @@ List<Project> findProjects({Directory? directory}) {
       hidden: hidden,
       dependencies: dependencies,
       fvm: fvm,
-      dependencyResolutionStrategy: dependencyResolutionStrategy,
-      parentDependencyResolutionStrategy: parentDependencyResolutionStrategy,
+      type: type,
+      parentType: parentType,
     );
 
     projects.add(project);
@@ -169,12 +172,6 @@ extension ProjectExtension on Project {
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
 
-    final isPubGetInExample = isPubGet && example;
-    final isPubGetInWorkspaceMember = isPubGet &&
-        dependencyResolutionStrategy == DependencyResolutionStrategy.workspace;
-    final standaloneParent = parentDependencyResolutionStrategy ==
-        DependencyResolutionStrategy.standalone;
-
     final String? dartRunPackage;
     if (command.args.length >= 2 && command.args[0] == 'run') {
       dartRunPackage = command.args[1];
@@ -191,12 +188,14 @@ extension ProjectExtension on Project {
     } else if (path.startsWith('build/') || path.contains('/build/')) {
       message = 'Skipping project in build folder: $path';
       skip = true;
-    } else if (isPubGetInExample && standaloneParent) {
+    } else if (isPubGet &&
+        example &&
+        {ProjectType.standalone, ProjectType.workspace}.contains(parentType)) {
       // Skip pub get in example projects since it happens anyways
       // Do not skip if parent is a workspace member
       message = 'Skipping example project: $path';
       skip = true;
-    } else if (isPubGetInWorkspaceMember) {
+    } else if (isPubGet && type == ProjectType.workspaceMember) {
       // Skip pub get in workspace members since they resolve with the workspace
       message = 'Skipping workspace member: $path';
       skip = true;
