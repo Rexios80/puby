@@ -142,10 +142,13 @@ extension ProjectExtension on Project {
   }
 
   bool _defaultExclude(Command command) {
-    final isPubGetInExample = example &&
-        command.args.length >= 2 &&
+    final isPubGet = command.args.length >= 2 &&
         command.args[0] == 'pub' &&
         command.args[1] == 'get';
+
+    final isPubGetInExample = isPubGet && example;
+    final isPubGetInWorkspaceMember = isPubGet &&
+        dependencyResolutionStrategy == DependencyResolutionStrategy.workspace;
 
     final String? dartRunPackage;
     if (command.args.length >= 2 && command.args[0] == 'run') {
@@ -166,6 +169,10 @@ extension ProjectExtension on Project {
     } else if (isPubGetInExample) {
       // Skip pub get in example projects since it happens anyways
       message = 'Skipping example project: $path';
+      skip = true;
+    } else if (isPubGetInWorkspaceMember) {
+      // Skip pub get in workspace members since they resolve with the workspace
+      message = 'Skipping workspace member: $path';
       skip = true;
     } else if (dartRunPackage != null &&
         !dependencies.contains(dartRunPackage)) {

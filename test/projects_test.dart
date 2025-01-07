@@ -57,15 +57,6 @@ void main() {
       });
 
       group('in workspace', () {
-        const workspacePubspec = '''
-name: workspace
-environment:
-  sdk: ^3.5.0
-
-workspace:
-  - dart_puby_test
-''';
-
         test('without lock file', () {
           final workingDirectory = createTestResources(
             {

@@ -1,6 +1,6 @@
 ## 1.38.0
 
-- Adds preliminary support for workspaces
+- Adds support for workspaces
 - Fixes grammar when only one project is found
 
 ## 1.37.0

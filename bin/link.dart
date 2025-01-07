@@ -19,7 +19,13 @@ Future<int> linkDependencies({
   print('Resolving all dependencies...');
   final dependencies = <PackageId>{};
   final resolutionQueue = TaskQueue();
+
   for (final project in projects) {
+    // Skip workspace members (the workspace will resolve them)
+    if (project.dependencyResolutionStrategy ==
+        DependencyResolutionStrategy.workspace) {
+      print(yellow.wrap('Skipping workspace member: ${project.path}'));
+    }
     unawaited(
       resolutionQueue.add(() async {
         final resolved = project.resolveWithCommand(command);

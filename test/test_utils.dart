@@ -137,6 +137,15 @@ environment:
   return pubspec;
 }
 
+const workspacePubspec = '''
+name: workspace
+environment:
+  sdk: ^3.5.0
+
+workspace:
+  - dart_puby_test
+''';
+
 String fvmrc(String version) => '''
 {
   "flutter": "$version",

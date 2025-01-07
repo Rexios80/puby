@@ -90,6 +90,25 @@ void main() {
           );
         });
       });
+
+      test('workspace members', () async {
+        final result = await testCommand(
+          ['get'],
+          entities: {
+            'pubspec.yaml': workspacePubspec,
+            ...dartProject(workspace: true),
+          },
+        );
+        final stdout = result.stdout;
+
+        expect(result.exitCode, ExitCode.success.code);
+
+        // Pub get should run in the workspace
+        expectLine(stdout, ['Running "dart pub get" in current directory...']);
+
+        // Pub get should NOT run in workspace members
+        expectLine(stdout, ['dart_puby_test', 'Skip']);
+      });
     });
   });
 }
