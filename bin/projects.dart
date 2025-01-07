@@ -34,8 +34,11 @@ List<Project> findProjects({Directory? directory}) {
     final config = PubyConfig.fromProjectPath(path);
 
     final Pubspec pubspec;
+    final YamlMap pubspecYaml;
     try {
-      pubspec = Pubspec.parse(pubspecEntity.readAsStringSync());
+      final pubspecContent = pubspecEntity.readAsStringSync();
+      pubspec = Pubspec.parse(pubspecContent);
+      pubspecYaml = loadYaml(pubspecContent) as YamlMap;
     } catch (e) {
       print(red.wrap('Error parsing pubspec: $path'));
       continue;
@@ -89,6 +92,11 @@ List<Project> findProjects({Directory? directory}) {
 
     final fvm = fvmPaths.any(absolutePath.startsWith);
 
+    final dependencyResolutionStrategy =
+        pubspecYaml['resolution'] == 'workspace'
+            ? DependencyResolutionStrategy.workspace
+            : DependencyResolutionStrategy.standalone;
+
     final project = Project(
       engine: engine,
       path: path,
@@ -97,6 +105,7 @@ List<Project> findProjects({Directory? directory}) {
       hidden: hidden,
       dependencies: dependencies,
       fvm: fvm,
+      dependencyResolutionStrategy: dependencyResolutionStrategy,
     );
 
     projects.add(project);

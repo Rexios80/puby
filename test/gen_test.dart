@@ -12,7 +12,7 @@ void main() {
     () async {
       final result = await testCommand(
         ['gen'],
-        projects: defaultProjects(devDependencies: {'build_runner: any'}),
+        entities: defaultProjects(devDependencies: {'build_runner: any'}),
         link: true,
       );
       final stdout = result.stdout;

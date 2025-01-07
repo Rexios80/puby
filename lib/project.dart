@@ -27,6 +27,9 @@ class Project {
   /// If this project is configured with FVM
   final bool fvm;
 
+  /// The dependency resolution strategy for this project
+  final DependencyResolutionStrategy dependencyResolutionStrategy;
+
   /// The arguments to prefix to any commands run in this project
   List<String> get prefixArgs => [
         if (fvm) 'fvm',
@@ -43,6 +46,7 @@ class Project {
     this.exclude = false,
     required this.dependencies,
     required this.fvm,
+    required this.dependencyResolutionStrategy
   });
 
   /// Create a copy of this [Project] with the specified changes
@@ -56,6 +60,16 @@ class Project {
       exclude: exclude ?? this.exclude,
       dependencies: dependencies,
       fvm: fvm ?? this.fvm,
+      dependencyResolutionStrategy: dependencyResolutionStrategy
     );
   }
+}
+
+/// Dependency resolution strategies
+enum DependencyResolutionStrategy {
+  /// Resolve this project as a standalone project
+  standalone,
+
+  /// Resolve this project with its workspace
+  workspace;
 }

@@ -24,7 +24,7 @@ void main() {
     test('handles invlaid pubspec', () async {
       final result = await testCommand(
         ['get'],
-        projects: {
+        entities: {
           'invalid_pubspec_test': {
             'pubspec.yaml': 'invalid',
           },
@@ -41,7 +41,7 @@ void main() {
       test('project in build folder', () async {
         final result = await testCommand(
           ['get'],
-          projects: {
+          entities: {
             'build_folder_test': {
               'build/web/pubspec.yaml': pubspec('web'),
             },
@@ -59,17 +59,17 @@ void main() {
 
       group('example projects', () {
         Future<void> skipsExample(
-          TestProjects projects, {
+          Map<String, Object> entities, {
           String match = 'Resolving dependencies in `./example`...',
         }) async {
-          final result = await testCommand(['get'], projects: projects);
+          final result = await testCommand(['get'], entities: entities);
           final stdout = result.stdout;
 
           expect(result.exitCode, ExitCode.success.code);
 
           expectLine(
             stdout,
-            [path.join(projects.keys.first, 'example'), 'Skip'],
+            [path.join(entities.keys.first, 'example'), 'Skip'],
           );
           expectLine(stdout, [match]);
         }
