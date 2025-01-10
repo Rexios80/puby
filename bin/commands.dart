@@ -70,9 +70,11 @@ abstract class Commands {
         // FVM will ask for input from the user, kill the process to avoid
         // hanging
         if (!command.silent) {
+          final version =
+              flutterVersionNotInstalledMatch[1]?.split(' ').last.toLowerCase();
           print(
             red.wrap(
-              'Run `fvm install ${flutterVersionNotInstalledMatch[1]}` first',
+              'Run `fvm install $version` first',
             ),
           );
         }
