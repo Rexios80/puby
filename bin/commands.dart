@@ -65,8 +65,7 @@ abstract class Commands {
   static bool shouldKill(Project project, Command command, String line) {
     if (project.fvm) {
       final flutterVersionNotInstalledMatch =
-          RegExp(r'Flutter SDK: SDK Version : (.+?) is not installed\.')
-              .firstMatch(line);
+          RegExp(r'Flutter SDK: (.+?) is not installed\.').firstMatch(line);
       if (flutterVersionNotInstalledMatch != null) {
         // FVM will ask for input from the user, kill the process to avoid
         // hanging

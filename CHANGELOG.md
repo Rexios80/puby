@@ -1,3 +1,7 @@
+## 1.38.1
+
+- Fixes FVM version not installed detection
+
 ## 1.38.0
 
 - Adds support for workspaces
