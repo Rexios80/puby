@@ -27,14 +27,14 @@ void main() {
         entities: {
           'fvm_version_not_installed_test': {
             'pubspec.yaml': pubspec('fvm_version_not_installed_test'),
-            '.fvmrc': fvmrc('stable'),
+            '.fvmrc': fvmrc('dev'),
           },
         },
       );
       final stdout = result.stdout;
 
       expect(result.exitCode, isNot(ExitCode.success.code));
-      expectLine(stdout, ['Run `fvm install stable` first']);
+      expectLine(stdout, ['Run `fvm install dev` first']);
     });
   });
 }
