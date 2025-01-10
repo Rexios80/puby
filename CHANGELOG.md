@@ -1,6 +1,7 @@
 ## 1.38.1
 
 - Fixes FVM version not installed detection
+- Bumps `dart_pub` to `0.0.4`
 
 ## 1.38.0
 

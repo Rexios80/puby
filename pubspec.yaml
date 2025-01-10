@@ -12,7 +12,7 @@ dependencies:
   path: ^1.8.1
   pub_update_checker: ^1.2.0
   flutter_tools_task_queue: ^1.0.0
-  dart_pub: 0.0.3
+  dart_pub: 0.0.4
   pub_semver: ^2.1.4
   io: ^1.0.4
 
