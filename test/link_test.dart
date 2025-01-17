@@ -75,6 +75,8 @@ void main() {
           'pubspec.yaml': workspacePubspec,
           ...dartProject(workspace: true),
         },
+        // Must link for workspace ref to exist
+        link: true,
       );
       final stdout = result.stdout;
 
