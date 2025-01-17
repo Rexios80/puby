@@ -98,21 +98,29 @@ List<Project> findProjects({Directory? directory}) {
       return packagesMap.keys.cast<String>().toSet();
     }
 
+    final bool workspaceInScope;
     if (projectLockFile.existsSync()) {
       dependencies = dependenciesFromLockFile(projectLockFile);
+      workspaceInScope = false;
     } else if (workspaceRefFile.existsSync()) {
       final workspaceRefContent = workspaceRefFile.readAsStringSync();
       final json = jsonDecode(workspaceRefContent) as Map<String, dynamic>;
       final workspaceRoot = json['workspaceRoot'] as String;
+      final absoluteWorkspaceRoot =
+          p.normalize(p.join(workspaceRefParent, workspaceRoot));
       final workspaceLockFile =
-          File(p.join(workspaceRefParent, workspaceRoot, 'pubspec.lock'));
+          File(p.join(absoluteWorkspaceRoot, 'pubspec.lock'));
       if (workspaceLockFile.existsSync()) {
         dependencies = dependenciesFromLockFile(workspaceLockFile);
       } else {
         dependencies = pubspecDependencies;
       }
+
+      workspaceInScope =
+          projectIntermediates.containsKey(absoluteWorkspaceRoot);
     } else {
       dependencies = pubspecDependencies;
+      workspaceInScope = false;
     }
 
     final fvm = fvmPaths.any(absolutePath.startsWith);
@@ -132,6 +140,7 @@ List<Project> findProjects({Directory? directory}) {
       fvm: fvm,
       type: type,
       parentType: parentType,
+      workspaceInScope: workspaceInScope,
     );
 
     projects.add(project);
@@ -195,8 +204,11 @@ extension ProjectExtension on Project {
       // Do not skip if parent is a workspace member
       message = 'Skipping example project: $path';
       skip = true;
-    } else if (isPubGet && type == ProjectType.workspaceMember) {
+    } else if (isPubGet &&
+        type == ProjectType.workspaceMember &&
+        workspaceInScope) {
       // Skip pub get in workspace members since they resolve with the workspace
+      // Unless the workspace is out of scope
       message = 'Skipping workspace member: $path';
       skip = true;
     } else if (dartRunPackage != null &&

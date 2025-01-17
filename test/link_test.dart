@@ -56,7 +56,7 @@ void main() {
         expect(
           File(
             path.join(
-              result.workingDirectory,
+              result.testDirectory,
               'fvm_puby_test',
               '.dart_tool',
               'version',
@@ -75,6 +75,8 @@ void main() {
           'pubspec.yaml': workspacePubspec,
           ...dartProject(workspace: true),
         },
+        // Must link for workspace ref to exist
+        link: true,
       );
       final stdout = result.stdout;
 
@@ -86,6 +88,24 @@ void main() {
         stdout,
         isNot(contains('Resolved dependencies for dart_puby_test\n')),
       );
+    });
+
+    test('does not skip workspace members if workspace out of scope', () async {
+      final result = await testCommand(
+        ['link'],
+        entities: {
+          'pubspec.yaml': workspacePubspec,
+          ...dartProject(workspace: true),
+        },
+        workingPath: 'dart_puby_test',
+        // Must link for workspace ref to exist
+        link: true,
+      );
+      final stdout = result.stdout;
+
+      expect(result.exitCode, ExitCode.success.code);
+
+      expectLine(stdout, ['Resolved dependencies for .']);
     });
   });
 }

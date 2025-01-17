@@ -7,13 +7,13 @@ import 'package:path/path.dart' as path;
 final _decoder = Utf8Decoder();
 
 class PubyProcessResult {
-  final String workingDirectory;
+  final String testDirectory;
   final int exitCode;
   final String stdout;
   final String stderr;
 
   PubyProcessResult(
-    this.workingDirectory,
+    this.testDirectory,
     this.exitCode,
     this.stdout,
     this.stderr,
@@ -25,8 +25,10 @@ Future<PubyProcessResult> testCommand(
   Map<String, Object>? entities,
   bool link = false,
   bool debug = false,
+  String workingPath = '',
 }) async {
-  final workingDirectory = createTestResources(entities ?? defaultProjects());
+  final testDirectory = createTestResources(entities ?? defaultProjects());
+  final workingDirectory = path.join(testDirectory, workingPath);
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
 
   if (link) {
@@ -34,7 +36,7 @@ Future<PubyProcessResult> testCommand(
     await Process.run(
       'dart',
       [puby, 'get'],
-      workingDirectory: workingDirectory,
+      workingDirectory: testDirectory,
     );
   }
 
@@ -55,7 +57,7 @@ Future<PubyProcessResult> testCommand(
 
   final exitCode = await process.exitCode;
   return PubyProcessResult(
-    workingDirectory,
+    testDirectory,
     exitCode,
     await processStdout,
     await processStderr,

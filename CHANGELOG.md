@@ -1,3 +1,7 @@
+## 1.38.2
+
+- Does not skip `pub get` in workspace members if the workspace is out of scope
+
 ## 1.38.1
 
 - Fixes FVM version not installed detection
