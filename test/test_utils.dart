@@ -25,8 +25,12 @@ Future<PubyProcessResult> testCommand(
   Map<String, Object>? entities,
   bool link = false,
   bool debug = false,
+  String workingPath = '',
 }) async {
-  final workingDirectory = createTestResources(entities ?? defaultProjects());
+  final workingDirectory = path.join(
+    createTestResources(entities ?? defaultProjects()),
+    workingPath,
+  );
   final puby = File(path.join('bin', 'puby.dart')).absolute.path;
 
   if (link) {

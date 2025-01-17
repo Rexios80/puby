@@ -141,23 +141,48 @@ void main() {
         });
       });
 
-      test('workspace members', () async {
-        final result = await testCommand(
-          ['get'],
-          entities: {
-            'pubspec.yaml': workspacePubspec,
-            ...dartProject(workspace: true),
-          },
-        );
-        final stdout = result.stdout;
+      group('workspace members', () {
+        test('if workspace in scope', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'pubspec.yaml': workspacePubspec,
+              ...dartProject(workspace: true),
+            },
+          );
+          final stdout = result.stdout;
 
-        expect(result.exitCode, ExitCode.success.code);
+          expect(result.exitCode, ExitCode.success.code);
 
-        // Pub get should run in the workspace
-        expectLine(stdout, ['Running "dart pub get" in current directory...']);
+          // Pub get should run in the workspace
+          expectLine(
+            stdout,
+            ['Running "dart pub get" in current directory...'],
+          );
 
-        // Pub get should NOT run in workspace members
-        expectLine(stdout, ['dart_puby_test', 'Skip']);
+          // Pub get should NOT run in workspace members
+          expectLine(stdout, ['dart_puby_test', 'Skip']);
+        });
+
+        test('NOT if workspace out of scope', () async {
+          final result = await testCommand(
+            ['get'],
+            entities: {
+              'pubspec.yaml': workspacePubspec,
+              ...dartProject(workspace: true),
+            },
+            workingPath: 'dart_puby_test',
+          );
+          final stdout = result.stdout;
+
+          expect(result.exitCode, ExitCode.success.code);
+
+          // Pub get should run in the workspace member
+          expectLine(
+            stdout,
+            ['Running "dart pub get" in current directory...'],
+          );
+        });
       });
     });
   });
