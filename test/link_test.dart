@@ -56,7 +56,7 @@ void main() {
         expect(
           File(
             path.join(
-              result.workingDirectory,
+              result.testDirectory,
               'fvm_puby_test',
               '.dart_tool',
               'version',

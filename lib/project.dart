@@ -57,6 +57,9 @@ class Project {
   /// The parent project's type
   final ProjectType? parentType;
 
+  /// If this project's workspace is in scope
+  final bool workspaceInScope;
+
   /// The arguments to prefix to any commands run in this project
   List<String> get prefixArgs => [
         if (fvm) 'fvm',
@@ -75,6 +78,7 @@ class Project {
     required this.fvm,
     required this.type,
     this.parentType,
+    required this.workspaceInScope,
   });
 
   /// Create a copy of this [Project] with the specified changes
@@ -90,6 +94,7 @@ class Project {
       fvm: fvm ?? this.fvm,
       type: type,
       parentType: parentType,
+      workspaceInScope: workspaceInScope,
     );
   }
 }

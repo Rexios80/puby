@@ -149,6 +149,8 @@ void main() {
               'pubspec.yaml': workspacePubspec,
               ...dartProject(workspace: true),
             },
+            // Must link for workspace ref to exist
+            link: true,
           );
           final stdout = result.stdout;
 
@@ -172,6 +174,8 @@ void main() {
               ...dartProject(workspace: true),
             },
             workingPath: 'dart_puby_test',
+            // Must link for workspace ref to exist
+            link: true,
           );
           final stdout = result.stdout;
 
