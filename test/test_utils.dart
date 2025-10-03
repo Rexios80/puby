@@ -3,16 +3,18 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
+import 'package:meta/meta.dart';
 
 final _decoder = Utf8Decoder();
 
+@immutable
 class PubyProcessResult {
   final String testDirectory;
   final int exitCode;
   final String stdout;
   final String stderr;
 
-  PubyProcessResult(
+  const PubyProcessResult(
     this.testDirectory,
     this.exitCode,
     this.stdout,

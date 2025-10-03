@@ -1,8 +1,10 @@
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:puby/config.dart';
 import 'package:puby/engine.dart';
+import 'package:meta/meta.dart';
 
 /// Intermediate data used during project resolution
+@immutable
 class ProjectIntermediate {
   /// The absolute path to the project
   final String absolutePath;
@@ -26,6 +28,7 @@ class ProjectIntermediate {
 }
 
 /// A dart project
+@immutable
 class Project {
   /// The engine this project uses
   final Engine engine;
@@ -67,7 +70,7 @@ class Project {
       ];
 
   /// Create a [Project]
-  Project({
+  const Project({
     required this.engine,
     required this.path,
     required this.config,

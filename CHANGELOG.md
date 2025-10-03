@@ -1,3 +1,7 @@
+## 1.38.3
+
+- Dependency upgrades
+
 ## 1.38.2
 
 - Does not skip `pub get` in workspace members if the workspace is out of scope

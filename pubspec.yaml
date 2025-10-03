@@ -1,6 +1,6 @@
 name: puby
 description: Run commands in all projects in the current directory. Handle monorepos with ease.
-version: 1.38.2
+version: 1.38.3
 homepage: https://github.com/Rexios80/puby
 
 environment:
@@ -12,13 +12,14 @@ dependencies:
   path: ^1.8.1
   pub_update_checker: ^1.2.0
   flutter_tools_task_queue: ^1.0.0
-  dart_pub: 0.0.4
+  dart_pub: 0.0.5
   pub_semver: ^2.1.4
   io: ^1.0.4
+  meta: ^1.17.0
 
 dev_dependencies:
   test: ^1.20.2
-  rexios_lints: ^9.1.0
+  rexios_lints: ^15.0.1
 
 executables:
   puby: puby

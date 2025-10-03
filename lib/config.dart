@@ -2,13 +2,15 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
+import 'package:meta/meta.dart';
 
 /// A puby configuration file
+@immutable
 class PubyConfig {
   /// Specified command exclusions
   final List<String> excludes;
 
-  PubyConfig._({
+  const PubyConfig._({
     required this.excludes,
   });
 

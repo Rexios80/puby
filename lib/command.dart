@@ -8,7 +8,7 @@ abstract class Command {
   /// The command to run
   List<String> get args => List.unmodifiable(_args);
 
-  bool _noFvm = false;
+  var _noFvm = false;
 
   /// If fvm support should be disabled
   bool get noFvm => _noFvm;
