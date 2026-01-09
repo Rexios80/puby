@@ -1,3 +1,7 @@
+## 1.38.4
+
+- Dependency upgrades
+
 ## 1.38.3
 
 - Dependency upgrades
