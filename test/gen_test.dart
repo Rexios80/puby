@@ -11,7 +11,7 @@ void main() {
     'puby gen',
     () async {
       final result = await testCommand(
-        ['gen'],
+        ['gen', '--puby-verbose'],
         entities: defaultProjects(devDependencies: {'build_runner: any'}),
         link: true,
       );

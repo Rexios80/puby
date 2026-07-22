@@ -27,6 +27,8 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 
 For projects configured with FVM, `fvm flutter` and `fvm dart` are used. FVM support can be disabled with the `--no-fvm` option.
 
+Pass `--puby-verbose` for more detailed puby output.
+
 ## Use as an executable
 
 ### Installation

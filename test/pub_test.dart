@@ -40,7 +40,7 @@ void main() {
     group('excludes', () {
       test('project in build folder', () async {
         final result = await testCommand(
-          ['get'],
+          ['get', '--puby-verbose'],
           entities: {
             'build_folder_test': {
               'build/web/pubspec.yaml': pubspec('web'),
@@ -64,7 +64,8 @@ void main() {
         }) async {
           skippedPath ??= path.join(entities.keys.first, 'example');
 
-          final result = await testCommand(['get'], entities: entities);
+          final result =
+              await testCommand(['get', '--puby-verbose'], entities: entities);
           final stdout = result.stdout;
 
           expect(result.exitCode, ExitCode.success.code);
@@ -144,7 +145,7 @@ void main() {
       group('workspace members', () {
         test('if workspace in scope', () async {
           final result = await testCommand(
-            ['get'],
+            ['get', '--puby-verbose'],
             entities: {
               'pubspec.yaml': workspacePubspec,
               ...dartProject(workspace: true),

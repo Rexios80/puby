@@ -28,7 +28,8 @@ Commands:
   puby exec [command]    command
 
 Options:
-  --no-fvm                Disable FVM support''';
+  --no-fvm                Disable FVM support
+  --puby-verbose          Show verbose output''';
 
 void main(List<String> arguments) async {
   final newVersion = await PubUpdateChecker.check();
