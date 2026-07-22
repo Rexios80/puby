@@ -36,7 +36,7 @@ void main() {
                 .first
                 .dependencies;
         expect(dependencies, contains('rexios_lints'));
-        expect(dependencies, isNot(contains('custom_lint')));
+        expect(dependencies, isNot(contains('analyzer')));
       });
 
       test('with lock file', () async {
@@ -54,7 +54,6 @@ void main() {
                 .dependencies;
         expect(dependencies, contains('rexios_lints'));
         expect(dependencies, contains('analyzer'));
-        expect(dependencies, isNot(contains('custom_lint')));
       });
 
       group('in workspace', () {
@@ -75,7 +74,7 @@ void main() {
                   .firstWhere((e) => e.type == ProjectType.workspaceMember)
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
-          expect(dependencies, isNot(contains('custom_lint')));
+          expect(dependencies, isNot(contains('analyzer')));
         });
 
         test('with lock file', () async {
@@ -97,7 +96,6 @@ void main() {
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
           expect(dependencies, contains('analyzer'));
-          expect(dependencies, isNot(contains('custom_lint')));
         });
       });
     });
