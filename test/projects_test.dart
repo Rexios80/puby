@@ -53,7 +53,8 @@ void main() {
                 .first
                 .dependencies;
         expect(dependencies, contains('rexios_lints'));
-        expect(dependencies, contains('custom_lint'));
+        expect(dependencies, contains('analyzer'));
+        expect(dependencies, isNot(contains('custom_lint')));
       });
 
       group('in workspace', () {
@@ -95,7 +96,8 @@ void main() {
                   .firstWhere((e) => e.type == ProjectType.workspaceMember)
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
-          expect(dependencies, contains('custom_lint'));
+          expect(dependencies, contains('analyzer'));
+          expect(dependencies, isNot(contains('custom_lint')));
         });
       });
     });
