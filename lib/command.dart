@@ -13,6 +13,11 @@ abstract class Command {
   /// If fvm support should be disabled
   bool get noFvm => _noFvm;
 
+  var _verbose = false;
+
+  /// If verbose output should be displayed
+  bool get verbose => _verbose;
+
   /// If output from this command should be displayed
   final bool silent;
 
@@ -25,8 +30,10 @@ abstract class Command {
   ///
   /// Processes the arguments and sets the relevant fields
   /// - [--no-fvm]: disables fvm support
+  /// - [--puby-verbose]: enables verbose output
   void addArgs(List<String> args) {
     _noFvm = _noFvm || args.remove('--no-fvm');
+    _verbose = _verbose || args.remove('--puby-verbose');
     _args.addAll(args);
   }
 }

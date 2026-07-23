@@ -1,3 +1,8 @@
+## 1.39.0
+
+- Hides some informational messages by default
+- Adds `--puby-verbose` for more detailed puby output
+
 ## 1.38.5
 
 - Dependency upgrades

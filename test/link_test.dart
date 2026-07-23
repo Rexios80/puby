@@ -70,7 +70,7 @@ void main() {
 
     test('skips workspace members', () async {
       final result = await testCommand(
-        ['link'],
+        ['link', '--puby-verbose'],
         entities: {
           'pubspec.yaml': workspacePubspec,
           ...dartProject(workspace: true),

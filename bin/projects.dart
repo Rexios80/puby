@@ -170,7 +170,7 @@ extension ProjectExtension on Project {
       message = null;
     }
 
-    if (message != null && !command.silent) {
+    if (message != null && command.verbose && !command.silent) {
       print(yellow.wrap(message));
     }
     return newEngine;
@@ -221,7 +221,7 @@ extension ProjectExtension on Project {
       skip = false;
     }
 
-    if (message != null && !command.silent) {
+    if (message != null && command.verbose && !command.silent) {
       print(yellow.wrap(message));
     }
     return skip;
@@ -231,7 +231,7 @@ extension ProjectExtension on Project {
     final argString = command.args.join(' ');
 
     final skip = config.excludes.any(argString.startsWith);
-    if (skip && !command.silent) {
+    if (skip && command.verbose && !command.silent) {
       print(yellow.wrap('Skipping project with exclusion: $path'));
     }
 

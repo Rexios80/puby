@@ -9,7 +9,7 @@ void main() {
     'puby run',
     () async {
       final result = await testCommand(
-        ['run', 'custom_lint'],
+        ['run', 'custom_lint', '--puby-verbose'],
         entities: defaultProjects(devDependencies: {'custom_lint: any'}),
         link: true,
       );

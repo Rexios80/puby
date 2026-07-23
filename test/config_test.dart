@@ -8,7 +8,7 @@ void main() {
   group('config', () {
     test('exclude', () async {
       final result = await testCommand(
-        ['gen'],
+        ['gen', '--puby-verbose'],
         entities: {
           'puby_yaml_test': {
             'pubspec.yaml': pubspec(
