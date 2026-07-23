@@ -16,6 +16,7 @@ Run commands in all projects in the current directory. Handle monorepos with eas
 | --------------------- | ---------------------------------------------------------- |
 | `puby [args]`         | `[engine] pub [args]`                                      |
 | `puby link`           | Warm the pub cache and run `[engine] pub get --offline`    |
+| `puby format`         | `dart format`, skipping build folders                      |
 | `puby gen`            | `dart run build_runner build --delete-conflicting-outputs` |
 | `puby run`            | `dart run`                                                 |
 | `puby test`           | `[engine] test`                                            |

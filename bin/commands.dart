@@ -8,6 +8,7 @@ import 'package:puby/engine.dart';
 import 'package:puby/project.dart';
 import 'package:puby/time.dart';
 
+import 'format.dart';
 import 'link.dart';
 import 'projects.dart';
 
@@ -19,10 +20,17 @@ abstract class Commands {
     (command, projects) =>
         linkDependencies(command: command, projects: projects),
   );
+  static final format = GlobalCommand(
+    ['format'],
+    (command, _) => runFormat(command),
+  );
   static final pubGetOffline =
       ProjectCommand(['pub', 'get', '--offline'], parallel: true);
 
   static final convenience = <String, List<Command>>{
+    'format': [
+      format,
+    ],
     'gen': [
       ProjectCommand(
         [

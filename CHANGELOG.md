@@ -1,3 +1,7 @@
+## 1.39.0
+
+- Adds `puby format` shortcut for `dart format`, skipping `build` folders
+
 ## 1.38.5
 
 - Dependency upgrades

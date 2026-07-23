@@ -18,6 +18,7 @@ const help = '''
 Commands:
   puby [args]            [engine] pub [args]
   puby link              Warm the pub cache and run [engine] pub get --offline
+  puby format            dart format, skipping build folders
   puby gen               dart run build_runner build --delete-conflicting-outputs
   puby run               dart run
   puby test              [engine] test
@@ -47,6 +48,13 @@ void main(List<String> arguments) async {
   if (showHelp) {
     print(magenta.wrap(help));
     exit(ExitCode.success.code);
+  }
+
+  // `format` is not tied to projects and should not trigger project
+  // discovery or the FVM check
+  if (arguments.first == 'format') {
+    Commands.format.addArgs(arguments.sublist(1));
+    exit(await Commands.format.run(projects: const []));
   }
 
   print('Finding projects...');
