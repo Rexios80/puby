@@ -38,23 +38,36 @@ void main() {
     });
 
     group('excludes', () {
-      test('project in build folder', () async {
-        final result = await testCommand(
-          ['get', '--puby-verbose'],
-          entities: {
-            'build_folder_test': {
-              'build/web/pubspec.yaml': pubspec('web'),
-            },
+      group('project in build folder', () {
+        final entities = {
+          'build_folder_test': {
+            'build/web/pubspec.yaml': pubspec('web'),
           },
-        );
-        final stdout = result.stdout;
+        };
+        final skippedPath = path.join('build_folder_test', 'build', 'web');
 
-        expect(result.exitCode, ExitCode.success.code);
+        test('without --puby-verbose', () async {
+          final result = await testCommand(['get'], entities: entities);
+          final stdout = result.stdout;
 
-        expectLine(
-          stdout,
-          [path.join('build_folder_test', 'build', 'web'), 'Skip'],
-        );
+          expect(result.exitCode, ExitCode.success.code);
+
+          // Still excluded, but skip message is hidden by default
+          expectLine(stdout, [skippedPath, 'Skip'], matches: false);
+          expectLine(stdout, [skippedPath, 'pub get'], matches: false);
+        });
+
+        test('with --puby-verbose', () async {
+          final result = await testCommand(
+            ['get', '--puby-verbose'],
+            entities: entities,
+          );
+          final stdout = result.stdout;
+
+          expect(result.exitCode, ExitCode.success.code);
+
+          expectLine(stdout, [skippedPath, 'Skip']);
+        });
       });
 
       group('example projects', () {
