@@ -1,3 +1,7 @@
+## 1.39.1
+
+- Bumps `dart_pub` to `0.0.9`
+
 ## 1.39.0
 
 - Hides some informational messages by default
