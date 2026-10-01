@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:test/test.dart';
-import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
-
-final _decoder = Utf8Decoder();
+import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 @immutable
 class PubyProcessResult {
@@ -28,34 +26,38 @@ Future<PubyProcessResult> testCommand(
   bool link = false,
   bool debug = false,
   String workingPath = '',
+  bool fakeCommands = true,
 }) async {
   final testDirectory = createTestResources(entities ?? defaultProjects());
   final workingDirectory = path.join(testDirectory, workingPath);
-  final puby = File(path.join('bin', 'puby.dart')).absolute.path;
+  final puby = _ensurePubyKernel();
+  final environment = _testEnvironment(fakeCommands: fakeCommands);
 
   if (link) {
-    // puby link was not working in the test environment
-    await Process.run(
-      'dart',
+    // Creates workspace metadata (workspace_ref.json) the same way `pub get` does.
+    final prepare = await Process.run(
+      Platform.resolvedExecutable,
       [puby, 'get'],
       workingDirectory: testDirectory,
+      environment: environment,
     );
+    if (prepare.exitCode != 0) {
+      fail(
+        'Preparing the test project failed with exit code ${prepare.exitCode}\n'
+        '${prepare.stdout}${prepare.stderr}',
+      );
+    }
   }
 
   final process = await Process.start(
-    'dart',
+    Platform.resolvedExecutable,
     [puby, ...arguments],
     workingDirectory: workingDirectory,
+    environment: environment,
   );
 
-  String handleLine(dynamic line) {
-    final decoded = _decoder.convert(line);
-    if (debug) stdout.write(decoded);
-    return decoded;
-  }
-
-  final processStdout = process.stdout.map(handleLine).join('\n');
-  final processStderr = process.stderr.map(handleLine).join('\n');
+  final processStdout = _capture(process.stdout, debug: debug);
+  final processStderr = _capture(process.stderr, debug: debug);
 
   final exitCode = await process.exitCode;
   return PubyProcessResult(
@@ -64,6 +66,132 @@ Future<PubyProcessResult> testCommand(
     await processStdout,
     await processStderr,
   );
+}
+
+/// Concatenate process output without inserting breaks between chunks.
+///
+/// Joining chunks with newlines splits a line that arrives in two reads and
+/// makes assertions on that line fail intermittently.
+Future<String> _capture(Stream<List<int>> stream, {required bool debug}) {
+  return stream.transform(utf8.decoder).map((chunk) {
+    if (debug) stdout.write(chunk);
+    return chunk;
+  }).join();
+}
+
+/// Compiles puby once per source revision.
+///
+/// `dart bin/puby.dart` recompiles the bundled pub solver on every launch,
+/// which costs several seconds. A kernel snapshot starts in a fraction of that
+/// and is shared by every test process.
+String _ensurePubyKernel() {
+  final stamp = _kernelStamp();
+  final dir = Directory(path.join(Directory.systemTemp.path, 'puby_kernels'));
+  dir.createSync(recursive: true);
+  final dill = File(path.join(dir.path, '$stamp.dill'));
+  final lock = File(path.join(dir.path, '$stamp.lock'));
+
+  for (var attempt = 0; attempt < 3; attempt++) {
+    if (dill.existsSync() && dill.lengthSync() > 0) return dill.path;
+
+    var ownsLock = false;
+    try {
+      lock.createSync(exclusive: true);
+      ownsLock = true;
+    } on FileSystemException {
+      ownsLock = false;
+    }
+
+    if (!ownsLock) {
+      for (var i = 0; i < 2400; i++) {
+        if (dill.existsSync() && dill.lengthSync() > 0) return dill.path;
+        if (!lock.existsSync()) break;
+        sleep(const Duration(milliseconds: 50));
+      }
+      continue;
+    }
+
+    try {
+      if (dill.existsSync() && dill.lengthSync() > 0) return dill.path;
+      final partial = File('${dill.path}.partial');
+      if (partial.existsSync()) partial.deleteSync();
+      final result = Process.runSync(
+        Platform.resolvedExecutable,
+        [
+          'compile',
+          'kernel',
+          '-o',
+          partial.path,
+          path.join('bin', 'puby.dart'),
+        ],
+      );
+      if (result.exitCode != 0) {
+        fail(
+          'Failed to compile puby test kernel (exit ${result.exitCode})\n'
+          '${result.stdout}${result.stderr}',
+        );
+      }
+      partial.renameSync(dill.path);
+      return dill.path;
+    } finally {
+      if (lock.existsSync()) lock.deleteSync();
+    }
+  }
+
+  fail('Failed to compile puby test kernel');
+}
+
+/// Stable fingerprint of the sources baked into the test kernel.
+String _kernelStamp() {
+  var hash = 0x811c9dc5;
+  for (final file in _kernelInputs()) {
+    for (final byte in file.readAsBytesSync()) {
+      hash ^= byte;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    hash ^= 0xFF;
+    hash = (hash * 0x01000193) & 0xFFFFFFFF;
+  }
+  return hash.toRadixString(16);
+}
+
+List<File> _kernelInputs() {
+  final files = <File>[
+    File('pubspec.yaml'),
+    File(path.join('.dart_tool', 'package_config.json')),
+  ];
+  for (final dirName in ['bin', 'lib']) {
+    files.addAll(
+      Directory(dirName)
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.dart')),
+    );
+  }
+  files.sort((a, b) => a.path.compareTo(b.path));
+  return files;
+}
+
+/// Point `dart`, `flutter`, and `fvm` at the stubs in `test/stubs`.
+///
+/// The real tools download packages and boot SDKs, which is both slow and
+/// sensitive to network and machine load. `PUBY_TEST_MODE` skips the pub
+/// solver inside `puby link` for the same reason.
+///
+/// [fakeCommands] is false for the one test that resolves a real package.
+Map<String, String> _testEnvironment({required bool fakeCommands}) {
+  final env = Map<String, String>.from(Platform.environment);
+  final separator = Platform.isWindows ? ';' : ':';
+  if (fakeCommands) {
+    final stubDir = path.join(Directory.current.path, 'test', 'stubs');
+    env['PATH'] = '$stubDir$separator${env['PATH'] ?? ''}';
+    env['PUBY_TEST_MODE'] = '1';
+  } else {
+    final sdkBin = path.dirname(Platform.resolvedExecutable);
+    env['PATH'] = '$sdkBin$separator${env['PATH'] ?? ''}';
+    env.remove('PUBY_TEST_MODE');
+  }
+  return env;
 }
 
 void expectLine(String stdout, List<String> matchers, {bool matches = true}) {
@@ -78,7 +206,12 @@ void expectLine(String stdout, List<String> matchers, {bool matches = true}) {
 }
 
 String createTestResources(Map<String, Object> entities) {
-  final directory = Directory.systemTemp.createTempSync('test_resources');
+  final directory = Directory.systemTemp.createTempSync('puby_test_');
+  addTearDown(() {
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
+  });
   for (final MapEntry(key: entityName, value: entityContent)
       in entities.entries) {
     if (entityContent is String) {
@@ -156,11 +289,30 @@ String fvmrc(String version) => '''
   "flavors": {}
 }''';
 
+/// Minimal `pubspec.lock` whose package keys are [packages].
+String lockFile(Set<String> packages) {
+  final sorted = packages.toList()..sort();
+  final buffer = StringBuffer('packages:\n');
+  for (final package in sorted) {
+    buffer
+      ..writeln('  $package:')
+      ..writeln('    version: "0.0.0"');
+  }
+  return buffer.toString();
+}
+
+/// `workspace_ref.json` for a member that is a direct child of the workspace.
+///
+/// Pub stores this under `<member>/.dart_tool/pub` and the path is relative to
+/// that directory.
+const directMemberWorkspaceRef = '{"workspaceRoot":"../../.."}';
+
 Map<String, Object> dartProject({
   Set<String> dependencies = const {},
   Set<String> devDependencies = const {},
   bool includeExample = true,
   bool workspace = false,
+  Map<String, String> extraFiles = const {},
 }) =>
     {
       'dart_puby_test': {
@@ -171,6 +323,7 @@ Map<String, Object> dartProject({
           devDependencies: devDependencies,
         ),
         if (includeExample) 'example/pubspec.yaml': pubspec('example'),
+        ...extraFiles,
       },
     };
 

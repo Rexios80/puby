@@ -39,17 +39,19 @@ void main() {
         expect(dependencies, isNot(contains('analyzer')));
       });
 
-      test('with lock file', () async {
-        final result = await testCommand(
-          ['get'],
-          entities: dartProject(
+      test('with lock file', () {
+        final workingDirectory = createTestResources(
+          dartProject(
             devDependencies: {'rexios_lints: any'},
             includeExample: false,
+            extraFiles: {
+              'pubspec.lock': lockFile(const {'rexios_lints', 'analyzer'}),
+            },
           ),
         );
 
         final dependencies =
-            findProjects(directory: Directory(result.testDirectory))
+            findProjects(directory: Directory(workingDirectory))
                 .first
                 .dependencies;
         expect(dependencies, contains('rexios_lints'));
@@ -77,21 +79,24 @@ void main() {
           expect(dependencies, isNot(contains('analyzer')));
         });
 
-        test('with lock file', () async {
-          final result = await testCommand(
-            ['get'],
-            entities: {
+        test('with lock file', () {
+          final workingDirectory = createTestResources(
+            {
               'pubspec.yaml': workspacePubspec,
+              'pubspec.lock': lockFile(const {'rexios_lints', 'analyzer'}),
               ...dartProject(
                 devDependencies: {'rexios_lints: any'},
                 includeExample: false,
                 workspace: true,
+                extraFiles: {
+                  '.dart_tool/pub/workspace_ref.json': directMemberWorkspaceRef,
+                },
               ),
             },
           );
 
           final dependencies =
-              findProjects(directory: Directory(result.testDirectory))
+              findProjects(directory: Directory(workingDirectory))
                   .firstWhere((e) => e.type == ProjectType.workspaceMember)
                   .dependencies;
           expect(dependencies, contains('rexios_lints'));
