@@ -1,3 +1,7 @@
+## 1.39.2
+
+- Bumps `dart_pub` to `0.0.10`
+
 ## 1.39.1
 
 - Bumps `dart_pub` to `0.0.9`
