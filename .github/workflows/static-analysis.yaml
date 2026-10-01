@@ -14,21 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-      - name: Install FVM
-        run: |
-          brew tap leoafarias/fvm
-          brew install fvm
-          echo "$HOME/fvm/default/bin" >> $GITHUB_PATH
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          fvm install 3.24.0 --setup
-          fvm install stable --setup
-          fvm global 3.24.0
-          fvm flutter doctor
-          fvm global stable
-          fvm flutter doctor
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      # Command stubs in test/stubs replace dart, flutter, and fvm.
       - name: Pub get
         run: dart pub get
       - name: Format

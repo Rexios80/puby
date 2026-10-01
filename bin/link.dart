@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools_task_queue/flutter_tools_task_queue.dart';
 import 'package:puby/command.dart';
@@ -37,6 +38,13 @@ Future<int> linkDependencies({
 
         final flutterVersionOverride =
             await resolved.getFlutterVersionOverride(command);
+
+        // Tests set this to exercise project selection without the pub solver.
+        // Resolution and downloads talk to pub.dev and dominate test time.
+        if (Platform.environment['PUBY_TEST_MODE'] == '1') {
+          print('Resolved dependencies for ${resolved.path}');
+          return;
+        }
 
         final entry = Entrypoint(resolved.path, _pubCache);
         try {

@@ -1,0 +1,16 @@
+#!/bin/sh
+# Fast stand-in for the Dart SDK. See test/test_utils.dart.
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1091
+. "$script_dir/common.sh"
+
+case "${1:-}" in
+  pub)
+    handle_pub "$@"
+    ;;
+  *)
+    exit 0
+    ;;
+esac
