@@ -26,11 +26,12 @@ Future<PubyProcessResult> testCommand(
   bool link = false,
   bool debug = false,
   String workingPath = '',
+  bool fakeCommands = true,
 }) async {
   final testDirectory = createTestResources(entities ?? defaultProjects());
   final workingDirectory = path.join(testDirectory, workingPath);
   final puby = _ensurePubyKernel();
-  final environment = _testEnvironment();
+  final environment = _testEnvironment(fakeCommands: fakeCommands);
 
   if (link) {
     // Creates workspace metadata (workspace_ref.json) the same way `pub get` does.
@@ -176,12 +177,20 @@ List<File> _kernelInputs() {
 /// The real tools download packages and boot SDKs, which is both slow and
 /// sensitive to network and machine load. `PUBY_TEST_MODE` skips the pub
 /// solver inside `puby link` for the same reason.
-Map<String, String> _testEnvironment() {
+///
+/// [fakeCommands] is false for the one test that resolves a real package.
+Map<String, String> _testEnvironment({required bool fakeCommands}) {
   final env = Map<String, String>.from(Platform.environment);
-  final stubDir = path.join(Directory.current.path, 'test', 'stubs');
   final separator = Platform.isWindows ? ';' : ':';
-  env['PATH'] = '$stubDir$separator${env['PATH'] ?? ''}';
-  env['PUBY_TEST_MODE'] = '1';
+  if (fakeCommands) {
+    final stubDir = path.join(Directory.current.path, 'test', 'stubs');
+    env['PATH'] = '$stubDir$separator${env['PATH'] ?? ''}';
+    env['PUBY_TEST_MODE'] = '1';
+  } else {
+    final sdkBin = path.dirname(Platform.resolvedExecutable);
+    env['PATH'] = '$sdkBin$separator${env['PATH'] ?? ''}';
+    env.remove('PUBY_TEST_MODE');
+  }
   return env;
 }
 

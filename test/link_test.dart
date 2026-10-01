@@ -101,5 +101,40 @@ void main() {
 
       expectLine(stdout, ['Resolved dependencies for .']);
     });
+
+    test(
+      'resolves a hosted package',
+      () async {
+        final result = await testCommand(
+          ['link'],
+          entities: dartProject(
+            includeExample: false,
+            dependencies: {'meta: ^1.0.0'},
+          ),
+          fakeCommands: false,
+        );
+
+        expect(
+          result.exitCode,
+          ExitCode.success.code,
+          reason: '${result.stdout}\n${result.stderr}',
+        );
+        expectLine(result.stdout, [
+          'dart_puby_test',
+          'Resolved dependencies for',
+        ]);
+        expect(
+          result.stdout,
+          isNot(contains('Failed to resolve dependencies')),
+        );
+        expect(
+          File(
+            path.join(result.testDirectory, 'dart_puby_test', 'pubspec.lock'),
+          ).readAsStringSync(),
+          contains('meta:'),
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
   });
 }
